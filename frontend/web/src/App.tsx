@@ -14,12 +14,13 @@ import Scanner from './pages/Scanner/Scanner';
 
 // Layout global englobant
 import AppLayout from './components/Layout/AppLayout';
+import SplashScreen from './components/Common/SplashScreen';
 
 const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
   const { isAuthenticated, isLoading } = useAuth();
   
   if (isLoading) {
-    return <div className="h-screen w-full flex items-center justify-center text-primary">Chargement...</div>;
+    return <SplashScreen />;
   }
   
   return isAuthenticated ? children : <Navigate to="/login" />;
@@ -29,7 +30,7 @@ const PublicRoute = ({ children }: { children: React.ReactNode }) => {
   const { isAuthenticated, isLoading } = useAuth();
   
   if (isLoading) {
-    return <div className="h-screen w-full flex items-center justify-center text-primary">Chargement...</div>;
+    return <SplashScreen />;
   }
   
   return !isAuthenticated ? children : <Navigate to="/dashboard" />;

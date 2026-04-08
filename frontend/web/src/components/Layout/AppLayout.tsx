@@ -75,7 +75,8 @@ const AppLayout = ({ children }: AppLayoutProps) => {
       {/* Sidebar / Bottom Nav */}
       <aside className="app-sidebar">
         <div className="sidebar-header">
-          Arlong
+          <img src="/logo.png" alt="Arlong" className="sidebar-logo" />
+          <span>Arlong</span>
         </div>
         
         <nav className="sidebar-nav">
