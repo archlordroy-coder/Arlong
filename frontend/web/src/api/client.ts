@@ -1,8 +1,10 @@
 import axios from 'axios';
 
 const api = axios.create({
-  // Dans un vrai projet, ceci utilserait import.meta.env.VITE_API_URL
-  baseURL: 'http://localhost:5000/api', 
+  // Utilisation de l'URL relative en production pour Vercel, localhost en dev
+  baseURL: import.meta.env.DEV 
+    ? (import.meta.env.VITE_API_URL || 'http://localhost:5000/api')
+    : '/api',
   headers: {
     'Content-Type': 'application/json',
   },
