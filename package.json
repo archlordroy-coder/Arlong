@@ -1,0 +1,22 @@
+{
+  "name": "driverx-root",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "dev": "concurrently \"npm run dev:backend\" \"npm run start:web\"",
+    "dev:backend": "npm run dev --prefix backend",
+    "start:web": "npm run dev --prefix frontend/web",
+    "start:mobile": "npm run dev --prefix frontend/mobile",
+    "start:desktop": "npm run dev --prefix frontend/desktop",
+    "build:web": "npm run build --prefix frontend/web",
+    "build:mobile": "npm run build --prefix frontend/mobile",
+    "build:electron": "npm run build --prefix frontend/desktop && npm run build:exe --prefix frontend/desktop",
+    "start:electron": "npm run start --prefix frontend/desktop"
+  },
+  "devDependencies": {
+    "concurrently": "^8.2.2"
+  },
+  "dependencies": {
+    "@supabase/supabase-js": "^2.102.1"
+  }
+}
