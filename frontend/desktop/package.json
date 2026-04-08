@@ -8,8 +8,30 @@
     "start": "electron .",
     "dev": "vite",
     "build": "tsc -b && vite build",
+    "build:exe": "electron-builder build --linux --win",
     "lint": "eslint .",
     "preview": "vite preview"
+  },
+  "build": {
+    "appId": "com.arlong.app",
+    "productName": "Arlong",
+    "directories": {
+      "output": "dist_electron"
+    },
+    "files": [
+      "dist/**/*",
+      "electron/**/*",
+      "package.json",
+      "public/**/*"
+    ],
+    "linux": {
+      "target": ["deb"],
+      "category": "Utility"
+    },
+    "win": {
+      "target": ["nsis"],
+      "icon": "public/logo.png"
+    }
   },
   "dependencies": {
     "axios": "^1.14.0",

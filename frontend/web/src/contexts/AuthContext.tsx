@@ -28,6 +28,9 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   // Vérifier la session au chargement
   useEffect(() => {
     const checkAuth = async () => {
+      // On commence le timer pour le splash screen
+      const timer = new Promise(resolve => setTimeout(resolve, 1500));
+      
       const token = localStorage.getItem('arlong_token');
       if (token) {
         try {
@@ -39,6 +42,9 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
           localStorage.removeItem('arlong_token');
         }
       }
+      
+      // On attend que les deux soient finis : le timer et la requête
+      await timer;
       setIsLoading(false);
     };
     checkAuth();
