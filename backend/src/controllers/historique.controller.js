@@ -12,7 +12,7 @@ const getHistorique = async (req, res) => {
       .select(`
         *,
         user:User(id, name, email, avatar),
-        doc:Document(id, name, type, isDeleted, dossier:Dossier(id, name, createdById, isPublic))
+        doc:Document(id, name, type, isDeleted, dossier:Dossier(id, name, createdById, isPublic, espace:Espace(id, name)))
       `, { count: 'exact' });
 
     if (docId) query = query.eq('docId', parseInt(docId));

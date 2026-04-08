@@ -56,6 +56,9 @@ const importDocument = async (req, res) => {
     if (dossier.espace?.name) pathSegments.push(dossier.espace.name);
     pathSegments.push(dossier.name);
 
+    const fileName = name || file.originalname;
+    const fileType = path.extname(file.originalname).substring(1).toLowerCase();
+
     // Upload vers Google Drive de l'utilisateur avec le chemin hierarchique
     const driveFile = await driveService.uploadFile(
       file.buffer, 
@@ -65,8 +68,8 @@ const importDocument = async (req, res) => {
       pathSegments
     );
 
-    filePath = driveFile.webViewLink; // Lien consultable sur Drive
-    driveId = driveFile.id; // ID unique du fichier sur Drive
+    const filePath = driveFile.webViewLink; // Lien consultable sur Drive
+    const driveId = driveFile.id; // ID unique du fichier sur Drive
 
     // Créer le document en base
     const { data: document, error: docError } = await supabase
@@ -106,7 +109,7 @@ const getDocuments = async (req, res) => {
       .from('Document')
       .select(`
         *,
-        dossier:Dossier(id, name, createdById, isPublic)
+        dossier:Dossier(id, name, createdById, isPublic, espace:Espace(id, name))
       `)
       .eq('isDeleted', false);
 
@@ -144,7 +147,7 @@ const getDocumentById = async (req, res) => {
       .from('Document')
       .select(`
         *,
-        dossier:Dossier(id, name, createdById, isPublic)
+        dossier:Dossier(id, name, createdById, isPublic, espace:Espace(id, name))
       `)
       .eq('id', parseInt(id))
       .eq('isDeleted', false)
@@ -181,7 +184,7 @@ const downloadDocument = async (req, res) => {
       .from('Document')
       .select(`
         *,
-        dossier:Dossier(id, name, createdById, isPublic)
+        dossier:Dossier(id, name, createdById, isPublic, espace:Espace(id, name))
       `)
       .eq('id', parseInt(id))
       .eq('isDeleted', false)

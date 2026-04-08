@@ -167,18 +167,8 @@ const Dashboard = () => {
   }, [selectedEspaceId]);
 
   const confirmUpload = async () => {
-    if (!selectedDossierId && !showNewFolderInput) {
-      alert("Veuillez choisir un dossier de destination.");
-      return;
-    }
-
-    if (showNewFolderInput && !newFolderName.trim()) {
-      alert("Veuillez saisir un nom pour le nouveau dossier.");
-      return;
-    }
-
     setShowUploadModal(false);
-    let DOSSIER_ID = selectedDossierId ? parseInt(selectedDossierId) : 0;
+    let DOSSIER_ID = (selectedDossierId && selectedDossierId !== "root") ? parseInt(selectedDossierId) : 0;
 
     // Création dynamique du dossier si demandé
     if (showNewFolderInput) {
@@ -195,6 +185,22 @@ const Dashboard = () => {
         }
       } catch (err) {
         alert("Impossible de créer le dossier. L'import est annulé.");
+        setIsSyncing(false);
+        return;
+      }
+    } else if (selectedDossierId === "root" || !selectedDossierId) {
+      // Mode Racine : Chercher ou créer un dossier "Général"
+      try {
+        setIsSyncing(true);
+        const dRes = await api.get(`/dossiers`, { params: { espaceId: selectedEspaceId } });
+        let general = dRes.data.data.find((d: any) => d.name === "Général");
+        if (!general) {
+          const createRes = await api.post('/dossiers', { name: "Général", espaceId: parseInt(selectedEspaceId) });
+          general = createRes.data.data;
+        }
+        DOSSIER_ID = general.id;
+      } catch (err) {
+        alert("Erreur lors de l'accès à la racine. L'import est annulé.");
         setIsSyncing(false);
         return;
       }
@@ -421,6 +427,7 @@ const Dashboard = () => {
                     }
                   }}
                 >
+                  <option value="root">Racine de l'espace</option>
                   {espaceDossiers.map(dos => (
                     <option key={dos.id} value={dos.id}>{dos.name}</option>
                   ))}

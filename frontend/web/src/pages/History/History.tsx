@@ -52,6 +52,16 @@ const History = () => {
     }
   };
 
+  const formatDate = (dateString: string) => {
+    try {
+      const date = new Date(dateString);
+      if (isNaN(date.getTime())) return "Date inconnue";
+      return format(date, "eeee d MMMM yyyy 'à' HH:mm", { locale: fr });
+    } catch (e) {
+      return "Date invalide";
+    }
+  };
+
   return (
     <div className="history-container animate-fade-in">
       <div className="history-header mb-8">
@@ -74,19 +84,19 @@ const History = () => {
 
                 <div className="flex-1">
                   <div className="flex flex-wrap items-center gap-x-2 gap-y-1">
-                    <span className="font-bold text-white">{item.user.name}</span>
+                    <span className="font-bold text-white">{item.user?.name || "Utilisateur inconnu"}</span>
                     <span className="text-secondary text-sm">a effectué une</span>
                     <span className="font-semibold text-primary">{item.actionType}</span>
                     {item.document && (
                       <>
                         <span className="text-secondary text-sm">sur</span>
-                        <span className="text-white italic underline decoration-white/20">{item.document.name}</span>
+                        <span className="text-white italic underline decoration-white/20">{item.document?.name || "Document inconnu"}</span>
                       </>
                     )}
                   </div>
                   <div className="flex items-center gap-2 mt-1 text-xs text-secondary">
                     <Clock size={12} />
-                    {format(new Date(item.created_at), "eeee d MMMM yyyy 'à' HH:mm", { locale: fr })}
+                    {formatDate(item.created_at)}
                   </div>
                 </div>
 

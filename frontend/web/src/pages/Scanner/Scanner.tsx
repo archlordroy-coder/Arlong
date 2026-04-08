@@ -15,6 +15,8 @@ const Scanner = () => {
   const [selectedEspaceId, setSelectedEspaceId] = useState<string>("");
   const [selectedDossierId, setSelectedDossierId] = useState<string>("");
   const [espaceDossiers, setEspaceDossiers] = useState<any[]>([]);
+  const [showNewFolderInput, setShowNewFolderInput] = useState(false);
+  const [newFolderName, setNewFolderName] = useState("");
 
   const fileInputRef = useRef<HTMLInputElement>(null);
   const navigate = useNavigate();
@@ -88,9 +90,26 @@ const Scanner = () => {
       const pdfBlob = pdf.output('blob');
       const fileName = `${pdfName}.pdf`;
 
+      let dId = selectedDossierId ? parseInt(selectedDossierId) : 0;
+
+      // Création dynamique si demandé
+      if (showNewFolderInput) {
+        const dRes = await api.post('/dossiers', { name: newFolderName, espaceId: parseInt(selectedEspaceId) });
+        if (dRes.data.success) dId = dRes.data.data.id;
+      } else if (selectedDossierId === "root") {
+        // Mode Racine : Chercher ou créer un dossier "Général"
+        const dRes = await api.get(`/dossiers`, { params: { espaceId: selectedEspaceId } });
+        let general = dRes.data.data.find((d: any) => d.name === "Général");
+        if (!general) {
+          const createRes = await api.post('/dossiers', { name: "Général", espaceId: parseInt(selectedEspaceId) });
+          general = createRes.data.data;
+        }
+        dId = general.id;
+      }
+
       const formData = new FormData();
       formData.append('file', pdfBlob, fileName);
-      formData.append('dossierId', selectedDossierId || '1');
+      formData.append('dossierId', dId.toString());
 
       const res = await api.post('/documents', formData, {
         headers: { 'Content-Type': 'multipart/form-data' }
@@ -195,15 +214,38 @@ const Scanner = () => {
               <label className="text-[10px] text-secondary uppercase font-bold mb-1 block">Dossier</label>
               <select 
                 className="w-full bg-white/5 border-none outline-none text-white text-xs p-2 rounded"
-                value={selectedDossierId}
-                onChange={e => setSelectedDossierId(e.target.value)}
+                value={showNewFolderInput ? "new" : selectedDossierId}
+                onChange={e => {
+                  if (e.target.value === "new") {
+                    setShowNewFolderInput(true);
+                  } else {
+                    setShowNewFolderInput(false);
+                    setSelectedDossierId(e.target.value);
+                  }
+                }}
               >
+                <option value="root">Racine de l'espace</option>
                 {espaceDossiers.map(dos => (
                   <option key={dos.id} value={dos.id}>{dos.name}</option>
                 ))}
+                <option value="new">+ Créer un nouveau dossier</option>
               </select>
             </div>
           </div>
+
+          {showNewFolderInput && (
+            <div className="mb-4 animate-slide-down">
+              <label className="text-[10px] text-primary uppercase font-bold mb-1 block">Nom du nouveau dossier</label>
+              <input 
+                type="text" 
+                className="w-full bg-primary/10 border border-primary/20 outline-none text-white text-xs p-2 rounded" 
+                placeholder="Nom du dossier..."
+                value={newFolderName}
+                onChange={e => setNewFolderName(e.target.value)}
+                autoFocus
+              />
+            </div>
+          )}
 
           <button 
             onClick={generateAndUpload}

@@ -75,8 +75,10 @@ const Explorer = () => {
         if (res.data.success) {
           setDocuments(res.data.data);
           const detail = res.data.data[0];
-          if (detail) {
-            newBreadcrumbs.push({ name: detail.dossier.espace.name, id: detail.dossier.espaceId, type: 'espace' });
+          if (detail && detail.dossier) {
+            if (detail.dossier.espace) {
+              newBreadcrumbs.push({ name: detail.dossier.espace.name, id: detail.dossier.espaceId, type: 'espace' });
+            }
             newBreadcrumbs.push({ name: detail.dossier.name, id: detail.dossier.id, type: 'dossier' });
           }
           setCurrentScope('documents');
@@ -155,7 +157,7 @@ const Explorer = () => {
     if (!selectedDossierId && !showNewFolderInput) return alert("Choisissez un dossier");
     if (showNewFolderInput && !newFolderName.trim()) return alert("Saisissez un nom de dossier");
 
-    let dId = selectedDossierId ? parseInt(selectedDossierId) : 0;
+    let dId = (selectedDossierId && selectedDossierId !== "root") ? parseInt(selectedDossierId) : 0;
 
     if (showNewFolderInput) {
       try {
@@ -169,6 +171,22 @@ const Explorer = () => {
         }
       } catch (err) {
         alert("Erreur création dossier");
+        setIsSyncing(false);
+        return;
+      }
+    } else if (selectedDossierId === "root" || !selectedDossierId) {
+      // Mode Racine : Chercher ou créer un dossier "Général"
+      try {
+        setIsSyncing(true);
+        const dRes = await api.get(`/dossiers`, { params: { espaceId: selectedEspaceId } });
+        let general = dRes.data.data.find((d: any) => d.name === "Général");
+        if (!general) {
+          const createRes = await api.post('/dossiers', { name: "Général", espaceId: parseInt(selectedEspaceId) });
+          general = createRes.data.data;
+        }
+        dId = general.id;
+      } catch (err) {
+        alert("Erreur accès racine");
         setIsSyncing(false);
         return;
       }
@@ -416,6 +434,7 @@ const Explorer = () => {
                     }
                   }}
                 >
+                  <option value="root">Racine de l'espace</option>
                   {espaceDossiers.map(dos => (
                     <option key={dos.id} value={dos.id}>{dos.name}</option>
                   ))}
