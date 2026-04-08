@@ -1,4 +1,5 @@
 #!/bin/bash
+set -e
 echo "🚀 Compilation de l'APK Arlong (Android)..."
 
 # Aller dans le dossier mobile
@@ -15,6 +16,11 @@ npm run build
 echo "🔄 Synchronisation Capacitor..."
 npx cap add android 2>/dev/null || true
 npx cap sync android
+
+# Forcer l'utilisation de Gradle local (pour éviter qu'il soit écrasé par Capacitor)
+echo "🔧 Configuration Gradle Local..."
+PROPS_FILE="android/gradle/wrapper/gradle-wrapper.properties"
+sed -i 's|^distributionUrl=.*|distributionUrl=../../../gradle-9.2.1-all.zip|' "$PROPS_FILE"
 
 # Compiler l'APK via Gradle
 echo "🏗️ Compilation native (Gradle)..."

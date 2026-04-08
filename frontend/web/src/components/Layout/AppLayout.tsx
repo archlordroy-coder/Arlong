@@ -56,14 +56,6 @@ const AppLayout = ({ children }: AppLayoutProps) => {
         };
 
         window.addEventListener('message', handleMessage);
-        
-        // Sécurité : au cas où le popup est fermé manuellement sans message
-        const checkClosed = setInterval(() => {
-          if (popup.closed) {
-            clearInterval(checkClosed);
-            // On laisse l'user re-cliquer si jamais ça n'a pas marché
-          }
-        }, 3000);
       }
     } catch (error) {
       alert("Erreur lors de la liaison au Drive");
