@@ -4,7 +4,7 @@ import { useAuth } from './contexts/AuthContext';
 import { SplashScreen as CapSplashScreen } from '@capacitor/splash-screen';
 import { StatusBar, Style } from '@capacitor/status-bar';
 import { Keyboard, KeyboardResize } from '@capacitor/keyboard';
-import { NavigationBar } from '@capgo/capacitor-navigation-bar';
+import { NavigationBar, NavigationBarColor } from '@capgo/capacitor-navigation-bar';
 
 // Pages placeholders
 import Login from './pages/Auth/Login';
@@ -44,9 +44,11 @@ const App = () => {
         await StatusBar.setBackgroundColor({ color: '#0d1117' });
         await Keyboard.setResizeMode({ mode: KeyboardResize.None });
         
-        // Mode immersif : cache la barre de navigation Android (boutons virtuels home/back)
-        // @ts-ignore : The property often differs in TS definition vs runtime for community plugins
-        await NavigationBar.hide();
+        // Rendre la barre de navigation transparente pour qu'elle se fonde dans l'app
+        await NavigationBar.setNavigationBarColor({
+          color: NavigationBarColor.TRANSPARENT,
+          darkButtons: false
+        });
       } catch (err) {
         // Ignorer silencieusement si exécuté sur le web et non sur mobile natif
       }
