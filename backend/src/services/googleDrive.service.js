@@ -150,14 +150,15 @@ class GoogleDriveService {
   /**
    * Génère l'URL d'autorisation OAuth2 envoyée au client pour attacher son compte
    * @param {string} userId - id interne pour sécuriser le callback (state)
+   * @param {string} platform - plateforme d'origine (web, mobile, desktop)
    */
-  getAuthUrl(userId) {
+  getAuthUrl(userId, platform = 'web') {
     const oauth2Client = new google.auth.OAuth2(this.clientId, this.clientSecret, this.redirectUri);
     return oauth2Client.generateAuthUrl({
       access_type: 'offline', // Demande explicitement le refresh_token (pour background uploads)
       prompt: 'consent', // Force le consentement pour un nouveau refresh_token permanent
       scope: ['https://www.googleapis.com/auth/drive.file'],
-      state: userId, // Passe l'id local de l'utilisateur qui fait cette procédure d'association
+      state: `${userId}:${platform}`, // On encode l'ID et la plateforme
     });
   }
 
