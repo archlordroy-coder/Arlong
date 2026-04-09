@@ -29,7 +29,7 @@ const Settings = () => {
 
   const linkDrive = async () => {
     try {
-      const res = await api.get('/auth/google/url?platform=web');
+      const res = await api.get('/auth/google/url?platform=desktop');
       if (res.data.success && res.data.url) {
         window.open(res.data.url, 'ArlongDriveAuth', 'width=500,height=650');
       }

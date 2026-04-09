@@ -1,0 +1,27 @@
+.history-container {
+  padding: 1rem;
+}
+
+.history-list-container {
+  border-radius: 1.25rem;
+  overflow: hidden;
+}
+
+.history-row {
+  border-color: rgba(255, 255, 255, 0.05);
+}
+
+.action-icon-wrapper {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: 44px;
+}
+
+@media (max-width: 768px) {
+  .history-row {
+    gap: 1rem;
+    padding: 1.25rem;
+  }
+}
