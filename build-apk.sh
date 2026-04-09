@@ -17,6 +17,11 @@ echo "🔄 Synchronisation Capacitor..."
 npx cap add android 2>/dev/null || true
 npx cap sync android
 
+# Générer les icônes ARLONG
+echo "🎨 Écrasement des logos natifs (ARLONG)..."
+npm install -D @capacitor/assets
+npx @capacitor/assets generate --android
+
 # Forcer l'utilisation de Gradle local seulement si on n'est PAS sur GitHub Actions
 if [ -z "$GITHUB_ACTIONS" ]; then
     echo "🔧 Configuration Gradle Local (Détecté : Machine locale)..."

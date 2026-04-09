@@ -16,7 +16,7 @@
   },
   "build": {
     "appId": "com.arlong.app",
-    "productName": "Arlong",
+    "productName": "ARLONG",
     "directories": {
       "output": "dist_electron"
     },
@@ -32,7 +32,7 @@
     },
     "win": {
       "target": ["nsis"],
-      "icon": "public/logo.png"
+      "icon": "public/icon.png"
     }
   },
   "dependencies": {

@@ -1,10 +1,10 @@
 import axios from 'axios';
 
 const api = axios.create({
-  // Utilisation de l'URL relative en production pour Vercel, localhost en dev
+  // Utilisation de l'URL absolue Vercel en production
   baseURL: import.meta.env.DEV 
     ? (import.meta.env.VITE_API_URL || 'http://localhost:5000/api')
-    : '/api',
+    : 'https://arlong-gamma.vercel.app/api',
   headers: {
     'Content-Type': 'application/json',
   },
