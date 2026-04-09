@@ -100,6 +100,10 @@ const Login = () => {
         <div className="auth-footer stagger-3 animate-fade-in" style={{opacity: 0}}>
           Pas encore de compte ? <Link to="/register">Créer un compte</Link>
         </div>
+
+        <div className="auth-footer stagger-3 animate-fade-in" style={{opacity: 0, fontSize: '0.75rem', marginTop: '0.5rem'}}>
+          <Link to="/privacy">Confidentialité</Link> • <Link to="/terms">Conditions d'utilisation</Link>
+        </div>
       </div>
     </div>
   );

@@ -9,8 +9,11 @@ import Dashboard from './pages/Dashboard/Dashboard';
 import Espaces from './pages/Espaces/Espaces';
 import Explorer from './pages/Explorer/Explorer';
 import History from './pages/History/History';
+import Home from './pages/Home';
 import Settings from './pages/Settings/Settings';
 import Scanner from './pages/Scanner/Scanner';
+import Privacy from './pages/Legal/Privacy';
+import Terms from './pages/Legal/Terms';
 
 // Layout global englobant
 import AppLayout from './components/Layout/AppLayout';
@@ -40,11 +43,15 @@ const App = () => {
   return (
     <Router >
       <Routes>
-        <Route path="/" element={<Navigate to="/dashboard" />} />
+        <Route path="/" element={<Home />} />
         
         {/* Routes publiques */}
         <Route path="/login" element={<PublicRoute><Login /></PublicRoute>} />
         <Route path="/register" element={<PublicRoute><Register /></PublicRoute>} />
+        
+        {/* Pages légales publiques (requises par Google OAuth) */}
+        <Route path="/privacy" element={<Privacy />} />
+        <Route path="/terms" element={<Terms />} />
         
         {/* Routes protégées */}
         <Route path="/dashboard" element={
