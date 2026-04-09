@@ -10,6 +10,21 @@ const Settings = () => {
   const [loading, setLoading] = useState(false);
   const [success, setSuccess] = useState(false);
 
+  React.useEffect(() => {
+    const handleMessage = async (event: MessageEvent) => {
+      if (event.data?.type === 'drive-linked' && event.data?.success) {
+        try {
+          const res = await api.get('/auth/me');
+          if (res.data?.success) {
+            window.location.reload(); 
+          }
+        } catch (error) {}
+      }
+    };
+    window.addEventListener('message', handleMessage);
+    return () => window.removeEventListener('message', handleMessage);
+  }, []);
+
   const handleUpdate = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);

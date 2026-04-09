@@ -39,31 +39,36 @@ router.get('/google/callback', async (req, res) => {
       if (error) throw error;
     }
 
-    // Réponse adaptée selon la plateforme
-    if (platform === 'mobile') {
-      // Pour le mobile, on peut rediriger vers une page de succès simple ou un deep link
-      return res.send(`
-        <div style="background:#0d1117; color:white; height:100vh; display:flex; flex-direction:column; align-items:center; justify-content:center; font-family:sans-serif;">
-          <h1 style="color:#4285F4">ARLONG MOBILE</h1>
-          <p>Liaison Google Drive réussie !</p>
-          <button onclick="window.close()" style="padding:10px 20px; background:#4285F4; border:none; color:white; border-radius:5px;">Retour à l'application</button>
-          <script>
-            // Optionnel : Tentative de redirection automatique vers l'app mobile si configurée
-            // window.location.href = 'arlong://auth-success';
-          </script>
-        </div>
-      `);
-    }
-
-    // Comportement par défaut (Web / Desktop)
+    // Réponse dynamique qui force la fermeture de la fenêtre (popup ou in-app browser) et notifie l'application mère
     res.send(`
-      <script>
-        if (window.opener) {
-          window.opener.postMessage({ type: 'drive-linked', success: true }, '*');
-        }
-        alert('Compte Google Drive lié avec succès !');
-        window.close();
-      </script>
+      <!DOCTYPE html>
+      <html>
+      <head>
+        <title>ARLONG Auth</title>
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <style>
+          body { background:#0d1117; color:white; height:100vh; margin:0; display:flex; flex-direction:column; align-items:center; justify-content:center; font-family:sans-serif; }
+          button { padding:12px 24px; background:#06b6d4; border:none; color:white; font-weight:bold; border-radius:8px; cursor:pointer; }
+        </style>
+      </head>
+      <body>
+        <h1 style="color:#06b6d4; margin-bottom:10px;">Liaison Réussie !</h1>
+        <p style="color:#a1a1aa; margin-bottom:20px;">Vous allez être redirigé vers l'application...</p>
+        <button onclick="closeSafely()">Fermer cet écran</button>
+
+        <script>
+          function closeSafely() {
+             if (window.opener) {
+               window.opener.postMessage({ type: 'drive-linked', success: true }, '*');
+             }
+             window.close();
+          }
+          
+          // Exécution immédiate
+          setTimeout(closeSafely, 500);
+        </script>
+      </body>
+      </html>
     `);
   } catch (error) {
     console.error('Erreur Callback Google:', error.message);
