@@ -22,3 +22,5 @@ gradle-9.2.1-all.zip
 *.njsproj
 *.sln
 *.sw?
+android
+.android
