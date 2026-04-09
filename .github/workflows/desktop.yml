@@ -21,7 +21,8 @@ jobs:
       - name: Install Dependencies
         run: |
           npm install
-          cd frontend/desktop && npm install
+          cd frontend/web && npm install
+          cd ../desktop && npm install
 
       - name: Build Web Assets & Package App
         run: |

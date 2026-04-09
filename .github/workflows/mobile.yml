@@ -27,7 +27,8 @@ jobs:
       - name: Install Dependencies
         run: |
           npm install
-          cd frontend/mobile && npm install
+          cd frontend/web && npm install
+          cd ../mobile && npm install
 
       - name: Build Web Assets & Generate APK
         run: ./build-apk.sh
