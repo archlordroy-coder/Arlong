@@ -19,7 +19,7 @@ Arlong (nom de code projet : ScanVault) est conçu pour gérer efficacement les 
 ## Démarrage Rapide (Environnement local)
 
 > [!IMPORTANT]
-> Assurez-vous d'avoir Node.js (v22 recommandé), Java 21, et Gradle d'installés sur votre machine avant de démarrer.
+> Assurez-vous d'avoir Node.js (v24 recommandé), Java 21, et Gradle d'installés sur votre machine avant de démarrer.
 
 1. **Cloner le projet** et installer les dépendances :
    ```bash
