@@ -27,7 +27,7 @@
       "public/**/*"
     ],
     "linux": {
-      "target": ["deb"],
+      "target": ["AppImage"],
       "category": "Utility"
     },
     "win": {
