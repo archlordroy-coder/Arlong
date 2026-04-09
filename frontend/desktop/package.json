@@ -1,7 +1,7 @@
 {
   "name": "desktop",
   "private": true,
-  "version": "0.0.0",
+  "version": "1.0.1",
   "type": "module",
   "author": "Arlong Team <support@arlong.app>",
   "homepage": "https://arlong-gamma.vercel.app",
