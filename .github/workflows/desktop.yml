@@ -1,0 +1,37 @@
+name: Desktop Build (Linux)
+
+on:
+  push:
+    branches: [ main ]
+  workflow_dispatch:
+
+jobs:
+  build_desktop:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: 'npm'
+
+      - name: Install Dependencies
+        run: |
+          npm install
+          cd frontend/desktop && npm install
+
+      - name: Build Web Assets & Package App
+        run: |
+          npm run build --prefix frontend/desktop
+          cd frontend/desktop && npx electron-builder build --linux
+        env:
+          GITHUB_ACTIONS: true
+
+      - name: Upload Linux DEB Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: arlong-linux-deb
+          path: frontend/desktop/dist_electron/*.deb

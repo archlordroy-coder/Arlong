@@ -17,14 +17,20 @@ echo "🔄 Synchronisation Capacitor..."
 npx cap add android 2>/dev/null || true
 npx cap sync android
 
-# Forcer l'utilisation de Gradle local (pour éviter qu'il soit écrasé par Capacitor)
-echo "🔧 Configuration Gradle Local..."
-PROPS_FILE="android/gradle/wrapper/gradle-wrapper.properties"
-sed -i 's|^distributionUrl=.*|distributionUrl=../../../gradle-9.2.1-all.zip|' "$PROPS_FILE"
+# Forcer l'utilisation de Gradle local seulement si on n'est PAS sur GitHub Actions
+if [ -z "$GITHUB_ACTIONS" ]; then
+    echo "🔧 Configuration Gradle Local (Détecté : Machine locale)..."
+    PROPS_FILE="android/gradle/wrapper/gradle-wrapper.properties"
+    sed -i 's|^distributionUrl=.*|distributionUrl=../../../gradle-9.2.1-all.zip|' "$PROPS_FILE"
+else
+    echo "☁️ Configuration Cloud (Détecté : GitHub Actions)..."
+    # Sur GitHub Actions, on laisse la configuration standard qui téléchargera Gradle proprement
+fi
 
 # Compiler l'APK via Gradle
 echo "🏗️ Compilation native (Gradle)..."
 cd android
+chmod +x gradlew
 ./gradlew assembleDebug
 
 echo "✅ APK généré avec succès !"
