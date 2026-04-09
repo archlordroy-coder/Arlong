@@ -1,4 +1,4 @@
-# Architecture Technique : Arlong / ScanVault
+# Architecture Technique : Arlong / ARLONG
 
 > [!TIP]
 > Ce projet est conçu selon une architecture "Monorepo" légère, permettant de tout ranger dans un même dépôt Git tout en gardant une séparation stricte entre Backend et Frontend.

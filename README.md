@@ -1,10 +1,10 @@
-# Arlong / ScanVault 🚀
+# Arlong / ARLONG 🚀
 
 Un système avancé de gestion d'archives multiplateforme (Web, Desktop, Mobile) avec synchronisation Cloud.
 
 ## Présentation
 
-Arlong (nom de code projet : ScanVault) est conçu pour gérer efficacement les documents en combinant une interface réactive avec une architecture centralisée. Le projet repose sur un socle React/Vite distribué intelligemment sur trois plateformes :
+Arlong (nom de code projet : ARLONG) est conçu pour gérer efficacement les documents en combinant une interface réactive avec une architecture centralisée. Le projet repose sur un socle React/Vite distribué intelligemment sur trois plateformes :
 - **Web** : Accessible via n'importe quel navigateur (hébergé sur Vercel/Supabase).
 - **Desktop (Windows/Linux)** : Application native propulsée par Electron et compilée en `.exe` et `.AppImage`.
 - **Mobile (Android)** : Application embarquée grâce à Capacitor et distribuée en `.apk`.

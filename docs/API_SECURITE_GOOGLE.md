@@ -7,7 +7,7 @@ Le plus grand problème à éviter : une immense page de blocage rouge *"Cette a
 ## Étape 1 : Activation Google Cloud Console
 
 1. Connectez un compte vérifié sur la [Google Cloud Console](https://console.cloud.google.com/).
-2. Créez un projet qui sera présenté explicitement aux utilisateurs (ex: `ScanVault` / `Arlong`).
+2. Créez un projet qui sera présenté explicitement aux utilisateurs (ex: `ARLONG` / `Arlong`).
 3. Cherchez selon les fonctionnalités utilisées (ex: `Google Drive API`) et cliquez sur `Activer l'API`. 
 
 ## Étape 2 : Configuration "Consent Screen" (Écran de consentement)
@@ -25,7 +25,7 @@ Chaque plateforme requiert un certificat / Client ID OAuth très singulier pour 
 
 - **Frontend Cloud (Vercel ou Supabase)** :
   - Choisissez le format de création en tant qu'`Application Web`.
-  - Intégrez **Origines Autorisées** (`http://localhost:5173` et pour Vercel `https://scanvault.vercel.app`).
+  - Intégrez **Origines Autorisées** (`http://localhost:5173` et pour Vercel `https://arlong.vercel.app`).
   - Autorisez les Redirections valides pour Supabase.
 - **Frontend Appli Android (`.apk`)** :
   - Optez explicitement à la création d'un identifiant `Application Android` !

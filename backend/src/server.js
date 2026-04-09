@@ -20,7 +20,7 @@ app.use(express.urlencoded({ extended: true }));
 
 // Health check
 app.get('/api/health', (req, res) => {
-  res.json({ status: 'ok', message: 'ScanVault API is running 🚀', timestamp: new Date().toISOString() });
+  res.json({ status: 'ok', message: 'ARLONG API is running 🚀', timestamp: new Date().toISOString() });
 });
 
 // Routes
@@ -40,7 +40,7 @@ app.use((err, req, res, next) => {
 });
 
 app.listen(PORT, () => {
-  console.log(`✅ ScanVault Backend démarré sur http://localhost:${PORT}`);
+  console.log(`✅ ARLONG Backend démarré sur http://localhost:${PORT}`);
   console.log(`📋 Health check: http://localhost:${PORT}/api/health`);
 });
 
