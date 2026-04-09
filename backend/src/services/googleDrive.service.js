@@ -11,7 +11,13 @@ class GoogleDriveService {
   constructor() {
     this.clientId = process.env.GOOGLE_CLIENT_ID;
     this.clientSecret = process.env.GOOGLE_CLIENT_SECRET;
-    this.redirectUri = process.env.GOOGLE_REDIRECT_URI;
+    
+    // Détermination dynamique de l'URL de redirection
+    // Si on est sur Vercel ou que l'URL locale n'est pas définie, on utilise le domaine de production
+    const isProduction = process.env.VERCEL || process.env.NODE_ENV === 'production';
+    this.redirectUri = isProduction 
+      ? 'https://arlong-gamma.vercel.app/api/auth/google/callback'
+      : (process.env.GOOGLE_REDIRECT_URI || 'http://localhost:5000/api/auth/google/callback');
   }
 
   /**
