@@ -1,10 +1,25 @@
-# Arlong / ARLONG 🚀
+<p align="center">
+  <img src="frontend/arlong_mascot_logo_1775639424002.png" alt="ARLONG Logo" width="180"/>
+</p>
 
-Un système avancé de gestion d'archives multiplateforme (Web, Desktop, Mobile) avec synchronisation Cloud.
+<h1 align="center">🏴‍☠️ ARLONG</h1>
+
+<p align="center">
+  <strong>Système de Gestion d'Archives Multiplateforme</strong><br/>
+  Projet Scolaire — v1.0.1
+</p>
+
+<p align="center">
+  <a href="https://arlong-gamma.vercel.app">🌐 Version Web</a> •
+  <a href="./RELEASE.md">📋 Notes de Version</a> •
+  <a href="./docs/ARCHITECTURE.md">🏗️ Architecture</a>
+</p>
+
+---
 
 ## Présentation
 
-Arlong (nom de code projet : ARLONG) est conçu pour gérer efficacement les documents en combinant une interface réactive avec une architecture centralisée. Le projet repose sur un socle React/Vite distribué intelligemment sur trois plateformes :
+ARLONG est conçu pour gérer efficacement les documents en combinant une interface réactive avec une architecture centralisée. Le projet repose sur un socle React/Vite distribué intelligemment sur trois plateformes :
 - **Web** : Accessible via n'importe quel navigateur (hébergé sur Vercel/Supabase).
 - **Desktop (Windows/Linux)** : Application native propulsée par Electron et compilée en `.exe` et `.AppImage`.
 - **Mobile (Android)** : Application embarquée grâce à Capacitor et distribuée en `.apk`.

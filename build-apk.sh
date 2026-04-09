@@ -41,5 +41,12 @@ cd android
 chmod +x gradlew
 ./gradlew assembleDebug
 
+# Renommer l'APK en ARLONG.apk
+APK_SRC="app/build/outputs/apk/debug/app-debug.apk"
+APK_DST="app/build/outputs/apk/debug/ARLONG.apk"
+if [ -f "$APK_SRC" ]; then
+    mv "$APK_SRC" "$APK_DST"
+fi
+
 echo "✅ APK généré avec succès !"
-echo "📍 Chemin : frontend/mobile/android/app/build/outputs/apk/debug/app-debug.apk"
+echo "📍 Chemin : frontend/mobile/android/app/build/outputs/apk/debug/ARLONG.apk"
