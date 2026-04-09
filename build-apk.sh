@@ -26,7 +26,7 @@ else
     echo "☁️ Configuration Cloud (Détecté : GitHub Actions)..."
     PROPS_FILE="android/gradle/wrapper/gradle-wrapper.properties"
     if [ -f "$PROPS_FILE" ]; then
-        sed -i 's|^distributionUrl=.*|distributionUrl=https\\://services.gradle.org/distributions/gradle-8.7-all.zip|' "$PROPS_FILE"
+        sed -i 's|^distributionUrl=.*|distributionUrl=https\\://services.gradle.org/distributions/gradle-8.13-all.zip|' "$PROPS_FILE"
     fi
 fi
 
