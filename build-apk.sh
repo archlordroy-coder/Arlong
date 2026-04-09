@@ -24,7 +24,10 @@ if [ -z "$GITHUB_ACTIONS" ]; then
     sed -i 's|^distributionUrl=.*|distributionUrl=../../../gradle-9.2.1-all.zip|' "$PROPS_FILE"
 else
     echo "☁️ Configuration Cloud (Détecté : GitHub Actions)..."
-    # Sur GitHub Actions, on laisse la configuration standard qui téléchargera Gradle proprement
+    PROPS_FILE="android/gradle/wrapper/gradle-wrapper.properties"
+    if [ -f "$PROPS_FILE" ]; then
+        sed -i 's|^distributionUrl=.*|distributionUrl=https\\://services.gradle.org/distributions/gradle-8.7-all.zip|' "$PROPS_FILE"
+    fi
 fi
 
 # Compiler l'APK via Gradle
