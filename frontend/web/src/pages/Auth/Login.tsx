@@ -52,7 +52,7 @@ const Login = () => {
         {error && <div className="auth-error animate-fade-in">{error}</div>}
 
         <form className="auth-form" onSubmit={handleSubmit}>
-          <div className="input-group stagger-1 animate-fade-in" style={{opacity: 0}}>
+          <div className="input-group stagger-1 animate-fade-in" style={{opacity: 1}}>
             <label className="input-label" htmlFor="email">Adresse e-mail</label>
             <input
               id="email"
@@ -65,7 +65,7 @@ const Login = () => {
             />
           </div>
 
-          <div className="input-group stagger-2 animate-fade-in" style={{opacity: 0}}>
+          <div className="input-group stagger-2 animate-fade-in" style={{opacity: 1}}>
             <label className="input-label" htmlFor="password">Mot de passe</label>
             <input
               id="password"
@@ -81,7 +81,7 @@ const Login = () => {
           <button 
             type="submit" 
             className="btn btn-primary stagger-3 animate-fade-in" 
-            style={{opacity: 0, width: '100%', marginTop: '0.5rem'}}
+            style={{opacity: 1, width: '100%', marginTop: '0.5rem'}}
             disabled={loading}
           >
             <span className="flex items-center gap-2" translate="no">
