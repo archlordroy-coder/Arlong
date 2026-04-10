@@ -4,7 +4,7 @@ import { useAuth } from './contexts/AuthContext';
 import { SplashScreen as CapSplashScreen } from '@capacitor/splash-screen';
 import { StatusBar, Style } from '@capacitor/status-bar';
 import { Keyboard, KeyboardResize } from '@capacitor/keyboard';
-import { NavigationBar, NavigationBarColor } from '@capgo/capacitor-navigation-bar';
+import { Fullscreen } from '@boengli/capacitor-fullscreen';
 
 // Pages placeholders
 import Login from './pages/Auth/Login';
@@ -19,8 +19,8 @@ import Scanner from './pages/Scanner/Scanner';
 import Privacy from './pages/Legal/Privacy';
 import Terms from './pages/Legal/Terms';
 
-// Layout global englobant
-import AppLayout from './components/Layout/AppLayout';
+// Layouts
+import MobileLayout from './components/Layout/MobileLayout';
 import SplashScreen from './components/Common/SplashScreen';
 
 const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
@@ -44,11 +44,8 @@ const App = () => {
         await StatusBar.setBackgroundColor({ color: '#0d1117' });
         await Keyboard.setResizeMode({ mode: KeyboardResize.None });
         
-        // Rendre la barre de navigation transparente pour qu'elle se fonde dans l'app
-        await NavigationBar.setNavigationBarColor({
-          color: NavigationBarColor.TRANSPARENT,
-          darkButtons: false
-        });
+        // Mode immersif total : masque les 3 boutons Android (Retour, Accueil, Récents)
+        await Fullscreen.activateImmersiveMode();
       } catch (err) {
         // Ignorer silencieusement si exécuté sur le web et non sur mobile natif
       }
@@ -86,42 +83,32 @@ const App = () => {
         {/* Routes protégées */}
         <Route path="/dashboard" element={
           <ProtectedRoute>
-            <AppLayout>
-              <Dashboard />
-            </AppLayout>
+            <MobileLayout><Dashboard /></MobileLayout>
           </ProtectedRoute>
         } />
         <Route path="/espaces" element={
           <ProtectedRoute>
-            <AppLayout>
-              <Espaces />
-            </AppLayout>
+            <MobileLayout><Espaces /></MobileLayout>
           </ProtectedRoute>
         } />
         <Route path="/explorer" element={
           <ProtectedRoute>
-            <AppLayout>
-              <Explorer />
-            </AppLayout>
+            <MobileLayout><Explorer /></MobileLayout>
           </ProtectedRoute>
         } />
         <Route path="/history" element={
           <ProtectedRoute>
-            <AppLayout>
-              <History />
-            </AppLayout>
+            <MobileLayout><History /></MobileLayout>
           </ProtectedRoute>
         } />
         <Route path="/settings" element={
           <ProtectedRoute>
-            <AppLayout>
-              <Settings />
-            </AppLayout>
+            <MobileLayout><Settings /></MobileLayout>
           </ProtectedRoute>
         } />
         <Route path="/scanner" element={
           <ProtectedRoute>
-            <Scanner />
+            <MobileLayout><Scanner /></MobileLayout>
           </ProtectedRoute>
         } />
         {/* On ajoutera /espaces/:id etc */}

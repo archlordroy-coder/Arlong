@@ -117,6 +117,7 @@ const Home: React.FC = () => {
 
       {/* ===== HERO ===== */}
       <section className="home-hero" ref={heroRef}>
+        <img src="/logo.png" alt="Arlong Logo Central" className="home-hero-logo" />
         <div className="home-hero-badge">
           <span className="home-hero-badge-dot"></span>
           Sécurisé · Chiffré · Open Source

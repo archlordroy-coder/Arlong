@@ -15,8 +15,9 @@ import Scanner from './pages/Scanner/Scanner';
 import Privacy from './pages/Legal/Privacy';
 import Terms from './pages/Legal/Terms';
 
-// Layout global englobant
+// Layouts
 import AppLayout from './components/Layout/AppLayout';
+import PublicLayout from './components/Layout/PublicLayout';
 import SplashScreen from './components/Common/SplashScreen';
 
 const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
@@ -42,13 +43,13 @@ const App = () => {
       <Routes>
         <Route path="/" element={<Home />} />
         
-        {/* Routes publiques */}
-        <Route path="/login" element={<PublicRoute><Login /></PublicRoute>} />
-        <Route path="/register" element={<PublicRoute><Register /></PublicRoute>} />
+        {/* Routes publiques — avec navbar universelle */}
+        <Route path="/login" element={<PublicLayout><PublicRoute><Login /></PublicRoute></PublicLayout>} />
+        <Route path="/register" element={<PublicLayout><PublicRoute><Register /></PublicRoute></PublicLayout>} />
         
-        {/* Pages légales publiques (requises par Google OAuth) */}
-        <Route path="/privacy" element={<Privacy />} />
-        <Route path="/terms" element={<Terms />} />
+        {/* Pages légales publiques */}
+        <Route path="/privacy" element={<PublicLayout><Privacy /></PublicLayout>} />
+        <Route path="/terms" element={<PublicLayout><Terms /></PublicLayout>} />
         
         {/* Routes protégées */}
         <Route path="/dashboard" element={
