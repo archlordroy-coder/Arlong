@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import { useState, useEffect, type FormEvent } from 'react';
 import { useAuth } from '../../contexts/AuthContext';
 import api from '../../api/client';
 import { User, Mail, Shield, Cloud, Save, Loader2, LogOut } from 'lucide-react';
@@ -10,7 +10,7 @@ const Settings = () => {
   const [loading, setLoading] = useState(false);
   const [success, setSuccess] = useState(false);
 
-  React.useEffect(() => {
+  useEffect(() => {
     const handleMessage = async (event: MessageEvent) => {
       if (event.data?.type === 'drive-linked' && event.data?.success) {
         try {
@@ -25,7 +25,7 @@ const Settings = () => {
     return () => window.removeEventListener('message', handleMessage);
   }, []);
 
-  const handleUpdate = async (e: React.FormEvent) => {
+  const handleUpdate = async (e: FormEvent) => {
     e.preventDefault();
     setLoading(true);
     setSuccess(false);
@@ -45,7 +45,7 @@ const Settings = () => {
     try {
       const res = await api.get('/auth/google/url?platform=mobile');
       if (res.data.success && res.data.url) {
-        window.open(res.data.url, 'ArlongDriveAuth', 'width=500,height=650');
+        window.location.href = res.data.url;
       }
     } catch (error) {
       alert("Erreur lors de la liaison au Drive");
