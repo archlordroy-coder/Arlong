@@ -1,6 +1,6 @@
 import React from 'react';
 import { NavLink } from 'react-router-dom';
-import { Home, Settings, Camera } from 'lucide-react';
+import { LayoutDashboard, FolderOpen, Camera, Clock, Settings } from 'lucide-react';
 import './MobileLayout.css';
 
 interface MobileLayoutProps {
@@ -8,20 +8,20 @@ interface MobileLayoutProps {
 }
 
 const TABS = [
-  { to: '/dashboard', icon: Home, label: 'Accueil' },
-  { to: '/scanner', icon: Camera, label: 'Scanner' },
-  { to: '/settings', icon: Settings, label: 'Paramètres' },
+  { to: '/dashboard',  icon: LayoutDashboard, label: 'Accueil'    },
+  { to: '/espaces',    icon: FolderOpen,       label: 'Espaces'    },
+  { to: '/scanner',    icon: Camera,           label: 'Scanner'    },
+  { to: '/history',    icon: Clock,            label: 'Historique' },
+  { to: '/settings',  icon: Settings,         label: 'Réglages'  },
 ];
 
 const MobileLayout: React.FC<MobileLayoutProps> = ({ children }) => {
   return (
     <div className="mobile-layout">
-      {/* Contenu principal */}
       <main className="mobile-main">
         {children}
       </main>
 
-      {/* Barre de navigation en bas */}
       <nav className="mobile-bottom-nav">
         {TABS.map((tab) => {
           const Icon = tab.icon;
@@ -34,7 +34,7 @@ const MobileLayout: React.FC<MobileLayoutProps> = ({ children }) => {
               }
             >
               <div className="mobile-tab-icon-wrap">
-                <Icon size={22} />
+                <Icon size={20} />
               </div>
               <span className="mobile-tab-label">{tab.label}</span>
             </NavLink>

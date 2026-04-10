@@ -1,39 +1,37 @@
 /* ============================================================
-   MOBILE LAYOUT — Bottom Tab Bar
-   Inspiré des apps natives Android / iOS
+   MOBILE LAYOUT — Bottom Tab Bar (5 onglets)
+   Design premium dark, safe-area aware
    ============================================================ */
 
 .mobile-layout {
   display: flex;
   flex-direction: column;
   height: 100vh;
-  height: 100dvh; /* Dynamic viewport pour Android avec barre système */
+  height: 100dvh;
   background-color: var(--bg-base);
   overflow: hidden;
 }
 
-/* Zone de contenu principal — scroll inside */
+/* ── Zone de contenu ─────────────────────────────────────── */
 .mobile-main {
   flex: 1;
   overflow-y: auto;
   overflow-x: hidden;
   -webkit-overflow-scrolling: touch;
-  /* Padding pour ne pas cacher le contenu sous la tab bar */
-  padding-bottom: 0;
+  scroll-behavior: smooth;
 }
 
 /* ── Bottom Tab Bar ───────────────────────────────────────── */
 .mobile-bottom-nav {
   display: flex;
   align-items: stretch;
-  justify-content: space-around;
-  background: rgba(11, 14, 20, 0.95);
-  backdrop-filter: blur(20px);
-  -webkit-backdrop-filter: blur(20px);
-  border-top: 1px solid rgba(255, 255, 255, 0.07);
-  height: 64px;
+  background: rgba(10, 13, 20, 0.98);
+  backdrop-filter: blur(24px);
+  -webkit-backdrop-filter: blur(24px);
+  border-top: 1px solid rgba(255, 255, 255, 0.06);
+  height: 60px;
   flex-shrink: 0;
-  /* Respect de l'inset bas (barre de navigation Android si visible) */
+  /* Respect de la zone système Android */
   padding-bottom: env(safe-area-inset-bottom, 0);
 }
 
@@ -43,45 +41,39 @@
   align-items: center;
   justify-content: center;
   flex: 1;
-  gap: 4px;
-  padding: 6px 0;
+  gap: 3px;
+  padding: 6px 2px;
   text-decoration: none;
-  color: var(--text-muted);
+  color: #475569;
   transition: color 0.2s ease;
+  min-width: 0;
   position: relative;
-  min-width: 0; /* allow shrinking */
-}
-
-.mobile-tab-item:hover {
-  color: var(--text-secondary);
 }
 
 .mobile-tab-item.active {
   color: var(--primary);
 }
 
-/* Indicateur actif — point lumineux */
-.mobile-tab-item.active .mobile-tab-icon-wrap::after {
+/* Barre active au-dessus de l'onglet sélectionné */
+.mobile-tab-item.active::before {
   content: '';
   position: absolute;
-  bottom: -4px;
-  left: 50%;
-  transform: translateX(-50%);
-  width: 4px;
-  height: 4px;
-  border-radius: 50%;
+  top: 0;
+  left: 20%;
+  right: 20%;
+  height: 2px;
   background: var(--primary);
-  box-shadow: 0 0 6px var(--primary);
+  border-radius: 0 0 3px 3px;
+  box-shadow: 0 0 8px var(--primary);
 }
 
 .mobile-tab-icon-wrap {
-  position: relative;
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 44px;
-  height: 32px;
-  border-radius: 12px;
+  width: 32px;
+  height: 22px;
+  border-radius: 8px;
   transition: background 0.2s;
 }
 
@@ -90,10 +82,12 @@
 }
 
 .mobile-tab-label {
-  font-size: 10px;
+  font-size: 9px;
   font-weight: 500;
   letter-spacing: 0.01em;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
+  max-width: 100%;
+  text-align: center;
 }
