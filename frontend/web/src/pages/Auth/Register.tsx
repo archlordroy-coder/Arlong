@@ -1,8 +1,8 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
 import api from '../../api/client';
-import { UserPlus, Loader2 } from 'lucide-react';
+import { UserPlus, Loader2, ArrowLeft } from 'lucide-react';
 import './Auth.css';
 
 const Register = () => {
@@ -44,6 +44,9 @@ const Register = () => {
       <div className="auth-bg-shape shape-2"></div>
       
       <div className="glass-panel auth-card animate-slide-up">
+        <button className="auth-back-btn" onClick={() => navigate('/')}>
+          <ArrowLeft size={20} />
+        </button>
         <div className="auth-header">
           <h1 className="auth-title">Arlong</h1>
           <p className="auth-subtitle">Créer un nouveau coffre-fort</p>
