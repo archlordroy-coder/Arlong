@@ -48,7 +48,7 @@
   width: 48px;
   height: 48px;
   border-radius: 12px;
-  background: linear-gradient(135deg, var(--primary), #9333ea);
+  background: linear-gradient(135deg, #6366F1, #9333ea);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -71,12 +71,12 @@
 .stat-value {
   font-size: 1.25rem;
   font-weight: bold;
-  color: var(--primary);
+  color: #6366F1;
 }
 
 .stat-label {
   font-size: 0.75rem;
-  color: var(--secondary);
+  color: #06B6D4;
   text-transform: uppercase;
   letter-spacing: 0.05em;
 }

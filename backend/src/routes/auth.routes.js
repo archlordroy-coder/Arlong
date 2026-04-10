@@ -21,6 +21,11 @@ router.get('/google/url', authMiddleware, (req, res) => {
 // Étape 2 : Callback appelé par Google après le consentement de l'utilisateur
 router.get('/google/callback', async (req, res) => {
   try {
+    const { code, state } = req.query;
+    if (!code || !state) {
+      return res.status(400).send('Erreur: Paramètres manquants depuis Google');
+    }
+
     const [userId, platform] = state.split(':');
     
     if (!userId) {
@@ -39,37 +44,15 @@ router.get('/google/callback', async (req, res) => {
       if (error) throw error;
     }
 
-    // Réponse dynamique qui force la fermeture de la fenêtre (popup ou in-app browser) et notifie l'application mère
-    res.send(`
-      <!DOCTYPE html>
-      <html>
-      <head>
-        <title>ARLONG Auth</title>
-        <meta name="viewport" content="width=device-width, initial-scale=1">
-        <style>
-          body { background:#0d1117; color:white; height:100vh; margin:0; display:flex; flex-direction:column; align-items:center; justify-content:center; font-family:sans-serif; }
-          button { padding:12px 24px; background:#06b6d4; border:none; color:white; font-weight:bold; border-radius:8px; cursor:pointer; }
-        </style>
-      </head>
-      <body>
-        <h1 style="color:#06b6d4; margin-bottom:10px;">Liaison Réussie !</h1>
-        <p style="color:#a1a1aa; margin-bottom:20px;">Vous allez être redirigé vers l'application...</p>
-        <button onclick="closeSafely()">Fermer cet écran</button>
+    // Redirection selon la plateforme
+    if (platform === 'mobile') {
+      res.redirect('arlong://app/drive-success');
+    } else {
+      // Pour le Web/Desktop, retourner vers le frontend classique (remplacer par VERCEL_URL si besoin en prod)
+      const redirectUrl = process.env.FRONTEND_URL || 'https://arlong-gamma.vercel.app';
+      res.redirect(`${redirectUrl}/dashboard?drive_linked=true`);
+    }
 
-        <script>
-          function closeSafely() {
-             if (window.opener) {
-               window.opener.postMessage({ type: 'drive-linked', success: true }, '*');
-             }
-             window.close();
-          }
-          
-          // Exécution immédiate
-          setTimeout(closeSafely, 500);
-        </script>
-      </body>
-      </html>
-    `);
   } catch (error) {
     console.error('Erreur Callback Google:', error.message);
     res.status(500).send('Erreur lors de la liaison du compte Google Drive. ' + error.message);

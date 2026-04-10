@@ -12,20 +12,20 @@
   justify-content: center;
   padding: 4rem 2rem;
   text-align: center;
-  color: var(--text-muted);
+  color: #475569;
   background: rgba(255, 255, 255, 0.02);
-  border: 1px dashed var(--border-light);
-  border-radius: var(--radius-lg);
+  border: 1px dashed rgba(255, 255, 255, 0.05);
+  border-radius: 1rem;
 }
 
 .upload-zone {
-  border: 2px dashed var(--primary);
-  background: var(--primary-glow);
+  border: 2px dashed #6366F1;
+  background: rgba(99, 102, 241, 0.5);
   padding: 2rem;
   text-align: center;
-  border-radius: var(--radius-lg);
+  border-radius: 1rem;
   cursor: pointer;
-  transition: all var(--trans-base);
+  transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
   margin-bottom: 2rem;
 }
 
@@ -44,7 +44,7 @@
 .stat-icon {
   width: 48px;
   height: 48px;
-  border-radius: var(--radius-md);
+  border-radius: 0.75rem;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -62,18 +62,18 @@
 
 .stat-details p {
   font-size: 0.875rem;
-  color: var(--text-secondary);
+  color: #94A3B8;
 }
 
 .sync-status {
   position: fixed;
   bottom: 2rem;
   right: 2rem;
-  background: var(--bg-surface);
-  border: 1px solid var(--border-light);
+  background: #12141D;
+  border: 1px solid rgba(255, 255, 255, 0.05);
   padding: 1rem 1.5rem;
-  border-radius: var(--radius-lg);
-  box-shadow: var(--shadow-lg);
+  border-radius: 1rem;
+  box-shadow: 0 16px 32px rgba(0, 0, 0, 0.6);
   display: flex;
   align-items: center;
   gap: 1rem;

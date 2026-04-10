@@ -1,61 +1,44 @@
-<p align="center">
-  <img src="frontend/arlong_mascot_logo_1775639424002.png" alt="ARLONG Logo" width="180"/>
-</p>
+# 🚀 Arlong System — Portail Documentation Pédagogique
 
-<h1 align="center">🏴‍☠️ ARLONG</h1>
+Bienvenue dans le dépôt principal du projet **Arlong System** (Frontend Mobile/Web/Desktop & Backend). 
+Ce projet a bénéficié d'une refonte structurelle, visuelle, et sécuritaire pour le rendre professionnel, multi-plateforme, et modulable.
 
-<p align="center">
-  <strong>Système de Gestion d'Archives Multiplateforme</strong><br/>
-  Projet Scolaire — v1.0.1
-</p>
-
-<p align="center">
-  <a href="https://arlong-gamma.vercel.app">🌐 Version Web</a> •
-  <a href="./RELEASE.md">📋 Notes de Version</a> •
-  <a href="./docs/ARCHITECTURE.md">🏗️ Architecture</a>
-</p>
+Puisque de nouveaux développeurs (Front-end, Back-end ou Devops) vont reprendre le projet, ce fichier vous servira de **hub central** pour savoir quoi lire, dans quel ordre.
 
 ---
 
-## Présentation
+## 📖 Dans quel ordre lire la documentation ?
 
-ARLONG est conçu pour gérer efficacement les documents en combinant une interface réactive avec une architecture centralisée. Le projet repose sur un socle React/Vite distribué intelligemment sur trois plateformes :
-- **Web** : Accessible via n'importe quel navigateur (hébergé sur Vercel/Supabase).
-- **Desktop (Windows/Linux)** : Application native propulsée par Electron et compilée en `.exe` et `.AppImage`.
-- **Mobile (Android)** : Application embarquée grâce à Capacitor et distribuée en `.apk`.
+### 1️⃣ Je suis un nouveau développeur (tous rôles) : Que dois-je savoir ?
+**Commencez par :**
+1. [ARCHITECTURE.md](./docs/ARCHITECTURE.md) : Comprendre comment le projet est architecturé (séparation des frontends `mobile/`, `web/`, `desktop/` et du `backend/`).
+2. [DEPENDENCES.md](./docs/DEPENDENCES.md) : Voir la liste des packages indispensables utilisés.
+3. [INSTALLATION_GUIDE.md](./docs/INSTALLATION_GUIDE.md) : Procédure pour lancer le projet en local (bash scripts `install-all.sh`).
 
-## Stack Technologique
+### 2️⃣ Je travaille sur l'Interface ou le Design (Dev Frontend)
+L'application n'utilise **PLUS** TailwindCSS ou de classes utilitaires.
+Nous avons migré vers une esthétique "Pure CSS BEM" (Variables dures, classes propres, composants isolés).
+**Lisez absolument :**
+1. [DESIGN_SYSTEM.md](./docs/DESIGN_SYSTEM.md) : Les règles d'or du thème **Aura Glassmorphism** (Codes couleurs, comment utiliser le mode transparent "Verre givré" et la typographie).
+2. Code de Référence : Explorez les fichiers dans `frontend/mobile/src/pages/Dashboard/Dashboard.css` par exemple pour voir comment architecturer votre CSS.
 
-- **Frontend** : React 19, Vite, TailwindCSS / Vanilla CSS, React Router v6/v7.
-- **Backend APIs** : Node.js (Express), intégration Supabase (PostgreSQL, Auth), et API Google Drive.
-- **Bridges Natifs** : Electron (Desktop), Capacitor 8 (Mobile).
-- **DevOps & CI/CD** : GitHub Actions pour automatiser les compilations multiplateformes.
+### 3️⃣ Je dois recompiler l'application (APK, Desktop, Web)
+**Lisez ces documents :**
+1. [COMPILATION_ET_BUILD.md](./docs/COMPILATION_ET_BUILD.md) : Scripts shells pour générer l'APK Android (`build-apk.sh`) et l'AppImage (`build-electron.sh`).
+2. [MOBILE_NATIVE_GUIDE.md](./docs/MOBILE_NATIVE_GUIDE.md) : Si vous rencontrez un problème avec Capacitor (ex: Le mode Immersif pour cacher la navbar Android).
+3. [PLUGINS_MOBILES.md](./docs/PLUGINS_MOBILES.md) : Liste des plugins natifs et leur fonctionnement.
 
-## Démarrage Rapide (Environnement local)
+### 4️⃣ Je dois gérer l'authentification et l'API Google Drive
+**Lisez cette documentation dans l'ordre de priorité :**
+1. [GOOGLE_OAUTH_VERIFICATION.md](./docs/GOOGLE_OAUTH_VERIFICATION.md) : Explications du flux OAuth. (Domaine configuré : `arlong-gamma.vercel.app`).
+2. Lors de la connexion, le backend (dans `auth.routes.js`) gère lui-même un Deep Link vers `arlong://app/drive-success` pour ramener l'utilisateur sur l'App native.
+3. [API_SECURITE_GOOGLE.md](./docs/API_SECURITE_GOOGLE.md) : Droits sur les fichiers de l'utilisateur.
 
-> [!IMPORTANT]
-> Assurez-vous d'avoir Node.js (v24 recommandé), Java 21, et Gradle d'installés sur votre machine avant de démarrer.
+---
 
-1. **Cloner le projet** et installer les dépendances :
-   ```bash
-   npm install
-   ```
+## 🛠️ Avancées Récentes Importantes (Changelog)
+- **UI/UX :** Remplacement de toutes les variables CSS dynamiques par du code hexadécimal fixe (Hardcoding) dans plus de 20 fichiers pour faciliter le travail d'intégration direct sans variables. Tout est au format BEM.
+- **Sécurité Fichiers :** Validation de sécurité lors du **déplacement** (`PUT /move`) et de la **suppression** (`DELETE /:id`) d'un document. Un utilisateur ne peut pas altérer le fichier d'un Espace qui ne lui appartient pas (vérification Back-end via req.user.id implémentée en dur).
+- **Google OAuth :** Mise en place d'un callback dynamique. Si connecté sur l'app (mobile), Google vous renverra via Deep Linking (`arlong://`). Si sur Web, `https://arlong-gamma.vercel.app/dashboard`.
 
-2. **Démarrer simultanément le Backend et le Frontend Web** :
-   ```bash
-   npm run dev
-   ```
-
-3. **Lancer les plateformes spécifiques** :
-   - Web seul : `npm run start:web`
-   - Mobile PWA local : `npm run start:mobile`
-   - Desktop Electron local : `npm run start:desktop` puis `npm run start:electron`
-
-## Index de la Documentation Technique
-
-Dans le dossier `docs/` vous trouverez toutes les informations nécessaires pour recréer ou maintenir ce projet de zéro :
-
-- 🏗️ [**Architecture (Backend & Frontend)**](./docs/ARCHITECTURE.md) : Comprendre comment les différents dossiers interagissent.
-- 📦 [**Dépendances et Bibliothèques**](./docs/DEPENDENCES.md) : Pourquoi et comment chaque package de compilation a été choisi.
-- ⚙️ [**Compilation et Build**](./docs/COMPILATION_ET_BUILD.md) : La magie de GitHub Actions, Electron builder, et Capacitor.
-- 🔑 [**Clés API et Sécurité Google**](./docs/API_SECURITE_GOOGLE.md) : Démarche cruciale pour obtenir les clés API et éviter les blocages de sécurité par Google.
+Bon développement ! 🚀

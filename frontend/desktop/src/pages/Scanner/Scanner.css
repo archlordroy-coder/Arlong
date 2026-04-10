@@ -29,7 +29,7 @@
     text-align: center;
     padding: 100px;
     font-size: 1.5rem;
-    color: var(--secondary);
+    color: #06B6D4;
   }
   .scanner-header, .scan-options, .previews-grid, .fixed-bottom-bar {
     display: none !important;

@@ -236,7 +236,30 @@ const moveDocument = async (req, res) => {
     const { id } = req.params;
     const { newDossierId } = req.body;
 
-    // TODO: Vérifier l'accès au nouveau dossier
+    // 1. Vérifier si le document existe et si l'utilisateur y a accès
+    const { data: document, error: docError } = await supabase
+      .from('Document')
+      .select('id, dossier:Dossier(createdById)')
+      .eq('id', parseInt(id))
+      .single();
+
+    if (docError || !document) return res.status(404).json({ success: false, message: 'Document introuvable' });
+    if (document.dossier.createdById !== req.user.id) {
+      return res.status(403).json({ success: false, message: 'Accès non autorisé pour déplacer ce document' });
+    }
+
+    // 2. Vérifier si le nouveau dossier existe et si l'utilisateur y a accès
+    const { data: newDossier, error: newDossierError } = await supabase
+      .from('Dossier')
+      .select('id, createdById')
+      .eq('id', parseInt(newDossierId))
+      .single();
+
+    if (newDossierError || !newDossier) return res.status(404).json({ success: false, message: 'Dossier de destination introuvable' });
+    if (newDossier.createdById !== req.user.id) {
+      return res.status(403).json({ success: false, message: 'Accès non autorisé au dossier de destination' });
+    }
+
     const { data: updated, error } = await supabase
       .from('Document')
       .update({ dossierId: parseInt(newDossierId) })
@@ -262,6 +285,18 @@ const moveDocument = async (req, res) => {
 const deleteDocument = async (req, res) => {
   try {
     const { id } = req.params;
+
+    // Vérifier l'accès
+    const { data: document, error: docError } = await supabase
+      .from('Document')
+      .select('id, dossier:Dossier(createdById)')
+      .eq('id', parseInt(id))
+      .single();
+
+    if (docError || !document) return res.status(404).json({ success: false, message: 'Document introuvable' });
+    if (document.dossier.createdById !== req.user.id) {
+      return res.status(403).json({ success: false, message: 'Accès non autorisé pour supprimer ce document' });
+    }
 
     const { error } = await supabase
       .from('Document')

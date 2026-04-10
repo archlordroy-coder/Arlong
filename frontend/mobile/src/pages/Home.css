@@ -13,7 +13,7 @@
     1.25rem
     1.25rem;
   gap: 1.25rem;
-  background-color: var(--bg-base);
+  background-color: #090A0F;
   overflow-y: auto;
 }
 
@@ -39,14 +39,14 @@
 .mobile-home-title {
   font-size: 1.25rem;
   font-weight: 800;
-  color: var(--text-primary);
+  color: #F8FAFC;
   letter-spacing: -0.025em;
   margin: 0;
 }
 
 .mobile-home-tagline {
   font-size: 0.72rem;
-  color: var(--text-muted);
+  color: #475569;
   margin: 0;
   letter-spacing: 0.08em;
   text-transform: uppercase;
@@ -56,7 +56,7 @@
 .mobile-home-hero {
   position: relative;
   background: rgba(21, 26, 34, 0.7);
-  border: 1px solid var(--border-light);
+  border: 1px solid rgba(255, 255, 255, 0.05);
   border-radius: 1.25rem;
   padding: 1.75rem 1.25rem;
   overflow: hidden;
@@ -79,7 +79,7 @@
 .mobile-home-hero-text {
   font-size: 1.3rem;
   font-weight: 700;
-  color: var(--text-primary);
+  color: #F8FAFC;
   line-height: 1.35;
   letter-spacing: -0.025em;
   margin: 0;
@@ -87,7 +87,7 @@
 }
 
 .mobile-home-gradient {
-  background: linear-gradient(90deg, var(--primary), var(--secondary));
+  background: linear-gradient(90deg, #6366F1, #06B6D4);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
@@ -114,7 +114,7 @@
   align-items: center;
   gap: 1rem;
   background: rgba(21, 26, 34, 0.6);
-  border: 1px solid var(--border-light);
+  border: 1px solid rgba(255, 255, 255, 0.05);
   border-radius: 1rem;
   padding: 1rem 1.125rem;
   transition: background 0.2s, transform 0.2s;
@@ -139,13 +139,13 @@
 .mobile-feat-title {
   font-size: 0.875rem;
   font-weight: 600;
-  color: var(--text-primary);
+  color: #F8FAFC;
   margin: 0 0 0.125rem;
 }
 
 .mobile-feat-desc {
   font-size: 0.75rem;
-  color: var(--text-secondary);
+  color: #94A3B8;
   margin: 0;
 }
 
@@ -157,15 +157,15 @@
   gap: 0.875rem;
   align-items: center;
   font-size: 0.72rem;
-  color: var(--text-muted);
+  color: #475569;
   padding-bottom: 0.5rem;
 }
 
 .mobile-home-footer a {
-  color: var(--text-muted);
+  color: #475569;
   text-decoration: none;
   transition: color 0.15s;
 }
 
-.mobile-home-footer a:hover { color: var(--primary); }
+.mobile-home-footer a:hover { color: #6366F1; }
 .mobile-home-footer span { opacity: 0.4; }

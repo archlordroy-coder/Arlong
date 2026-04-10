@@ -21,7 +21,7 @@
 .shape-1 {
   width: 400px;
   height: 400px;
-  background: var(--primary);
+  background: #6366F1;
   top: -100px;
   left: -100px;
 }
@@ -29,7 +29,7 @@
 .shape-2 {
   width: 300px;
   height: 300px;
-  background: var(--secondary);
+  background: #06B6D4;
   bottom: -50px;
   right: -50px;
   animation-delay: 2s;
@@ -54,7 +54,7 @@
   font-size: 1.75rem;
   font-weight: 700;
   margin-bottom: 0.5rem;
-  background: linear-gradient(to right, #ffffff, var(--text-secondary));
+  background: linear-gradient(to right, #ffffff, #94A3B8);
   background-clip: text;
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
@@ -62,7 +62,7 @@
 
 .auth-subtitle {
   font-size: 0.875rem;
-  color: var(--text-secondary);
+  color: #94A3B8;
 }
 
 .auth-form {
@@ -76,7 +76,7 @@
   border: 1px solid rgba(239, 68, 68, 0.2);
   color: #FCA5A5;
   padding: 0.75rem;
-  border-radius: var(--radius-md);
+  border-radius: 0.75rem;
   font-size: 0.875rem;
   text-align: center;
 }
@@ -84,7 +84,7 @@
 .auth-footer {
   text-align: center;
   font-size: 0.875rem;
-  color: var(--text-secondary);
+  color: #94A3B8;
   margin-top: 1rem;
 }
 
@@ -97,6 +97,6 @@
 @media (max-width: 480px) {
   .auth-card {
     padding: 2rem 1.5rem;
-    border-radius: var(--radius-xl);
+    border-radius: 1.5rem;
   }
 }

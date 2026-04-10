@@ -16,13 +16,13 @@
 .mobile-settings-title {
   font-size: 1.5rem;
   font-weight: 700;
-  color: var(--text-primary);
+  color: #F8FAFC;
   margin-bottom: 0.25rem;
 }
 
 .mobile-settings-subtitle {
   font-size: 0.8rem;
-  color: var(--text-secondary);
+  color: #94A3B8;
 }
 
 .mobile-settings-section {
@@ -31,9 +31,9 @@
 }
 
 .mobile-settings-card {
-  background: var(--bg-glass);
-  border: 1px solid var(--border-light);
-  border-radius: var(--radius-xl);
+  background: rgba(18, 20, 29, 0.45);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  border-radius: 1.5rem;
   padding: 1.25rem;
   display: flex;
   flex-direction: column;
@@ -41,7 +41,7 @@
 }
 
 .drive-card {
-  border-left: 4px solid var(--warning);
+  border-left: 4px solid #F59E0B;
 }
 
 .mobile-profile-overview {
@@ -54,7 +54,7 @@
 .mobile-avatar {
   width: 60px;
   height: 60px;
-  background: linear-gradient(135deg, var(--primary), #9333ea);
+  background: linear-gradient(135deg, #6366F1, #9333ea);
   border-radius: 16px;
   display: flex;
   align-items: center;
@@ -68,13 +68,13 @@
 .mobile-profile-info h2 {
   font-size: 1.1rem;
   font-weight: 600;
-  color: var(--text-primary);
+  color: #F8FAFC;
   margin-bottom: 0.1rem;
 }
 
 .mobile-profile-info p {
   font-size: 0.75rem;
-  color: var(--text-secondary);
+  color: #94A3B8;
 }
 
 .mobile-settings-form {
@@ -99,15 +99,15 @@
   gap: 0.4rem;
   font-size: 0.75rem;
   font-weight: 500;
-  color: var(--text-secondary);
+  color: #94A3B8;
 }
 
 .mobile-form-group input {
   padding: 0.75rem;
   background: rgba(0, 0, 0, 0.2);
   border: 1px solid rgba(255, 255, 255, 0.1);
-  border-radius: var(--radius-md);
-  color: var(--text-primary);
+  border-radius: 0.75rem;
+  color: #F8FAFC;
   font-size: 0.9rem;
 }
 
@@ -116,10 +116,10 @@
   align-items: center;
   justify-content: center;
   gap: 0.5rem;
-  background: var(--primary);
+  background: #6366F1;
   color: white;
   border: none;
-  border-radius: var(--radius-md);
+  border-radius: 0.75rem;
   padding: 0.8rem;
   font-size: 0.9rem;
   font-weight: 600;
@@ -150,18 +150,18 @@
   justify-content: center;
 }
 
-.mobile-card-icon.warning { background: rgba(245, 158, 11, 0.15); color: var(--warning); }
-.mobile-card-icon.primary { background: rgba(99, 102, 241, 0.15); color: var(--primary); }
+.mobile-card-icon.warning { background: rgba(245, 158, 11, 0.15); color: #F59E0B; }
+.mobile-card-icon.primary { background: rgba(99, 102, 241, 0.15); color: #6366F1; }
 
 .mobile-card-header h3 {
   font-size: 1rem;
   font-weight: 600;
-  color: var(--text-primary);
+  color: #F8FAFC;
 }
 
 .mobile-card-desc {
   font-size: 0.8rem;
-  color: var(--text-secondary);
+  color: #94A3B8;
   line-height: 1.4;
 }
 
@@ -170,10 +170,10 @@
   align-items: center;
   justify-content: center;
   gap: 0.5rem;
-  background: var(--primary);
+  background: #6366F1;
   color: white;
   border: none;
-  border-radius: var(--radius-md);
+  border-radius: 0.75rem;
   padding: 0.8rem;
   font-size: 0.9rem;
   font-weight: 600;
@@ -186,9 +186,9 @@
   justify-content: center;
   gap: 0.5rem;
   background: transparent;
-  color: var(--text-secondary);
+  color: #94A3B8;
   border: 1px solid rgba(255, 255, 255, 0.1);
-  border-radius: var(--radius-md);
+  border-radius: 0.75rem;
   padding: 0.8rem;
   font-size: 0.9rem;
   font-weight: 500;
@@ -203,19 +203,19 @@
 .mobile-badge-success {
   background: rgba(16, 185, 129, 0.1);
   border: 1px solid rgba(16, 185, 129, 0.3);
-  color: var(--success);
+  color: #10B981;
   text-transform: uppercase;
   font-size: 0.7rem;
   font-weight: 700;
   padding: 0.6rem;
   text-align: center;
-  border-radius: var(--radius-sm);
+  border-radius: 0.5rem;
   letter-spacing: 0.05em;
 }
 
 .mobile-btn-text {
   background: transparent;
   border: none;
-  color: var(--text-secondary);
+  color: #94A3B8;
   font-size: 0.8rem;
 }
