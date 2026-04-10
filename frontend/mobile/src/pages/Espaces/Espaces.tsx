@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect, type FormEvent } from 'react';
 import api from '../../api/client';
 import { Plus, Search, FolderOpen } from 'lucide-react';
 import './Espaces.css';
@@ -47,7 +47,7 @@ const Espaces = () => {
     }
   };
 
-  const handleCreate = async (e: React.FormEvent) => {
+  const handleCreate = async (e: FormEvent) => {
     e.preventDefault();
     if (!newName) return;
     

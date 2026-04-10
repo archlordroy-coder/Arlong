@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { Camera, RefreshCw, Upload, Image as ImageIcon } from 'lucide-react';
 import './Scanner.css';
 
@@ -18,6 +18,7 @@ const Scanner = () => {
     setScannedFiles([...scannedFiles, dummyFile]);
     setIsScanning(false);
   };
+
 
   const handleRetake = () => {
     setIsScanning(true);
