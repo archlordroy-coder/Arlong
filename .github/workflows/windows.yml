@@ -26,8 +26,8 @@ jobs:
 
       - name: Build Web Assets & Package App
         run: |
-          npm run build --prefix frontend/desktop
           cd frontend/desktop
+          npm run build
           npx electron-builder build --win
         env:
           GITHUB_ACTIONS: true

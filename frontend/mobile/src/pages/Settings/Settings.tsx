@@ -16,7 +16,6 @@ const Settings = () => {
         try {
           const res = await api.get('/auth/me');
           if (res.data?.success) {
-            // Recharger le profil complet (y compris googleRefreshToken)
             window.location.reload(); 
           }
         } catch (error) {}
@@ -34,7 +33,6 @@ const Settings = () => {
       const res = await api.put('/auth/profile', { name });
       if (res.data.success) {
         setSuccess(true);
-        // On pourrait recharger le contexte ici, mais le localStorage sera mis à jour au prochain refresh
       }
     } catch (error) {
       alert('Erreur lors de la mise à jour');
@@ -55,102 +53,97 @@ const Settings = () => {
   };
 
   return (
-    <div className="settings-container animate-fade-in">
-      <div className="settings-header mb-10">
-        <h1 className="text-3xl font-bold mb-2">Paramètres de sécurité</h1>
-        <p className="text-secondary">Gérez votre identité et vos intégrations cloud.</p>
-      </div>
+    <div className="mobile-settings">
+      <header className="mobile-settings-header">
+        <h1 className="mobile-settings-title">Paramètres</h1>
+        <p className="mobile-settings-subtitle">Identité et intégrations</p>
+      </header>
 
-      <div className="settings-grid grid md:grid-cols-[1.5fr_1fr] gap-8">
-        <div className="profile-section glass-panel p-8">
-          <div className="flex items-center gap-4 mb-8">
-            <div className="avatar-large bg-primary text-2xl font-bold flex items-center justify-center w-20 h-20 rounded-2xl shadow-lg ring-4 ring-primary/10">
+      <section className="mobile-settings-section">
+        <div className="mobile-settings-card">
+          <div className="mobile-profile-overview">
+            <div className="mobile-avatar">
               {user?.name?.charAt(0).toUpperCase()}
             </div>
-            <div>
-              <h2 className="text-xl font-bold">{user?.name}</h2>
-              <p className="text-secondary text-sm">{user?.email}</p>
+            <div className="mobile-profile-info">
+              <h2>{user?.name}</h2>
+              <p>{user?.email}</p>
             </div>
           </div>
 
-          <form onSubmit={handleUpdate}>
-            <div className="input-group mb-6">
-              <label className="input-label flex items-center gap-2">
-                <User size={16} /> Nom complet
-              </label>
+          <form onSubmit={handleUpdate} className="mobile-settings-form">
+            <div className="mobile-form-group">
+              <label><User size={14} /> Nom complet</label>
               <input 
                 type="text" 
-                className="input-field" 
                 value={name}
                 onChange={e => setName(e.target.value)}
               />
             </div>
 
-            <div className="input-group mb-8 opacity-50 cursor-not-allowed">
-              <label className="input-label flex items-center gap-2">
-                <Mail size={16} /> Adresse Email (Non modifiable)
-              </label>
+            <div className="mobile-form-group disabled">
+              <label><Mail size={14} /> Email (Fixe)</label>
               <input 
                 type="email" 
-                className="input-field" 
                 value={user?.email}
                 disabled
               />
             </div>
 
-            <button type="submit" className="btn btn-primary flex items-center gap-2" disabled={loading}>
-              {loading ? <Loader2 size={18} className="animate-spin" /> : <Save size={18} />}
-              <span>{success ? 'Profil mis à jour !' : 'Enregistrer les modifications'}</span>
+            <button type="submit" className="mobile-btn-save" disabled={loading}>
+              {loading ? <Loader2 size={16} className="spin" /> : <Save size={16} />}
+              <span>{success ? 'Profil mis à jour !' : 'Enregistrer'}</span>
             </button>
           </form>
         </div>
+      </section>
 
-        <div className="integrations-section flex flex-col gap-8">
-          <div className="drive-link-card glass-panel p-8 border-l-4 border-warning">
-            <div className="flex items-center gap-4 mb-6">
-              <div className="p-3 bg-warning/10 rounded-xl text-warning">
-                <Cloud size={24} />
-              </div>
-              <h3 className="text-lg font-bold">Google Drive</h3>
+      <section className="mobile-settings-section">
+        <div className="mobile-settings-card drive-card">
+          <div className="mobile-card-header">
+            <div className="mobile-card-icon warning">
+              <Cloud size={20} />
             </div>
-            
-            <p className="text-sm text-secondary mb-8">
-              L'intégration Drive permet de sauvegarder vos archives sur votre propre espace Google. 
-              C'est indispensable pour le mode **synchronisé**.
-            </p>
+            <h3>Google Drive</h3>
+          </div>
+          
+          <p className="mobile-card-desc">
+            Indispensable pour archiver vos documents et activer la synchronisation.
+          </p>
 
-            {user?.googleRefreshToken ? (
-              <div className="flex flex-col gap-4">
-                <div className="badge success py-3 px-4 flex items-center justify-center gap-2 rounded-lg bg-green-500/10 text-green-400 border border-green-500/20 font-bold uppercase text-xs tracking-widest">
-                  Compte Lié avec succès
-                </div>
-                <button className="btn btn-ghost text-secondary text-xs hover:text-white" onClick={linkDrive}>
-                  Relier un autre compte
-                </button>
+          {user?.googleRefreshToken ? (
+            <div className="mobile-drive-status">
+              <div className="mobile-badge-success">
+                Compte Lié
               </div>
-            ) : (
-              <button onClick={linkDrive} className="btn btn-primary w-full flex items-center justify-center gap-2 py-4">
-                <Cloud size={20} />
-                <span>Connecter mon Google Drive</span>
+              <button className="mobile-btn-text" onClick={linkDrive}>
+                Modifier le compte
               </button>
-            )}
-          </div>
-
-          <div className="security-card glass-panel p-8">
-            <div className="flex items-center gap-4 mb-6">
-              <div className="p-3 bg-primary/10 rounded-xl text-primary">
-                <Shield size={24} />
-              </div>
-              <h3 className="text-lg font-bold">Sécurité</h3>
             </div>
-            <p className="text-sm text-secondary mb-6">Votre compte est protégé par chiffrement AES-256 à la source.</p>
-            <button onClick={logout} className="btn btn-secondary w-full flex items-center justify-center gap-2">
-              <LogOut size={18} />
-              <span>Se déconnecter de l'appareil</span>
+          ) : (
+            <button onClick={linkDrive} className="mobile-btn-connect">
+              <Cloud size={18} />
+              <span>Connecter Drive</span>
             </button>
-          </div>
+          )}
         </div>
-      </div>
+      </section>
+
+      <section className="mobile-settings-section">
+        <div className="mobile-settings-card">
+          <div className="mobile-card-header">
+            <div className="mobile-card-icon primary">
+              <Shield size={20} />
+            </div>
+            <h3>Sécurité</h3>
+          </div>
+          <p className="mobile-card-desc">Chiffrement de bout en bout activé (AES-256).</p>
+          <button onClick={logout} className="mobile-btn-logout">
+            <LogOut size={16} />
+            <span>Déconnexion</span>
+          </button>
+        </div>
+      </section>
     </div>
   );
 };

@@ -19,7 +19,6 @@ const Dashboard = () => {
   const [isOnline, setIsOnline] = useState(navigator.onLine);
   const [offlineQueue, setOfflineQueue] = useState<OfflineFile[]>([]);
   const [isSyncing, setIsSyncing] = useState(false);
-  const [dragActive, setDragActive] = useState(false);
   
   const [stats, setStats] = useState({
     espaces: 0,
@@ -29,9 +28,9 @@ const Dashboard = () => {
 
   const [recentDocs, setRecentDocs] = useState<any[]>([]);
 
-  // États pour la modale d'importation
+  // États modale
   const [showUploadModal, setShowUploadModal] = useState(false);
-  const [tempFiles, setTempFiles] = useState<File[]>([]);
+  const [tempFiles, setTempFiles] = useState<globalThis.File[]>([]);
   const [allEspaces, setAllEspaces] = useState<any[]>([]);
   const [selectedEspaceId, setSelectedEspaceId] = useState<string>("");
   const [selectedDossierId, setSelectedDossierId] = useState<string>("");
@@ -39,7 +38,6 @@ const Dashboard = () => {
   const [showNewFolderInput, setShowNewFolderInput] = useState(false);
   const [newFolderName, setNewFolderName] = useState("");
 
-  // Chargement des données initiales
   useEffect(() => {
     const fetchDashboardData = async () => {
       try {
@@ -57,7 +55,6 @@ const Dashboard = () => {
     fetchDashboardData();
   }, []);
 
-  // Initialisation file d'attente hors-ligne
   useEffect(() => {
     const loadQueue = async () => {
       const queue = await localforage.getItem<OfflineFile[]>('arlong_offline_docs') || [];
@@ -77,7 +74,6 @@ const Dashboard = () => {
     };
   }, []);
 
-  // Synchronisation automatique au retour internet
   useEffect(() => {
     if (isOnline && offlineQueue.length > 0 && !isSyncing && user?.googleRefreshToken) {
       syncOfflineFiles();
@@ -99,7 +95,6 @@ const Dashboard = () => {
           headers: { 'Content-Type': 'multipart/form-data' }
         });
 
-        // Retirer de la file d'attente en cas de succès
         const index = newQueue.findIndex(f => f.id === file.id);
         if (index > -1) newQueue.splice(index, 1);
         
@@ -120,14 +115,12 @@ const Dashboard = () => {
     
     if ('dataTransfer' in e) {
       uploadedFiles = e.dataTransfer.files;
-      setDragActive(false);
     } else if ('target' in e && e.target.files) {
       uploadedFiles = (e.target as HTMLInputElement).files;
     }
 
     if (!uploadedFiles || uploadedFiles.length === 0) return;
 
-    // Récupérer les espaces pour la modale
     try {
       const res = await api.get('/espaces');
       if (res.data.success) {
@@ -146,7 +139,6 @@ const Dashboard = () => {
     setShowUploadModal(true);
   };
 
-  // Charger les dossiers d'un espace quand il est choisi
   useEffect(() => {
     if (selectedEspaceId) {
       const fetchDossiers = async () => {
@@ -170,7 +162,6 @@ const Dashboard = () => {
     setShowUploadModal(false);
     let DOSSIER_ID = (selectedDossierId && selectedDossierId !== "root") ? parseInt(selectedDossierId) : 0;
 
-    // Création dynamique du dossier si demandé
     if (showNewFolderInput) {
       try {
         setIsSyncing(true);
@@ -181,15 +172,14 @@ const Dashboard = () => {
         if (res.data.success) {
           DOSSIER_ID = res.data.data.id;
         } else {
-          throw new Error("Erreur lors de la création du dossier");
+          throw new Error("Erreur");
         }
       } catch (err) {
-        alert("Impossible de créer le dossier. L'import est annulé.");
+        alert("Impossible de créer le dossier.");
         setIsSyncing(false);
         return;
       }
     } else if (selectedDossierId === "root" || !selectedDossierId) {
-      // Mode Racine : Chercher ou créer un dossier "Général"
       try {
         setIsSyncing(true);
         const dRes = await api.get(`/dossiers`, { params: { espaceId: selectedEspaceId } });
@@ -200,7 +190,7 @@ const Dashboard = () => {
         }
         DOSSIER_ID = general.id;
       } catch (err) {
-        alert("Erreur lors de l'accès à la racine. L'import est annulé.");
+        alert("Erreur accès racine.");
         setIsSyncing(false);
         return;
       }
@@ -210,7 +200,6 @@ const Dashboard = () => {
       const file = tempFiles[i];
 
       if (!isOnline || !user?.googleRefreshToken) {
-        // HORS-LIGNE: Sauvegarde locale
         const offlineFile: OfflineFile = {
           id: Date.now().toString() + i,
           name: file.name,
@@ -222,27 +211,20 @@ const Dashboard = () => {
         const updatedQueue = [...offlineQueue, offlineFile];
         setOfflineQueue(updatedQueue);
         await localforage.setItem('arlong_offline_docs', updatedQueue);
-        alert(`☁️ Mode Hors-ligne : "${file.name}" enregistré localement. Il sera synchronisé dès le retour d'internet.`);
+        alert(`💾 Mode Hors-ligne : "${file.name}" enregistré localement.`);
       } else {
-        // EN LIGNE: Upload direct
         try {
           setIsSyncing(true);
           const formData = new FormData();
           formData.append('file', file);
           formData.append('dossierId', DOSSIER_ID.toString());
           
-          const res = await api.post('/documents', formData, {
+          await api.post('/documents', formData, {
             headers: { 'Content-Type': 'multipart/form-data' }
           });
-
-          if (res.data.success) {
-            alert(`✅ Succès : "${file.name}" a été archivé avec succès sur votre Google Drive !`);
-            // On pourrait rafraîchir recentDocs ici
-          }
         } catch (error: any) {
           console.error('Upload failed:', error);
-          const msg = error.response?.data?.message || "Erreur lors de la synchronisation Drive.";
-          alert(`❌ Échec d'envoi pour ${file.name} : ${msg}`);
+          alert(`❌ Échec d'envoi pour ${file.name}`);
         } finally {
           setIsSyncing(false);
         }
@@ -250,159 +232,121 @@ const Dashboard = () => {
     }
   };
 
-  const handleDrag = (e: React.DragEvent) => {
-    e.preventDefault();
-    e.stopPropagation();
-    if (e.type === "dragenter" || e.type === "dragover") {
-      setDragActive(true);
-    } else if (e.type === "dragleave") {
-      setDragActive(false);
-    }
-  };
-
   return (
-    <div>
-      <div className="flex justify-between items-start mb-6">
-        <div>
-          <h1 className="text-2xl font-bold mb-2">Bienvenue, {user?.name}</h1>
-          <p className="text-secondary">Voici l'état de votre coffre-fort d'archives.</p>
+    <div className="mobile-dashboard">
+      <header className="mobile-dashboard-header">
+        <div className="mobile-dashboard-welcome">
+          <h1 className="mobile-dashboard-title">Bonjour, {user?.name}</h1>
+          <p className="mobile-dashboard-subtitle">Gérez vos archives numériques</p>
         </div>
-        <button 
-          className="btn btn-primary flex items-center gap-2 shadow-lg shadow-primary/20"
-          onClick={() => document.getElementById('file-upload')?.click()}
-        >
-          <UploadCloud size={20} />
-          <span>Importer</span>
-        </button>
-      </div>
+      </header>
 
-      <div className="dashboard-grid mb-8">
-        <div className="glass-panel stat-card">
-          <div className="stat-icon blue"><Folder size={24} /></div>
-          <div className="stat-details">
-            <h3>{stats.espaces}</h3>
-            <p>Espaces de travail</p>
+      <div className="mobile-dashboard-stats">
+        <div className="mobile-stat-card">
+          <div className="mobile-stat-icon blue">
+            <Folder size={20} />
           </div>
+          <div className="mobile-stat-number">{stats.espaces}</div>
+          <div className="mobile-stat-label">Espaces</div>
         </div>
-        <div className="glass-panel stat-card">
-          <div className="stat-icon purple"><Folder size={24} /></div>
-          <div className="stat-details">
-            <h3>{stats.dossiers}</h3>
-            <p>Dossiers partagés</p>
+        <div className="mobile-stat-card">
+          <div className="mobile-stat-icon purple">
+            <Folder size={20} />
           </div>
+          <div className="mobile-stat-number">{stats.dossiers}</div>
+          <div className="mobile-stat-label">Dossiers</div>
         </div>
-        <div className="glass-panel stat-card">
-          <div className="stat-icon green"><File size={24} /></div>
-          <div className="stat-details">
-            <h3>{stats.documents}</h3>
-            <p>Documents stockés</p>
+        <div className="mobile-stat-card">
+          <div className="mobile-stat-icon green">
+            <File size={20} />
           </div>
+          <div className="mobile-stat-number">{stats.documents}</div>
+          <div className="mobile-stat-label">Fichiers</div>
         </div>
       </div>
 
-      <div 
-        className={`upload-zone ${dragActive ? 'drag-active' : ''}`}
-        onDragEnter={handleDrag}
-        onDragLeave={handleDrag}
-        onDragOver={handleDrag}
-        onDrop={handleFileUpload}
-      >
-        <UploadCloud size={48} className="mx-auto mb-4 text-primary" />
-        <h3 className="text-lg font-bold mb-2">Glissez vos fichiers ici</h3>
-        <p className="text-secondary mb-4">ou cliquez sur le bouton pour numériser vers votre Google Drive (Dossier Arlong)</p>
-        
+      <div className="mobile-upload-action">
         <input 
           type="file" 
-          id="file-upload" 
+          id="mobile-file-upload" 
           multiple 
           className="hidden" 
           onChange={handleFileUpload} 
         />
-        <label htmlFor="file-upload" className="btn btn-primary cursor-pointer">
-          Parcourir les fichiers
+        <label htmlFor="mobile-file-upload" className="mobile-upload-btn">
+          <UploadCloud size={24} />
+          <span>Importer un fichier local</span>
         </label>
       </div>
 
-      {/* Barre statut Synchronisation */}
       {offlineQueue.length > 0 && (
-        <div className="sync-status">
-          <div className="flex items-center gap-2">
-            {!isOnline ? (
-              <span key="status-offline" className="flex items-center gap-2">
-                <WifiOff className="text-warning" /> 
-                <span>{offlineQueue.length} fichier(s) en attente de connexion...</span>
-              </span>
-            ) : !user?.googleRefreshToken ? (
-              <span key="status-no-drive" className="flex items-center gap-2">
-                <WifiOff className="text-warning" /> 
-                <span>{offlineQueue.length} fichier(s) locaux. Veuillez lier votre compte Drive !</span>
-              </span>
-            ) : isSyncing ? (
-              <span key="status-syncing" className="flex items-center gap-2">
-                <RefreshCw className="text-primary animate-spin" /> 
-                <span>Synchronisation vers Drive en cours...</span>
-              </span>
-            ) : (
-              <span key="status-ready" className="flex items-center gap-2">
-                <CheckCircle className="text-success" /> 
-                <span>Prêt à synchroniser</span>
-              </span>
-            )}
-          </div>
+        <div className="mobile-sync-banner">
+          {!isOnline ? (
+            <>
+              <WifiOff size={18} className="text-warning" />
+              <span>{offlineQueue.length} fichier(s) en attente</span>
+            </>
+          ) : !user?.googleRefreshToken ? (
+            <>
+              <WifiOff size={18} className="text-warning" />
+              <span>{offlineQueue.length} fichier(s): Liez votre Drive</span>
+            </>
+          ) : isSyncing ? (
+            <>
+              <RefreshCw size={18} className="text-primary animate-spin" />
+              <span>Synchro en cours...</span>
+            </>
+          ) : (
+            <>
+              <CheckCircle size={18} className="text-success" />
+              <span>Prêt à synchroniser</span>
+            </>
+          )}
         </div>
       )}
 
-      {/* Liste des documents récents */}
-      <div className="mt-8 transition-all">
-        <h2 className="text-xl font-bold mb-4 flex items-center gap-2">
-          <Clock size={20} className="text-primary" />
-          Dernières archives
+      <div className="mobile-dashboard-recent">
+        <h2 className="mobile-section-title">
+          <Clock size={18} />
+          Récemment ajoutés
         </h2>
-        <div className="glass-panel overflow-hidden">
+        
+        <div className="mobile-recent-list border-glass">
           {recentDocs.length > 0 ? (
-            <div className="flex flex-col">
-              {recentDocs.map((doc) => (
-                <div key={doc.id} className="p-4 border-b border-white/5 flex items-center justify-between hover:bg-white/5 transition-all">
-                  <div className="flex items-center gap-3">
-                    <div className="p-2 bg-white/5 rounded-lg text-secondary">
-                      <File size={18} />
-                    </div>
-                    <div>
-                      <div className="text-sm font-medium">{doc.name}</div>
-                      <div className="text-xs text-muted">Dossier: {doc.dossier.name}</div>
-                    </div>
-                  </div>
-                  <div className="text-xs text-muted">
-                    {new Date(doc.created_at).toLocaleDateString()}
-                  </div>
+            recentDocs.map((doc) => (
+              <div key={doc.id} className="mobile-recent-item">
+                <div className="mobile-recent-icon">
+                  <File size={16} />
                 </div>
-              ))}
-            </div>
+                <div className="mobile-recent-info">
+                  <div className="mobile-recent-name">{doc.name}</div>
+                  <div className="mobile-recent-meta">Dossier: {doc.dossier?.name || 'Général'}</div>
+                </div>
+                <div className="mobile-recent-date">
+                  {new Date(doc.created_at).toLocaleDateString()}
+                </div>
+              </div>
+            ))
           ) : (
-            <div className="p-10 text-center text-secondary text-sm">
-              Aucun document importé récemment.
+            <div className="mobile-recent-empty">
+              Aucune archive récente trouvée.
             </div>
           )}
         </div>
       </div>
 
-      {/* Modale Destination d'Upload */}
       {showUploadModal && (
-        <div className="modal-overlay animate-fade-in" onClick={() => setShowUploadModal(false)}>
-          <div className="modal-content glass-panel max-w-md w-full" onClick={e => e.stopPropagation()}>
-            <div className="mb-6 text-center">
-              <div className="w-16 h-16 bg-primary/10 rounded-full flex items-center justify-center mx-auto mb-4">
-                <UploadCloud size={32} className="text-primary" />
-              </div>
-              <h2 className="text-xl font-bold">Où archiver ces fichiers ?</h2>
-              <p className="text-secondary text-sm">Choisissez la destination sur votre Drive.</p>
+        <div className="mobile-modal-overlay">
+          <div className="mobile-modal-content">
+            <div className="mobile-modal-header">
+              <h3>Choisir la destination</h3>
+              <p>Où classer ces {tempFiles.length} fichier(s) ?</p>
             </div>
 
-            <div className="space-y-4 mb-8">
-              <div className="input-group">
-                <label className="input-label">Espace de travail</label>
+            <div className="mobile-modal-body">
+              <div className="mobile-input-group">
+                <label>Espace de travail</label>
                 <select 
-                  className="input-field bg-black/40"
                   value={selectedEspaceId}
                   onChange={(e) => setSelectedEspaceId(e.target.value)}
                 >
@@ -412,10 +356,9 @@ const Dashboard = () => {
                 </select>
               </div>
 
-              <div className="input-group">
-                <label className="input-label">Dossier de destination</label>
+              <div className="mobile-input-group">
+                <label>Dossier cible</label>
                 <select 
-                  className="input-field bg-black/40"
                   value={showNewFolderInput ? "new" : selectedDossierId}
                   onChange={(e) => {
                     if (e.target.value === "new") {
@@ -432,41 +375,27 @@ const Dashboard = () => {
                     <option key={dos.id} value={dos.id}>{dos.name}</option>
                   ))}
                   <option value="new">+ Créer un nouveau dossier</option>
-                  {!showNewFolderInput && espaceDossiers.length === 0 && <option disabled>Aucun dossier trouvé</option>}
+                  {!showNewFolderInput && espaceDossiers.length === 0 && <option disabled>Aucun dossier existant</option>}
                 </select>
               </div>
 
               {showNewFolderInput && (
-                <div className="input-group animate-slide-down">
-                  <label className="input-label font-bold text-primary">Nom du nouveau dossier</label>
+                <div className="mobile-input-group">
+                  <label className="text-primary">Nom du nouveau dossier</label>
                   <input 
                     type="text" 
-                    className="input-field bg-primary/5 border-primary/20 focus:border-primary"
-                    placeholder="Ex: Factures 2024, Travaux..."
+                    placeholder="Ex: Contrats, Factures..."
                     value={newFolderName}
                     onChange={(e) => setNewFolderName(e.target.value)}
-                    autoFocus
                   />
                 </div>
               )}
-
-              <div className="bg-white/5 p-3 rounded-lg">
-                <div className="text-xs font-bold text-secondary uppercase mb-2">Fichiers à envoyer ({tempFiles.length})</div>
-                <div className="max-h-24 overflow-y-auto space-y-1">
-                  {tempFiles.map((f, idx) => (
-                    <div key={idx} className="text-sm truncate flex items-center gap-2">
-                      <File size={14} className="text-primary" />
-                      {f.name}
-                    </div>
-                  ))}
-                </div>
-              </div>
             </div>
 
-            <div className="flex gap-4">
-              <button className="btn btn-secondary flex-1" onClick={() => setShowUploadModal(false)}>Annuler</button>
-              <button className="btn btn-primary flex-1" onClick={confirmUpload} disabled={isSyncing}>
-                {isSyncing ? "Envoi..." : "Confirmer l'archivage"}
+            <div className="mobile-modal-actions">
+              <button className="mobile-btn ghost" onClick={() => setShowUploadModal(false)}>Annuler</button>
+              <button className="mobile-btn primary" onClick={confirmUpload} disabled={isSyncing}>
+                {isSyncing ? "Envoi..." : "Valider"}
               </button>
             </div>
           </div>
