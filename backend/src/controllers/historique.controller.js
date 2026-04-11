@@ -12,7 +12,7 @@ const getHistorique = async (req, res) => {
       .select(`
         *,
         user:User(id, name, email, avatar),
-        doc:Document(id, name, type, isDeleted, dossier:Dossier(id, name, createdById, isPublic, espace:Espace(id, name)))
+        document:Document(id, name, type, isDeleted, dossier:Dossier(id, name, createdById, isPublic, espace:Espace(id, name)))
       `, { count: 'exact' });
 
     if (docId) query = query.eq('docId', parseInt(docId));
@@ -27,11 +27,14 @@ const getHistorique = async (req, res) => {
 
     // Filtrage pour la sécurité: On ne voit que les historiques des docs auxquels on a accès
     const filteredHist = historiques.filter(h => {
-        if (!h.doc) return false;
-        if (h.doc.isDeleted) return false;
-        const d = h.doc.dossier;
+        if (!h.document) return false;
+        if (h.document.isDeleted) return false;
+        const d = h.document.dossier;
         return d.createdById === req.user.id || d.isPublic === true;
-    });
+    }).map(h => ({
+      ...h,
+      created_at: h.actionDate
+    }));
 
     res.json({
       success: true,
@@ -49,4 +52,41 @@ const getHistorique = async (req, res) => {
   }
 };
 
-module.exports = { getHistorique };
+/** Supprimer une entrée d'historique */
+const deleteHistoriqueItem = async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    const { error } = await supabase
+      .from('Historique')
+      .delete()
+      .eq('id', parseInt(id))
+      .eq('userId', req.user.id);
+
+    if (error) throw error;
+
+    res.json({ success: true, message: 'Entrée supprimée' });
+  } catch (error) {
+    console.error('Delete Historique error:', error);
+    res.status(500).json({ success: false, message: 'Erreur lors de la suppression' });
+  }
+};
+
+/** Supprimer tout l'historique de l'utilisateur */
+const clearAllHistorique = async (req, res) => {
+  try {
+    const { error } = await supabase
+      .from('Historique')
+      .delete()
+      .eq('userId', req.user.id);
+
+    if (error) throw error;
+
+    res.json({ success: true, message: 'Historique effacé' });
+  } catch (error) {
+    console.error('Clear Historique error:', error);
+    res.status(500).json({ success: false, message: 'Erreur lors de la suppression' });
+  }
+};
+
+module.exports = { getHistorique, deleteHistoriqueItem, clearAllHistorique };

@@ -281,6 +281,46 @@ const moveDocument = async (req, res) => {
   }
 };
 
+/** Renommer un document */
+const updateDocument = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { name } = req.body;
+
+    if (!name || !name.trim()) {
+      return res.status(400).json({ success: false, message: 'Le nouveau nom est requis' });
+    }
+
+    // Vérifier l'accès
+    const { data: document, error: docError } = await supabase
+      .from('Document')
+      .select('id, name, dossier:Dossier(createdById)')
+      .eq('id', parseInt(id))
+      .single();
+
+    if (docError || !document) {
+      return res.status(404).json({ success: false, message: 'Document introuvable' });
+    }
+    if (document.dossier.createdById !== req.user.id) {
+      return res.status(403).json({ success: false, message: 'Accès non autorisé' });
+    }
+
+    const { data: updated, error } = await supabase
+      .from('Document')
+      .update({ name: name.trim() })
+      .eq('id', parseInt(id))
+      .select()
+      .single();
+
+    if (error) throw error;
+
+    res.json({ success: true, data: updated });
+  } catch (error) {
+    console.error('Update document error:', error);
+    res.status(500).json({ success: false, message: 'Erreur lors du renommage' });
+  }
+};
+
 /** Suppression logique */
 const deleteDocument = async (req, res) => {
   try {
@@ -317,4 +357,4 @@ const deleteDocument = async (req, res) => {
   }
 };
 
-module.exports = { upload, importDocument, getDocuments, getDocumentById, downloadDocument, moveDocument, deleteDocument };
+module.exports = { upload, importDocument, getDocuments, getDocumentById, downloadDocument, moveDocument, deleteDocument, updateDocument };

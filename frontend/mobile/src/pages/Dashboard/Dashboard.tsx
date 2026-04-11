@@ -2,7 +2,11 @@ import { useState, useEffect } from 'react';
 import { useAuth } from '../../contexts/AuthContext';
 import api from '../../api/client';
 import localforage from 'localforage';
-import { UploadCloud, Folder, File, WifiOff, RefreshCw, CheckCircle, Clock } from 'lucide-react';
+import { 
+  UploadCloud, Folder, File, WifiOff, RefreshCw, CheckCircle, Clock,
+  TrendingUp, Activity, Trash2, Download, Import, Eye, ChevronRight
+} from 'lucide-react';
+import { SkeletonStatCard, SkeletonListItem } from '../../components/Common/Skeleton';
 import './Dashboard.css';
 
 interface OfflineFile {
@@ -14,21 +18,30 @@ interface OfflineFile {
   timestamp: number;
 }
 
+interface HistoryItem {
+  id: number;
+  actionType: string;
+  docId: number | null;
+  created_at: string;
+  document: { name: string; type: string } | null;
+  user: { name: string };
+}
+
 const Dashboard = () => {
   const { user } = useAuth();
   const [isOnline, setIsOnline] = useState(navigator.onLine);
   const [offlineQueue, setOfflineQueue] = useState<OfflineFile[]>([]);
   const [isSyncing, setIsSyncing] = useState(false);
   
-  const [stats, setStats] = useState({
-    espaces: 0,
-    dossiers: 0,
-    documents: 0
-  });
+  const [stats, setStats] = useState({ espaces: 0, dossiers: 0, documents: 0 });
+  const [isLoadingStats, setIsLoadingStats] = useState(true);
 
   const [recentDocs, setRecentDocs] = useState<any[]>([]);
+  const [isLoadingDocs, setIsLoadingDocs] = useState(true);
 
-  // États modale
+  const [history, setHistory] = useState<HistoryItem[]>([]);
+  const [isLoadingHistory, setIsLoadingHistory] = useState(true);
+
   const [showUploadModal, setShowUploadModal] = useState(false);
   const [tempFiles, setTempFiles] = useState<globalThis.File[]>([]);
   const [allEspaces, setAllEspaces] = useState<any[]>([]);
@@ -39,20 +52,7 @@ const Dashboard = () => {
   const [newFolderName, setNewFolderName] = useState("");
 
   useEffect(() => {
-    const fetchDashboardData = async () => {
-      try {
-        const [statsRes, docsRes] = await Promise.all([
-          api.get('/espaces/stats'),
-          api.get('/documents', { params: { limit: 5 } })
-        ]);
-        
-        if (statsRes.data.success) setStats(statsRes.data.data);
-        if (docsRes.data.success) setRecentDocs(docsRes.data.data.slice(0, 5));
-      } catch (error) {
-        console.error("Échec du chargement du dashboard:", error);
-      }
-    };
-    fetchDashboardData();
+    fetchAllData();
   }, []);
 
   useEffect(() => {
@@ -79,6 +79,30 @@ const Dashboard = () => {
       syncOfflineFiles();
     }
   }, [isOnline, offlineQueue, user]);
+
+  const fetchAllData = async () => {
+    setIsLoadingStats(true);
+    setIsLoadingDocs(true);
+    setIsLoadingHistory(true);
+    
+    try {
+      const [statsRes, docsRes, historyRes] = await Promise.all([
+        api.get('/espaces/stats'),
+        api.get('/documents', { params: { limit: 3 } }),
+        api.get('/historique', { params: { limit: 3 } })
+      ]);
+      
+      if (statsRes.data.success) setStats(statsRes.data.data);
+      if (docsRes.data.success) setRecentDocs(docsRes.data.data.slice(0, 3));
+      if (historyRes.data.success) setHistory(historyRes.data.data.slice(0, 3));
+    } catch (error) {
+      console.error("Échec du chargement:", error);
+    } finally {
+      setIsLoadingStats(false);
+      setIsLoadingDocs(false);
+      setIsLoadingHistory(false);
+    }
+  };
 
   const syncOfflineFiles = async () => {
     setIsSyncing(true);
@@ -222,6 +246,7 @@ const Dashboard = () => {
           await api.post('/documents', formData, {
             headers: { 'Content-Type': 'multipart/form-data' }
           });
+          fetchAllData();
         } catch (error: any) {
           console.error('Upload failed:', error);
           alert(`❌ Échec d'envoi pour ${file.name}`);
@@ -232,39 +257,79 @@ const Dashboard = () => {
     }
   };
 
+  const getActionIcon = (actionType: string) => {
+    switch (actionType) {
+      case 'Importation': return <Import size={14} className="action-icon import" />;
+      case 'Consultation': return <Eye size={14} className="action-icon view" />;
+      case 'Téléchargement': return <Download size={14} className="action-icon download" />;
+      case 'Suppression': return <Trash2 size={14} className="action-icon delete" />;
+      default: return <Activity size={14} className="action-icon default" />;
+    }
+  };
+
+  const formatTimeAgo = (dateString: string) => {
+    const date = new Date(dateString);
+    const now = new Date();
+    const diff = now.getTime() - date.getTime();
+    const minutes = Math.floor(diff / 60000);
+    const hours = Math.floor(diff / 3600000);
+    const days = Math.floor(diff / 86400000);
+
+    if (minutes < 1) return "À l'instant";
+    if (minutes < 60) return `Il y a ${minutes}min`;
+    if (hours < 24) return `Il y a ${hours}h`;
+    if (days < 7) return `Il y a ${days}j`;
+    return date.toLocaleDateString('fr-FR', { day: '2-digit', month: 'short' });
+  };
+
   return (
     <div className="mobile-dashboard">
       <header className="mobile-dashboard-header">
         <div className="mobile-dashboard-welcome">
           <h1 className="mobile-dashboard-title">Bonjour, {user?.name}</h1>
-          <p className="mobile-dashboard-subtitle">Gérez vos archives numériques</p>
+          <p className="mobile-dashboard-subtitle">Voici un aperçu de vos archives</p>
         </div>
+        <button className="refresh-btn" onClick={fetchAllData}>
+          <RefreshCw size={18} />
+        </button>
       </header>
 
+      {/* Stats Cards */}
       <div className="mobile-dashboard-stats">
-        <div className="mobile-stat-card">
-          <div className="mobile-stat-icon blue">
-            <Folder size={20} />
-          </div>
-          <div className="mobile-stat-number">{stats.espaces}</div>
-          <div className="mobile-stat-label">Espaces</div>
-        </div>
-        <div className="mobile-stat-card">
-          <div className="mobile-stat-icon purple">
-            <Folder size={20} />
-          </div>
-          <div className="mobile-stat-number">{stats.dossiers}</div>
-          <div className="mobile-stat-label">Dossiers</div>
-        </div>
-        <div className="mobile-stat-card">
-          <div className="mobile-stat-icon green">
-            <File size={20} />
-          </div>
-          <div className="mobile-stat-number">{stats.documents}</div>
-          <div className="mobile-stat-label">Fichiers</div>
-        </div>
+        {isLoadingStats ? (
+          <>
+            <SkeletonStatCard />
+            <SkeletonStatCard />
+            <SkeletonStatCard />
+          </>
+        ) : (
+          <>
+            <div className="mobile-stat-card">
+              <div className="mobile-stat-icon blue">
+                <Folder size={20} />
+              </div>
+              <div className="mobile-stat-number">{stats.espaces}</div>
+              <div className="mobile-stat-label">Espaces</div>
+            </div>
+            <div className="mobile-stat-card">
+              <div className="mobile-stat-icon purple">
+                <TrendingUp size={20} />
+              </div>
+              <div className="mobile-stat-number">{stats.dossiers}</div>
+              <div className="mobile-stat-label">Dossiers</div>
+            </div>
+            <div className="mobile-stat-card">
+              <div className="mobile-stat-icon green">
+                <File size={20} />
+              </div>
+              <div className="mobile-stat-number">{stats.documents}</div>
+              <div className="mobile-stat-label">Fichiers</div>
+            </div>
+          </>
+        )}
       </div>
 
+      {/* Upload Action */}
       <div className="mobile-upload-action">
         <input 
           type="file" 
@@ -275,10 +340,11 @@ const Dashboard = () => {
         />
         <label htmlFor="mobile-file-upload" className="mobile-upload-btn">
           <UploadCloud size={24} />
-          <span>Importer un fichier local</span>
+          <span>Importer un fichier</span>
         </label>
       </div>
 
+      {/* Sync Banner */}
       {offlineQueue.length > 0 && (
         <div className="mobile-sync-banner">
           {!isOnline ? (
@@ -289,11 +355,11 @@ const Dashboard = () => {
           ) : !user?.googleRefreshToken ? (
             <>
               <WifiOff size={18} className="text-warning" />
-              <span>{offlineQueue.length} fichier(s): Liez votre Drive</span>
+              <span>{offlineQueue.length} fichier(s): Liez Drive</span>
             </>
           ) : isSyncing ? (
             <>
-              <RefreshCw size={18} className="text-primary animate-spin" />
+              <RefreshCw size={18} className="text-primary spin" />
               <span>Synchro en cours...</span>
             </>
           ) : (
@@ -305,14 +371,26 @@ const Dashboard = () => {
         </div>
       )}
 
-      <div className="mobile-dashboard-recent">
-        <h2 className="mobile-section-title">
-          <Clock size={18} />
-          Récemment ajoutés
-        </h2>
+      {/* Recent Documents */}
+      <div className="mobile-dashboard-section">
+        <div className="mobile-section-header">
+          <h2 className="mobile-section-title">
+            <Clock size={18} />
+            Documents récents
+          </h2>
+          <a href="/explorer" className="mobile-section-link">
+            Voir tout <ChevronRight size={16} />
+          </a>
+        </div>
         
         <div className="mobile-recent-list border-glass">
-          {recentDocs.length > 0 ? (
+          {isLoadingDocs ? (
+            <>
+              <SkeletonListItem />
+              <SkeletonListItem />
+              <SkeletonListItem />
+            </>
+          ) : recentDocs.length > 0 ? (
             recentDocs.map((doc) => (
               <div key={doc.id} className="mobile-recent-item">
                 <div className="mobile-recent-icon">
@@ -320,27 +398,77 @@ const Dashboard = () => {
                 </div>
                 <div className="mobile-recent-info">
                   <div className="mobile-recent-name">{doc.name}</div>
-                  <div className="mobile-recent-meta">Dossier: {doc.dossier?.name || 'Général'}</div>
+                  <div className="mobile-recent-meta">{doc.dossier?.name || 'Général'}</div>
                 </div>
                 <div className="mobile-recent-date">
-                  {new Date(doc.created_at).toLocaleDateString()}
+                  {new Date(doc.created_at).toLocaleDateString('fr-FR', { 
+                    day: '2-digit', month: 'short' 
+                  })}
                 </div>
               </div>
             ))
           ) : (
             <div className="mobile-recent-empty">
-              Aucune archive récente trouvée.
+              <File size={32} />
+              <p>Aucune archive récente</p>
             </div>
           )}
         </div>
       </div>
 
+      {/* Activity History */}
+      <div className="mobile-dashboard-section">
+        <div className="mobile-section-header">
+          <h2 className="mobile-section-title">
+            <Activity size={18} />
+            Activité récente
+          </h2>
+          <a href="/history" className="mobile-section-link">
+            Voir tout <ChevronRight size={16} />
+          </a>
+        </div>
+        
+        <div className="mobile-activity-list border-glass">
+          {isLoadingHistory ? (
+            <>
+              <SkeletonListItem />
+              <SkeletonListItem />
+            </>
+          ) : history.length > 0 ? (
+            history.map((item) => (
+              <div key={item.id} className="mobile-activity-item">
+                <div className="mobile-activity-icon">
+                  {getActionIcon(item.actionType)}
+                </div>
+                <div className="mobile-activity-content">
+                  <div className="mobile-activity-text">
+                    <span className="mobile-activity-type">{item.actionType}</span>
+                    {item.document && (
+                      <span className="mobile-activity-doc"> sur {item.document.name}</span>
+                    )}
+                  </div>
+                  <div className="mobile-activity-time">
+                    {formatTimeAgo(item.created_at)}
+                  </div>
+                </div>
+              </div>
+            ))
+          ) : (
+            <div className="mobile-recent-empty">
+              <Activity size={32} />
+              <p>Aucune activité récente</p>
+            </div>
+          )}
+        </div>
+      </div>
+
+      {/* Upload Modal */}
       {showUploadModal && (
         <div className="mobile-modal-overlay">
           <div className="mobile-modal-content">
             <div className="mobile-modal-header">
               <h3>Choisir la destination</h3>
-              <p>Où classer ces {tempFiles.length} fichier(s) ?</p>
+              <p>{tempFiles.length} fichier(s) à classer</p>
             </div>
 
             <div className="mobile-modal-body">
@@ -375,7 +503,6 @@ const Dashboard = () => {
                     <option key={dos.id} value={dos.id}>{dos.name}</option>
                   ))}
                   <option value="new">+ Créer un nouveau dossier</option>
-                  {!showNewFolderInput && espaceDossiers.length === 0 && <option disabled>Aucun dossier existant</option>}
                 </select>
               </div>
 

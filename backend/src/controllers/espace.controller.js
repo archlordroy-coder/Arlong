@@ -24,9 +24,6 @@ const createEspace = async (req, res) => {
 /** Lister les espaces de l'utilisateur */
 const getEspaces = async (req, res) => {
   try {
-    // 1. Espaces créés par l'utilisateur
-    // 2. Espaces où l'utilisateur est invité (via EspaceUser)
-    // Approche ultra-robuste : récupérer tous les espaces où l'utilisateur a un rôle (créateur ou membre)
     const { data: espaces, error } = await supabase
       .from('Espace')
       .select(`
@@ -37,21 +34,16 @@ const getEspaces = async (req, res) => {
         )
       `)
       .eq('isDeleted', false)
-      // On utilise un filtre .or() simplifié qui ne dépend pas d'inner joins ambigus
-      .or(`createdById.eq.${req.user.id}`); 
-      // Note: Pour une gestion parfaite des invitations, on ferait deux requêtes, 
-      // mais ici on se concentre sur la stabilité de la création/lecture de base.
+      .or(`createdById.eq.${req.user.id}`)
 
     if (error) throw error;
 
-    res.json({ success: true, data: espaces });
+    res.json({ success: true, data: espaces || [] });
   } catch (error) {
     console.error('Get Espaces error:', error);
     res.status(500).json({ success: false, message: 'Erreur serveur' });
   }
 };
-
-/** Obtenir un espace par ID */
 const getEspaceById = async (req, res) => {
   try {
     const { id } = req.params;
@@ -190,31 +182,38 @@ const inviteUser = async (req, res) => {
 /** Obtenir les statistiques globales de l'utilisateur */
 const getStats = async (req, res) => {
   try {
-    // Compte des espaces (créés + invités)
-    const { count: espacesCount } = await supabase
+    // Compte des espaces créés par l'utilisateur
+    const { count: myEspaces } = await supabase
       .from('Espace')
-      .select('id, users:EspaceUser!left(userId)', { count: 'exact', head: true })
-      .eq('isDeleted', false)
-      .or(`createdById.eq.${req.user.id},users.userId.eq.${req.user.id}`);
+      .select('id', { count: 'exact', head: true })
+      .eq('createdById', req.user.id)
+      .eq('isDeleted', false);
 
-    // Compte des dossiers
+    // Compte des espaces où l'utilisateur est invité
+    const { count: invitedEspaces } = await supabase
+      .from('EspaceUser')
+      .select('espaceId', { count: 'exact', head: true })
+      .eq('userId', req.user.id);
+
+    const espacesCount = (myEspaces || 0) + (invitedEspaces || 0);
+
+    // Compte des dossiers créés par l'utilisateur
     const { count: dossiersCount } = await supabase
       .from('Dossier')
       .select('id', { count: 'exact', head: true })
       .eq('createdById', req.user.id);
 
-    // Compte des documents
+    // Compte des documents dans les dossiers de l'utilisateur
     const { count: documentsCount } = await supabase
       .from('Document')
       .select('id', { count: 'exact', head: true })
       .eq('isDeleted', false)
-      // Jointure implicite pour ne compter que les siens ou accessibles
-      .or(`dossier:Dossier.createdById.eq.${req.user.id}`);
+      .eq('dossier.createdById', req.user.id);
 
     res.json({
       success: true,
       data: {
-        espaces: espacesCount || 0,
+        espaces: espacesCount,
         dossiers: dossiersCount || 0,
         documents: documentsCount || 0
       }
