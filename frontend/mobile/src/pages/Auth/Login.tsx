@@ -42,7 +42,7 @@ const Login = () => {
     <div className="auth-container">
       <div className="auth-bg-shape shape-1"></div>
       <div className="auth-bg-shape shape-2"></div>
-      
+
       <div className="glass-panel auth-card animate-slide-up">
         <button className="auth-back-btn" onClick={() => navigate('/')}>
           <ArrowLeft size={20} />
@@ -55,7 +55,7 @@ const Login = () => {
         {error && <div className="auth-error animate-fade-in">{error}</div>}
 
         <form className="auth-form" onSubmit={handleSubmit}>
-          <div className="input-group stagger-1 animate-fade-in" style={{opacity: 1}}>
+          <div className="input-group stagger-1 animate-fade-in" style={{ opacity: 1 }}>
             <label className="input-label" htmlFor="email">Adresse e-mail</label>
             <input
               id="email"
@@ -68,7 +68,7 @@ const Login = () => {
             />
           </div>
 
-          <div className="input-group stagger-2 animate-fade-in" style={{opacity: 1}}>
+          <div className="input-group stagger-2 animate-fade-in" style={{ opacity: 1 }}>
             <label className="input-label" htmlFor="password">Mot de passe</label>
             <input
               id="password"
@@ -81,10 +81,10 @@ const Login = () => {
             />
           </div>
 
-          <button 
-            type="submit" 
-            className="btn btn-primary stagger-3 animate-fade-in" 
-            style={{opacity: 1, width: '100%', marginTop: '0.5rem'}}
+          <button
+            type="submit"
+            className="btn btn-primary stagger-3 animate-fade-in"
+            style={{ opacity: 1, width: '100%', marginTop: '0.5rem' }}
             disabled={loading}
           >
             <span className="flex items-center gap-2" translate="no">
@@ -100,11 +100,11 @@ const Login = () => {
           </button>
         </form>
 
-        <div className="auth-footer stagger-3 animate-fade-in" style={{opacity: 0}}>
+        <div className="auth-footer stagger-3 animate-fade-in" style={{ opacity: 0 }}>
           Pas encore de compte ? <Link to="/register">Créer un compte</Link>
         </div>
 
-        <div className="auth-footer stagger-3 animate-fade-in" style={{opacity: 0, fontSize: '0.75rem', marginTop: '0.5rem'}}>
+        <div className="auth-footer stagger-3 animate-fade-in" style={{ opacity: 0, fontSize: '0.75rem', marginTop: '0.5rem' }}>
           <Link to="/privacy">Confidentialité</Link> • <Link to="/terms">Conditions d'utilisation</Link>
         </div>
       </div>
