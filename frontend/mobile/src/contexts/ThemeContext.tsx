@@ -11,12 +11,12 @@ const ThemeContext = createContext<ThemeContextType | undefined>(undefined);
 
 export const ThemeProvider = ({ children }: { children: ReactNode }) => {
   const [theme, setTheme] = useState<Theme>(() => {
-    const saved = localStorage.getItem('arlong_theme');
+    const saved = localStorage.getItem('mboadrive_theme');
     return (saved as Theme) || 'dark';
   });
 
   useEffect(() => {
-    localStorage.setItem('arlong_theme', theme);
+    localStorage.setItem('mboadrive_theme', theme);
     document.documentElement.setAttribute('data-theme', theme);
   }, [theme]);
 

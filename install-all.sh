@@ -1,6 +1,6 @@
 #!/bin/bash
 set -e
-echo "🌟 Installation Globale ARLONG 🌟"
+echo "🌟 Installation Globale Mboa Drive 🌟"
 echo "-----------------------------------"
 
 # Installe d'abord la racine si elle contient ses propres dépendances (ex: yarn/npm concurrently)

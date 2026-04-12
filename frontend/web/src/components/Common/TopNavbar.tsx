@@ -27,8 +27,8 @@ const TopNavbar: React.FC = () => {
       </div>
       
       <div className="top-navbar-center" onClick={() => navigate('/')}>
-        <img src="/logo.png" alt="Arlong Logo" className="top-navbar-logo" />
-        <span className="top-navbar-title">ARLONG</span>
+        <img src="/logo.png" alt="Mboa Drive Logo" className="top-navbar-logo" />
+        <span className="top-navbar-title">Mboa Drive</span>
       </div>
 
       <div className="top-navbar-right">

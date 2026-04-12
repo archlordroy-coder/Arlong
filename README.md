@@ -1,8 +1,8 @@
 <p align="center">
-  <img src="./logo.png" width="220" alt="Arlong Logo" />
+  <img src="./logo.png" width="220" alt="Mboa Drive Logo" />
 </p>
 
-<h1 align="center">📘 Arlong System — L'Écosystème d'Archivage Ultime</h1>
+<h1 align="center">📘 Mboa Drive — L'Écosystème d'Archivage Ultime</h1>
 
 <p align="center">
   <strong>Une plateforme unifiée haute performance pour la gestion, le scan et la sécurisation d'archives numériques.</strong>
@@ -32,9 +32,9 @@
 ---
 
 ## 🌟 Vision du Projet
-Arlong n'est pas qu'un simple gestionnaire de fichiers. C'est un **coffre-fort numérique intelligent** qui fait le pont entre vos documents physiques (via son scanner mobile haute résolution) et vos espaces de stockage cloud. 
+Mboa Drive n'est pas qu'un simple gestionnaire de fichiers. C'est un **coffre-fort numérique intelligent** qui fait le pont entre vos documents physiques (via son scanner mobile haute résolution) et vos espaces de stockage cloud. 
 
-**Pourquoi Arlong ?**
+**Pourquoi Mboa Drive ?**
 - **Souveraineté des données** : Vos documents sont sur votre Drive et gérés via notre interface chiffrée.
 - **Accessibilité Totale** : Une seule base de code pour gérer votre WebApp, votre version de bureau et votre app mobile.
 - **Esthétique Moderne** : Un design épuré, sombre et immersif qui réduit la fatigue visuelle.
@@ -71,7 +71,7 @@ Arlong n'est pas qu'un simple gestionnaire de fichiers. C'est un **coffre-fort n
 ## 🏗️ Architecture du Mono-repo
 Le projet est organisé pour faciliter la collaboration :
 ```text
-Arlong/
+Mboa Drive/
 ├── backend/             # API REST (Supabase Connector, Google Drive Service)
 ├── docs/                # 📚 TOUTE LA DOCUMENTATION TECHNIQUE
 ├── frontend/
@@ -104,12 +104,12 @@ Utilisez des terminaux séparés pour :
 
 ## 🔐 Liaison Google Drive & OAuth
 
-La gestion de Google Drive est l'élément le plus sensible d'Arlong. 
+La gestion de Google Drive est l'élément le plus sensible d'Mboa Drive. 
 
 **Processus technique :**
 1. **Console Google Cloud** : Le domaine `arlong-gamma.vercel.app` est enregistré comme domaine autorisé.
 2. **Flux OAuth** : Le Backend initie la demande avec les scopes `drive.file` et `drive.metadata.readonly`.
-3. **Callback Callback** : Le serveur redirige dynamiquement via Deep Linking sur mobile (`arlong://`) ou via URL sur le web.
+3. **Callback Callback** : Le serveur redirige dynamiquement via Deep Linking sur mobile (`mboadrive://`) ou via URL sur le web.
 
 👉 **Lire le guide d'authentification complet** : [GOOGLE_OAUTH_VERIFICATION.md](./docs/GOOGLE_OAUTH_VERIFICATION.md)
 
@@ -147,7 +147,7 @@ Chaque commit déclenche un workflow GitHub :
 ---
 
 ## 🎨 Design System : Aura Glassmorphism
-Arlong a abandonné TailwindCSS pour un système de design **Pure CSS**.
+Mboa Drive a abandonné TailwindCSS pour un système de design **Pure CSS**.
 - **Couleur Primaire** : `#6366F1` (Neon Indigo)
 - **Fond Base** : `#090A0F`
 - **Effet Verre** : `rgba(18, 20, 29, 0.45)` avec `backdrop-filter: blur(16px)`
@@ -168,4 +168,4 @@ Toutes les couleurs sont injectées "en dur" dans les fichiers CSS de chaque com
 - **JEAN MARC WOGUE DEFFO** — Développeur
 
 ---
-<p align="center">Made with ❤️ for Arlong System © 2026</p>
+<p align="center">Made with ❤️ for Mboa Drive © 2026</p>

@@ -12,7 +12,7 @@ const Terms: React.FC = () => {
       background: '#0d1117',
       minHeight: '100vh'
     }}>
-      <h1 style={{ fontSize: 28, color: '#fff', marginBottom: 24 }}>📜 Conditions d'utilisation — ARLONG</h1>
+      <h1 style={{ fontSize: 28, color: '#fff', marginBottom: 24 }}>📜 Conditions d'utilisation — Mboa Drive</h1>
       <p><strong>Dernière mise à jour :</strong> 9 avril 2026</p>
       <p>Cette application a été développée dans le cadre d'un projet scolaire. Les points suivants s'appliquent :</p>
       <ul>
@@ -21,8 +21,8 @@ const Terms: React.FC = () => {
         <li>Les documents stockés restent la propriété exclusive de l'utilisateur et sont hébergés sur son compte Google Drive.</li>
         <li>Le code source est disponible publiquement sous licence MIT dans le dépôt GitHub du projet.</li>
       </ul>
-      <p>En utilisant ARLONG, vous acceptez ces conditions.</p>
-      <p>Pour toute question, contactez <a href="mailto:ravel.nghomsi@facsciences-uy1.cm" style={{ color: '#58a6ff' }}>ravel.nghomsi@facsciences-uy1.cm</a>.</p>
+      <p>En utilisant Mboa Drive, vous acceptez ces conditions.</p>
+      <p>Pour toute question, contactez <a href="mailto:contact@mboadrive.com" style={{ color: '#58a6ff' }}>contact@mboadrive.com</a>.</p>
       <div style={{ marginTop: 40, paddingTop: 20, borderTop: '1px solid #30363d' }}>
         <Link to="/" style={{ color: '#58a6ff' }}>← Retour à l'accueil</Link>
       </div>

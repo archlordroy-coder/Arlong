@@ -1,7 +1,7 @@
 const { google } = require('googleapis');
 const stream = require('stream');
 
-const ARLONG_FOLDER_NAME = 'Mboa Drive';
+const Mboa Drive_FOLDER_NAME = 'Mboa Drive';
 
 /**
  * Service Google Drive pour le stockage des documents
@@ -38,7 +38,7 @@ class GoogleDriveService {
   /**
    * S'assure qu'un chemin de dossiers existe sur Google Drive et retourne l'ID du dernier dossier.
    * @param {string} refreshToken 
-   * @param {string[]} segments - ex: ['Arlong', 'Espace A', 'Dossier 1']
+   * @param {string[]} segments - ex: ['Mboa Drive', 'Espace A', 'Dossier 1']
    */
   async _ensurePath(refreshToken, segments) {
     const driveClient = this._getUserDriveClient(refreshToken);
@@ -80,9 +80,9 @@ class GoogleDriveService {
    * @param {string} fileName
    * @param {string} mimeType
    * @param {string} refreshToken
-   * @param {string[]} pathSegments - ex: ['Arlong', 'Espace', 'Dossier']
+   * @param {string[]} pathSegments - ex: ['Mboa Drive', 'Espace', 'Dossier']
    */
-  async uploadFile(fileBuffer, fileName, mimeType, refreshToken, pathSegments = [ARLONG_FOLDER_NAME]) {
+  async uploadFile(fileBuffer, fileName, mimeType, refreshToken, pathSegments = [Mboa Drive_FOLDER_NAME]) {
     const driveClient = this._getUserDriveClient(refreshToken);
     const parentId = await this._ensurePath(refreshToken, pathSegments);
 

@@ -46,7 +46,7 @@ router.get('/google/callback', async (req, res) => {
 
     // Redirection selon la plateforme
     if (platform === 'mobile') {
-      res.redirect('arlong://app/drive-success');
+      res.redirect('mboadrive://app/drive-success');
     } else {
       // Pour le Web/Desktop, retourner vers le frontend classique (remplacer par VERCEL_URL si besoin en prod)
       const redirectUrl = process.env.FRONTEND_URL || 'https://arlong-gamma.vercel.app';

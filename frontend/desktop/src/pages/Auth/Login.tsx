@@ -48,7 +48,7 @@ const Login = () => {
           <ArrowLeft size={20} />
         </button>
         <div className="auth-header">
-          <h1 className="auth-title">Arlong</h1>
+          <h1 className="auth-title">Mboa Drive</h1>
           <p className="auth-subtitle">Accédez à vos archives sécurisées</p>
         </div>
 

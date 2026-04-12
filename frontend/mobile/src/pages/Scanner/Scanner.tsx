@@ -358,7 +358,7 @@ const Scanner = () => {
               <ImageIcon size={48} />
             </div>
             <h2>Accès Caméra Requis</h2>
-            <p>Arlong a besoin de la caméra pour numériser vos documents.</p>
+            <p>Mboa Drive a besoin de la caméra pour numériser vos documents.</p>
             <button className="btn-allow-camera" onClick={requestPermission}>
               Autoriser l'accès
             </button>

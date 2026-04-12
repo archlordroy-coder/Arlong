@@ -29,7 +29,7 @@ const Privacy: React.FC = () => {
       <p>Les connexions sont sécurisées via HTTPS et l'authentification est gérée par le protocole standard OAuth 2.0 de Google. Les tokens d'accès sont stockés de manière sécurisée côté serveur.</p>
 
       <h2 style={{ marginTop: 24 }}>5. Contact</h2>
-      <p>Pour toute question relative à la confidentialité, contactez-nous à : <strong>ravel.nghomsi@facsciences-uy1.cm</strong></p>
+      <p>Pour toute question relative à la confidentialité, contactez-nous à : <strong>contact@mboadrive.com</strong></p>
 
       <div style={{ marginTop: 40, paddingTop: 20, borderTop: '1px solid #30363d' }}>
         <Link to="/login" style={{ color: '#58a6ff' }}>← Retour à l'application</Link>

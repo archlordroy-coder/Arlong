@@ -11,9 +11,9 @@ const Home: React.FC = () => {
       <div className="home-card">
         {/* Logo + Titre */}
         <div className="home-header">
-          <img src="/logo.png" alt="Arlong" className="home-logo" />
+          <img src="/logo.png" alt="Mboa Drive" className="home-logo" />
           <h1 className="home-title">
-            ARLONG <span className="home-accent">Desktop</span>
+            Mboa Drive <span className="home-accent">Desktop</span>
           </h1>
           <p className="home-subtitle">
             Le poste de commande de vos archives. Organisez et chiffrez vos documents avec la puissance native de votre machine.

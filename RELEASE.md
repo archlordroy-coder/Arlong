@@ -48,16 +48,16 @@
 
 ### 🐧 Linux (AppImage)
 ```bash
-chmod +x ARLONG-1.0.1.AppImage
-./ARLONG-1.0.1.AppImage
+chmod +x Mboa Drive-1.0.1.AppImage
+./Mboa Drive-1.0.1.AppImage
 ```
 
 ### 🪟 Windows
-Double-cliquer sur `ARLONG Setup 1.0.1.exe` et suivre l'assistant d'installation.
+Double-cliquer sur `Mboa Drive Setup 1.0.1.exe` et suivre l'assistant d'installation.
 
 ### 📱 Android
 1. Activer **"Sources inconnues"** dans `Paramètres > Sécurité`.
-2. Ouvrir le fichier `ARLONG.apk` et confirmer l'installation.
+2. Ouvrir le fichier `Mboa Drive.apk` et confirmer l'installation.
 
 ### 🌐 Web
 Aucune installation requise. Accéder directement à [arlong-gamma.vercel.app](https://arlong-gamma.vercel.app).

@@ -23,7 +23,7 @@ const AppLayout = ({ children }: AppLayoutProps) => {
     if (location.pathname.includes('/dashboard')) return 'Tableau de bord';
     if (location.pathname.includes('/espaces')) return 'Espaces de travail';
     if (location.pathname.includes('/settings')) return 'Paramètres';
-    return 'Arlong';
+    return 'Mboa Drive';
   };
 
   const linkDrive = async () => {
@@ -37,7 +37,7 @@ const AppLayout = ({ children }: AppLayoutProps) => {
         
         const popup = window.open(
           res.data.url, 
-          'ArlongDriveAuth', 
+          'Mboa DriveDriveAuth', 
           `width=${width},height=${height},top=${top},left=${left}`
         );
 
@@ -67,8 +67,8 @@ const AppLayout = ({ children }: AppLayoutProps) => {
       {/* Sidebar / Bottom Nav */}
       <aside className="app-sidebar">
         <div className="sidebar-header">
-          <img src="/logo.png" alt="Arlong" className="sidebar-logo" />
-          <span>Arlong</span>
+          <img src="/logo.png" alt="Mboa Drive" className="sidebar-logo" />
+          <span>Mboa Drive</span>
         </div>
         
         <nav className="sidebar-nav">

@@ -22,7 +22,7 @@ const Terms: React.FC = () => {
         <li>Le code source est disponible publiquement sous licence MIT dans le dépôt GitHub du projet.</li>
       </ul>
       <p>En utilisant Mboa Drive, vous acceptez ces conditions.</p>
-      <p>Pour toute question, contactez <a href="mailto:ravel.nghomsi@facsciences-uy1.cm" style={{ color: '#58a6ff' }}>ravel.nghomsi@facsciences-uy1.cm</a>.</p>
+      <p>Pour toute question, contactez <a href="mailto:contact@mboadrive.com" style={{ color: '#58a6ff' }}>contact@mboadrive.com</a>.</p>
       <div style={{ marginTop: 40, paddingTop: 20, borderTop: '1px solid #30363d' }}>
         <Link to="/" style={{ color: '#58a6ff' }}>← Retour à l'accueil</Link>
       </div>
