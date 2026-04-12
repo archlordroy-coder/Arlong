@@ -4,7 +4,8 @@ import api from '../../api/client';
 import localforage from 'localforage';
 import { 
   UploadCloud, Folder, File, WifiOff, RefreshCw, CheckCircle, Clock,
-  TrendingUp, Activity, Trash2, Download, Import, Eye, ChevronRight
+  TrendingUp, Activity, Trash2, Download, Import, Eye, ChevronRight,
+  Loader2, AlertCircle
 } from 'lucide-react';
 import { SkeletonStatCard, SkeletonListItem } from '../../components/Common/Skeleton';
 import './Dashboard.css';
@@ -25,6 +26,17 @@ interface HistoryItem {
   created_at: string;
   document: { name: string; type: string } | null;
   user: { name: string };
+}
+
+type UploadStatus = 'idle' | 'uploading' | 'success' | 'error';
+
+interface UploadProgress {
+  status: UploadStatus;
+  current: number;
+  total: number;
+  currentFile: string;
+  errors: string[];
+  targetFolder: string;
 }
 
 const Dashboard = () => {
@@ -50,6 +62,16 @@ const Dashboard = () => {
   const [espaceDossiers, setEspaceDossiers] = useState<any[]>([]);
   const [showNewFolderInput, setShowNewFolderInput] = useState(false);
   const [newFolderName, setNewFolderName] = useState("");
+
+  const [showProgressModal, setShowProgressModal] = useState(false);
+  const [uploadProgress, setUploadProgress] = useState<UploadProgress>({
+    status: 'idle',
+    current: 0,
+    total: 0,
+    currentFile: '',
+    errors: [],
+    targetFolder: ''
+  });
 
   useEffect(() => {
     fetchAllData();
@@ -184,11 +206,13 @@ const Dashboard = () => {
 
   const confirmUpload = async () => {
     setShowUploadModal(false);
+    
+    let targetFolderName = "Racine";
     let DOSSIER_ID = (selectedDossierId && selectedDossierId !== "root") ? parseInt(selectedDossierId) : 0;
 
-    if (showNewFolderInput) {
+    if (showNewFolderInput && newFolderName) {
+      targetFolderName = newFolderName;
       try {
-        setIsSyncing(true);
         const res = await api.post('/dossiers', { 
           name: newFolderName, 
           espaceId: parseInt(selectedEspaceId) 
@@ -198,14 +222,20 @@ const Dashboard = () => {
         } else {
           throw new Error("Erreur");
         }
-      } catch (err) {
-        alert("Impossible de créer le dossier.");
-        setIsSyncing(false);
+      } catch {
+        setUploadProgress({
+          status: 'error',
+          current: 0,
+          total: tempFiles.length,
+          currentFile: '',
+          errors: ['Erreur création dossier'],
+          targetFolder: targetFolderName
+        });
+        setShowProgressModal(true);
         return;
       }
     } else if (selectedDossierId === "root" || !selectedDossierId) {
       try {
-        setIsSyncing(true);
         const dRes = await api.get(`/dossiers`, { params: { espaceId: selectedEspaceId } });
         let general = dRes.data.data.find((d: any) => d.name === "Général");
         if (!general) {
@@ -213,15 +243,42 @@ const Dashboard = () => {
           general = createRes.data.data;
         }
         DOSSIER_ID = general.id;
-      } catch (err) {
-        alert("Erreur accès racine.");
-        setIsSyncing(false);
+      } catch {
+        setUploadProgress({
+          status: 'error',
+          current: 0,
+          total: tempFiles.length,
+          currentFile: '',
+          errors: ['Erreur accès racine'],
+          targetFolder: targetFolderName
+        });
+        setShowProgressModal(true);
         return;
       }
+    } else {
+      const folder = espaceDossiers.find(d => d.id.toString() === selectedDossierId);
+      targetFolderName = folder?.name || "Racine";
     }
+
+    setUploadProgress({
+      status: 'uploading',
+      current: 0,
+      total: tempFiles.length,
+      currentFile: '',
+      errors: [],
+      targetFolder: targetFolderName
+    });
+    setShowProgressModal(true);
+
+    const errors: string[] = [];
 
     for (let i = 0; i < tempFiles.length; i++) {
       const file = tempFiles[i];
+      setUploadProgress(prev => ({ 
+        ...prev, 
+        current: i + 1, 
+        currentFile: file.name 
+      }));
 
       if (!isOnline || !user?.googleRefreshToken) {
         const offlineFile: OfflineFile = {
@@ -235,10 +292,8 @@ const Dashboard = () => {
         const updatedQueue = [...offlineQueue, offlineFile];
         setOfflineQueue(updatedQueue);
         await localforage.setItem('arlong_offline_docs', updatedQueue);
-        alert(`💾 Mode Hors-ligne : "${file.name}" enregistré localement.`);
       } else {
         try {
-          setIsSyncing(true);
           const formData = new FormData();
           formData.append('file', file);
           formData.append('dossierId', DOSSIER_ID.toString());
@@ -246,14 +301,61 @@ const Dashboard = () => {
           await api.post('/documents', formData, {
             headers: { 'Content-Type': 'multipart/form-data' }
           });
-          fetchAllData();
-        } catch (error: any) {
+        } catch (error) {
           console.error('Upload failed:', error);
-          alert(`❌ Échec d'envoi pour ${file.name}`);
-        } finally {
-          setIsSyncing(false);
+          errors.push(file.name);
         }
       }
+    }
+
+    fetchAllData();
+
+    if (errors.length === 0) {
+      setUploadProgress(prev => ({ ...prev, status: 'success' }));
+      setTimeout(() => {
+        setShowProgressModal(false);
+        setUploadProgress({
+          status: 'idle',
+          current: 0,
+          total: 0,
+          currentFile: '',
+          errors: [],
+          targetFolder: ''
+        });
+        setTempFiles([]);
+        setNewFolderName("");
+        setShowNewFolderInput(false);
+      }, 1500);
+    } else if (errors.length === tempFiles.length) {
+      setUploadProgress(prev => ({ 
+        ...prev, 
+        status: 'error',
+        errors 
+      }));
+    } else {
+      setUploadProgress(prev => ({ 
+        ...prev, 
+        status: 'success',
+        errors 
+      }));
+    }
+    setIsSyncing(false);
+  };
+
+  const closeProgressModal = () => {
+    if (uploadProgress.status !== 'uploading') {
+      setShowProgressModal(false);
+      setUploadProgress({
+        status: 'idle',
+        current: 0,
+        total: 0,
+        currentFile: '',
+        errors: [],
+        targetFolder: ''
+      });
+      setTempFiles([]);
+      setNewFolderName("");
+      setShowNewFolderInput(false);
     }
   };
 
@@ -335,6 +437,7 @@ const Dashboard = () => {
           type="file" 
           id="mobile-file-upload" 
           multiple 
+          accept="image/*,.pdf,.doc,.docx,.txt,.md,.zip,.ppt,.pptx,.xls,.xlsx"
           className="hidden" 
           onChange={handleFileUpload} 
         />
@@ -525,6 +628,78 @@ const Dashboard = () => {
                 {isSyncing ? "Envoi..." : "Valider"}
               </button>
             </div>
+          </div>
+        </div>
+      )}
+
+      {/* Upload Progress Modal */}
+      {showProgressModal && (
+        <div className="upload-progress-overlay">
+          <div className="upload-progress-modal">
+            {uploadProgress.status === 'uploading' && (
+              <>
+                <div className="upload-progress-icon loading">
+                  <Loader2 size={48} className="spin" />
+                </div>
+                <h3>Importation en cours</h3>
+                <p className="upload-progress-folder">
+                  <Folder size={14} />
+                  {uploadProgress.targetFolder}
+                </p>
+                <div className="upload-progress-bar-container">
+                  <div 
+                    className="upload-progress-bar-fill"
+                    style={{ width: `${(uploadProgress.current / uploadProgress.total) * 100}%` }}
+                  />
+                </div>
+                <p className="upload-progress-text">
+                  {uploadProgress.current} / {uploadProgress.total} fichiers
+                </p>
+                <p className="upload-progress-current">{uploadProgress.currentFile}</p>
+              </>
+            )}
+
+            {uploadProgress.status === 'success' && (
+              <>
+                <div className="upload-progress-icon success">
+                  <CheckCircle size={48} />
+                </div>
+                <h3>Importation réussie !</h3>
+                <p className="upload-progress-folder">
+                  <Folder size={14} />
+                  {uploadProgress.targetFolder}
+                </p>
+                <p className="upload-progress-success">
+                  {uploadProgress.total} fichier(s) importé(s)
+                </p>
+                {uploadProgress.errors.length > 0 && (
+                  <p className="upload-progress-errors">
+                    {uploadProgress.errors.length} erreur(s)
+                  </p>
+                )}
+              </>
+            )}
+
+            {uploadProgress.status === 'error' && (
+              <>
+                <div className="upload-progress-icon error">
+                  <AlertCircle size={48} />
+                </div>
+                <h3>Erreur d'importation</h3>
+                <p className="upload-progress-folder">
+                  <Folder size={14} />
+                  {uploadProgress.targetFolder}
+                </p>
+                <p className="upload-progress-error">
+                  {uploadProgress.errors.length > 0 
+                    ? `${uploadProgress.errors.length} fichier(s) échoué(s)`
+                    : 'Une erreur est survenue'}
+                </p>
+                <button className="upload-progress-close" onClick={closeProgressModal}>
+                  Fermer
+                </button>
+              </>
+            )}
           </div>
         </div>
       )}

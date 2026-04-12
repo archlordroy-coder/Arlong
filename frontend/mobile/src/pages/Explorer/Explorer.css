@@ -172,11 +172,84 @@
   flex-direction: column;
   align-items: center;
   padding: 1.5rem 1rem;
-  cursor: pointer;
+  position: relative;
   transition: all 0.2s;
 }
 
-.folder-card:active { transform: scale(0.96); }
+.folder-card.menu-active {
+  background: rgba(99, 102, 241, 0.1);
+}
+
+.folder-card-main {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  cursor: pointer;
+}
+
+.folder-card:active .folder-card-main { transform: scale(0.96); }
+
+.folder-menu-btn {
+  position: absolute;
+  top: 0.5rem;
+  right: 0.5rem;
+  width: 32px;
+  height: 32px;
+  background: rgba(0, 0, 0, 0.6);
+  backdrop-filter: blur(8px);
+  border: none;
+  border-radius: 0.5rem;
+  color: #F8FAFC;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.2s;
+  z-index: 10;
+}
+
+.folder-menu-btn:hover {
+  background: rgba(99, 102, 241, 0.3);
+}
+
+.folder-options-menu {
+  position: absolute;
+  top: 2.5rem;
+  right: 0.5rem;
+  background: #1a1a2e;
+  border-radius: 0.75rem;
+  padding: 0.5rem;
+  min-width: 140px;
+  z-index: 100;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+}
+
+.folder-option {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  width: 100%;
+  padding: 0.6rem 0.75rem;
+  background: none;
+  border: none;
+  border-radius: 0.5rem;
+  color: #F8FAFC;
+  font-size: 0.85rem;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+
+.folder-option:hover {
+  background: rgba(255, 255, 255, 0.08);
+}
+
+.folder-option.danger {
+  color: #F87171;
+}
+
+.folder-option.danger:hover {
+  background: rgba(239, 68, 68, 0.15);
+}
 
 .folder-icon {
   width: 60px;
@@ -285,6 +358,12 @@
   border-radius: 0.375rem;
 }
 
+.file-type-icon {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+
 .doc-card-info {
   padding: 0.75rem;
   display: flex;
@@ -387,7 +466,10 @@
 .icon-red { color: #F87171; }
 .icon-blue-dark { color: #3B82F6; }
 .icon-green { color: #34D399; }
+.icon-green-dark { color: #059669; }
 .icon-purple { color: #A78BFA; }
+.icon-yellow { color: #FBBF24; }
+.icon-orange { color: #FB923C; }
 .icon-gray { color: #94A3B8; }
 
 /* ── Modals ─────────────────────────────────── */
@@ -652,6 +734,11 @@
   color: #F87171;
 }
 
+.delete-confirm-icon.warning {
+  background: rgba(245, 158, 11, 0.15);
+  color: #FBBF24;
+}
+
 .delete-confirm-modal h3 {
   font-size: 1.2rem;
   font-weight: 700;
@@ -822,4 +909,10 @@
 /* Hidden utility */
 .hidden {
   display: none !important;
+}
+
+/* Text utilities */
+.text-warning {
+  color: #FBBF24 !important;
+  font-weight: 600;
 }

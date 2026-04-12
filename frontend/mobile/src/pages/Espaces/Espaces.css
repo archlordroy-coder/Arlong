@@ -537,3 +537,101 @@
   opacity: 0.6;
   cursor: not-allowed;
 }
+
+/* ── Progress Modal ─────────────────────────────────── */
+.espaces-progress-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.85);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+}
+
+.espaces-progress-modal {
+  background: #12141D;
+  border-radius: 1.5rem;
+  padding: 2rem;
+  width: 85%;
+  max-width: 300px;
+  text-align: center;
+}
+
+.espaces-progress-icon {
+  width: 80px;
+  height: 80px;
+  margin: 0 auto 1.5rem;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.espaces-progress-icon.loading {
+  background: rgba(99, 102, 241, 0.12);
+  color: #6366F1;
+}
+
+.espaces-progress-icon.success {
+  background: rgba(16, 185, 129, 0.12);
+  color: #10B981;
+  animation: successPop 0.4s ease-out;
+}
+
+.espaces-progress-icon.error {
+  background: rgba(239, 68, 68, 0.12);
+  color: #EF4444;
+}
+
+@keyframes successPop {
+  0% { transform: scale(0.5); opacity: 0; }
+  60% { transform: scale(1.15); }
+  100% { transform: scale(1); opacity: 1; }
+}
+
+@keyframes spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+.spin {
+  animation: spin 1s linear infinite;
+}
+
+.espaces-progress-modal h3 {
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: #F8FAFC;
+  margin: 0 0 0.75rem;
+}
+
+.espaces-progress-item {
+  font-size: 0.85rem;
+  color: #94A3B8;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  max-width: 100%;
+}
+
+.espaces-progress-close {
+  width: 100%;
+  padding: 0.75rem;
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 0.75rem;
+  color: #F8FAFC;
+  font-weight: 600;
+  font-size: 0.9rem;
+  cursor: pointer;
+  margin-top: 1.25rem;
+  transition: all 0.2s;
+}
+
+.espaces-progress-close:hover {
+  background: rgba(255, 255, 255, 0.12);
+}

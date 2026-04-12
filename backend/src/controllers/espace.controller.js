@@ -182,40 +182,55 @@ const inviteUser = async (req, res) => {
 /** Obtenir les statistiques globales de l'utilisateur */
 const getStats = async (req, res) => {
   try {
-    // Compte des espaces créés par l'utilisateur
-    const { count: myEspaces } = await supabase
+    const userId = req.user.id;
+
+    // Get espaces where user has access (created or invited)
+    const { data: myEspaces } = await supabase
       .from('Espace')
-      .select('id', { count: 'exact', head: true })
-      .eq('createdById', req.user.id)
+      .select('id')
+      .eq('createdById', userId)
       .eq('isDeleted', false);
 
-    // Compte des espaces où l'utilisateur est invité
-    const { count: invitedEspaces } = await supabase
+    const { data: invitedEspaces } = await supabase
       .from('EspaceUser')
-      .select('espaceId', { count: 'exact', head: true })
-      .eq('userId', req.user.id);
+      .select('espaceId')
+      .eq('userId', userId);
 
-    const espacesCount = (myEspaces || 0) + (invitedEspaces || 0);
+    const allEspaceIds = [
+      ...(myEspaces?.map(e => e.id) || []),
+      ...(invitedEspaces?.map(e => e.espaceId) || [])
+    ];
+    const uniqueEspaceIds = [...new Set(allEspaceIds)];
 
-    // Compte des dossiers créés par l'utilisateur
-    const { count: dossiersCount } = await supabase
+    const espacesCount = uniqueEspaceIds.length;
+
+    // Get ALL dossiers (created by user OR public) - just select the data
+    const { data: allDossiers } = await supabase
       .from('Dossier')
-      .select('id', { count: 'exact', head: true })
-      .eq('createdById', req.user.id);
+      .select('id')
+      .or(`createdById.eq.${userId},isPublic.eq.true`);
 
-    // Compte des documents dans les dossiers de l'utilisateur
-    const { count: documentsCount } = await supabase
-      .from('Document')
-      .select('id', { count: 'exact', head: true })
-      .eq('isDeleted', false)
-      .eq('dossier.createdById', req.user.id);
+    const allDossierIds = allDossiers?.map(d => d.id) || [];
+    const dossiersCount = allDossierIds.length;
+
+    // Get documents for those dossiers
+    let documentsCount = 0;
+    if (allDossierIds.length > 0) {
+      const { data: documents } = await supabase
+        .from('Document')
+        .select('id')
+        .eq('isDeleted', false)
+        .in('dossierId', allDossierIds);
+      
+      documentsCount = documents?.length || 0;
+    }
 
     res.json({
       success: true,
       data: {
         espaces: espacesCount,
-        dossiers: dossiersCount || 0,
-        documents: documentsCount || 0
+        dossiers: dossiersCount,
+        documents: documentsCount
       }
     });
   } catch (error) {
