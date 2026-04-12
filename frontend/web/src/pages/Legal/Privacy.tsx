@@ -4,11 +4,11 @@ import { Link } from 'react-router-dom';
 const Privacy: React.FC = () => {
   return (
     <div style={{ maxWidth: 800, margin: '40px auto', padding: '0 24px', fontFamily: 'system-ui, sans-serif', color: '#e0e0e0', background: '#0d1117', minHeight: '100vh' }}>
-      <h1 style={{ fontSize: 28, marginBottom: 32, color: '#fff' }}>🔒 Politique de Confidentialité — ARLONG</h1>
+      <h1 style={{ fontSize: 28, marginBottom: 32, color: '#fff' }}>🔒 Politique de Confidentialité — Mboa Drive</h1>
       <p><strong>Dernière mise à jour :</strong> 9 avril 2026</p>
 
       <h2 style={{ marginTop: 24 }}>1. Données collectées</h2>
-      <p>ARLONG collecte uniquement les données nécessaires à son fonctionnement :</p>
+      <p>Mboa Drive collecte uniquement les données nécessaires à son fonctionnement :</p>
       <ul>
         <li>Votre adresse e-mail et nom (via Google OAuth) pour l'authentification.</li>
         <li>Les fichiers et documents que vous choisissez de stocker via Google Drive.</li>
@@ -23,7 +23,7 @@ const Privacy: React.FC = () => {
       </ul>
 
       <h2 style={{ marginTop: 24 }}>3. Partage des données</h2>
-      <p>ARLONG ne vend, ne loue et ne partage aucune donnée personnelle avec des tiers. Vos documents restent strictement sur votre propre compte Google Drive.</p>
+      <p>Mboa Drive ne vend, ne loue et ne partage aucune donnée personnelle avec des tiers. Vos documents restent strictement sur votre propre compte Google Drive.</p>
 
       <h2 style={{ marginTop: 24 }}>4. Sécurité</h2>
       <p>Les connexions sont sécurisées via HTTPS et l'authentification est gérée par le protocole standard OAuth 2.0 de Google. Les tokens d'accès sont stockés de manière sécurisée côté serveur.</p>

@@ -14,7 +14,7 @@ Pour tout autre utilisateur, la liaison échoue avec l'erreur :
 Cette méthode est **immédiate**, sans attente, sans validation Google.
 
 1. Rendez-vous sur [console.cloud.google.com](https://console.cloud.google.com)
-2. Sélectionnez le projet **ARLONG**
+2. Sélectionnez le projet **Mboa Drive** (ou le nom actuel dans GCP)
 3. Dans le menu gauche : **APIs & Services → OAuth consent screen**
 4. Faites défiler jusqu'à la section **"Test users"**
 5. Cliquez sur **"+ Add users"**
@@ -55,7 +55,7 @@ Pour lever la limite des 100 utilisateurs et permettre à **n'importe qui** de l
 
 La vidéo est **obligatoire** pour la soumission Google. Elle doit :
 - Durer **1 à 5 minutes**
-- Montrer comment l'utilisateur accorde l'accès Google Drive à ARLONG
+- Montrer comment l'utilisateur accorde l'accès Google Drive à Mboa Drive
 - Montrer comment l'application utilise l'accès (upload/lecture de fichiers)
 - Être hébergée sur **YouTube** (mode non-listé possible)
 
@@ -65,7 +65,7 @@ La vidéo est **obligatoire** pour la soumission Google. Elle doit :
 2. Cliquez **"Préparer la vérification"**
 3. Décrivez l'utilisation du scope `drive.file` :
 
-> *"ARLONG permet aux utilisateurs de stocker leurs archives chiffrées dans leur propre espace Google Drive. Seuls les fichiers créés par l'application sont accessibles, via le scope drive.file. Les données ne sont jamais partagées avec des tiers."*
+> *"Mboa Drive permet aux utilisateurs de stocker leurs archives chiffrées dans leur propre espace Google Drive. Seuls les fichiers créés par l'application sont accessibles, via le scope drive.file. Les données ne sont jamais partagées avec des tiers."*
 
 4. Soumettez avec la vidéo YouTube
 5. Attendez la réponse Google (**4 à 6 semaines**)

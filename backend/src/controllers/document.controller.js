@@ -56,8 +56,8 @@ const importDocument = async (req, res) => {
       return res.status(404).json({ success: false, message: 'Dossier non trouvé ou inaccessible' });
     }
 
-    // Chemin hiérarchique : Arlong / [Espace] / [Dossier]
-    const pathSegments = ['Arlong'];
+    // Chemin hiérarchique : Mboa Drive / [Espace] / [Dossier]
+    const pathSegments = ['Mboa Drive'];
     if (dossier.espace?.name) pathSegments.push(dossier.espace.name);
     pathSegments.push(dossier.name);
 

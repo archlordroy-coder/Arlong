@@ -9,10 +9,10 @@ const Home: React.FC = () => {
       {/* En-tête */}
       <header className="mobile-home-header">
         <div className="mobile-home-brand">
-          <img src="/logo.png" alt="Arlong" className="mobile-home-logo" />
+          <img src="/logo.png" alt="Mboa Drive" className="mobile-home-logo" />
           <div>
-            <h1 className="mobile-home-title">ARLONG</h1>
-            <p className="mobile-home-tagline">Document Management</p>
+            <h1 className="mobile-home-title">Mboa Drive</h1>
+            <p className="mobile-home-tagline">Cloud Document Management</p>
           </div>
         </div>
       </header>

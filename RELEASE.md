@@ -1,7 +1,7 @@
-# 🏴‍☠️ ARLONG v1.0.1 — Notes de Version
+# 🚀 Mboa Drive v1.0.1 — Notes de Version
 
 <p align="center">
-  <img src="frontend/arlong_mascot_logo_1775639424002.png" alt="ARLONG Logo" width="200"/>
+  <img src="MboaDrive.png" alt="Mboa Drive Logo" width="200"/>
 </p>
 
 <p align="center">
@@ -14,9 +14,9 @@
 
 | Plateforme | Fichier | Description |
 |---|---|---|
-| 🐧 Linux | `ARLONG-1.0.1.AppImage` | Exécutable portable (aucune installation requise) |
-| 🪟 Windows | `ARLONG Setup 1.0.1.exe` | Installeur Windows classique |
-| 📱 Android | `ARLONG.apk` | Application mobile Android |
+| 🐧 Linux | `MboaDrive-1.0.1.AppImage` | Exécutable portable (aucune installation requise) |
+| 🪟 Windows | `MboaDrive Setup 1.0.1.exe` | Installeur Windows classique |
+| 📱 Android | `MboaDrive.apk` | Application mobile Android |
 | 🌐 Web | [arlong-gamma.vercel.app](https://arlong-gamma.vercel.app) | Version en ligne hébergée |
 
 ---
@@ -24,10 +24,10 @@
 ## ✨ Nouveautés de cette version
 
 - **Architecture centralisée** : Les versions Desktop et Mobile se connectent désormais au backend hébergé sur Vercel (`arlong-gamma.vercel.app/api`), unifiant l'authentification et l'accès aux données Google Drive sur toutes les plateformes.
-- **Branding ARLONG** : Nom d'application, icônes et métadonnées uniformisés sur l'ensemble des cibles de compilation.
+- **Branding Mboa Drive** : Nom d'application, icônes et métadonnées uniformisés sur l'ensemble des cibles de compilation.
 - **Migration Linux vers AppImage** : Le format de distribution Linux passe du `.deb` (Debian uniquement) au `.AppImage` (compatible avec la majorité des distributions Linux).
 - **Correction du chargement Desktop** : Résolution du bug `ERR_FILE_NOT_FOUND` empêchant le chargement des assets CSS/JS dans la version Electron.
-- **Renommage APK** : Le fichier Android généré s'appelle désormais `ARLONG.apk` au lieu de `app-debug.apk`.
+- **Renommage APK** : Le fichier Android généré s'appelle désormais `MboaDrive.apk` au lieu de `app-debug.apk`.
 
 ---
 
@@ -70,4 +70,4 @@ Ce projet a été réalisé dans un cadre scolaire. Il démontre la capacité à
 
 ---
 
-**ARLONG Team** • 2026
+**Mboa Drive Team** • 2026

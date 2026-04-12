@@ -31,7 +31,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       // On commence le timer pour le splash screen
       const timer = new Promise(resolve => setTimeout(resolve, 1500));
       
-      const token = localStorage.getItem('arlong_token');
+      const token = localStorage.getItem('mboadrive_token');
       if (token) {
         try {
           const res = await api.get('/auth/me');
@@ -39,7 +39,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
             setUser(res.data.data);
           }
         } catch (error) {
-          localStorage.removeItem('arlong_token');
+          localStorage.removeItem('mboadrive_token');
         }
       }
       
@@ -51,12 +51,12 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   }, []);
 
   const login = (token: string, userData: User) => {
-    localStorage.setItem('arlong_token', token);
+    localStorage.setItem('mboadrive_token', token);
     setUser(userData);
   };
 
   const logout = () => {
-    localStorage.removeItem('arlong_token');
+    localStorage.removeItem('mboadrive_token');
     setUser(null);
   };
 

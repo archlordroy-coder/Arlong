@@ -60,7 +60,7 @@ const Dashboard = () => {
   // Initialisation file d'attente hors-ligne
   useEffect(() => {
     const loadQueue = async () => {
-      const queue = await localforage.getItem<OfflineFile[]>('arlong_offline_docs') || [];
+      const queue = await localforage.getItem<OfflineFile[]>('mboadrive_offline_docs') || [];
       setOfflineQueue(queue);
     };
     loadQueue();
@@ -108,7 +108,7 @@ const Dashboard = () => {
       }
     }
 
-    await localforage.setItem('arlong_offline_docs', newQueue);
+    await localforage.setItem('mboadrive_offline_docs', newQueue);
     setOfflineQueue(newQueue);
     setIsSyncing(false);
   };
@@ -221,7 +221,7 @@ const Dashboard = () => {
         };
         const updatedQueue = [...offlineQueue, offlineFile];
         setOfflineQueue(updatedQueue);
-        await localforage.setItem('arlong_offline_docs', updatedQueue);
+        await localforage.setItem('mboadrive_offline_docs', updatedQueue);
         alert(`☁️ Mode Hors-ligne : "${file.name}" enregistré localement. Il sera synchronisé dès le retour d'internet.`);
       } else {
         // EN LIGNE: Upload direct

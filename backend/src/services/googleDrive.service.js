@@ -1,11 +1,11 @@
 const { google } = require('googleapis');
 const stream = require('stream');
 
-const ARLONG_FOLDER_NAME = 'Arlong';
+const ARLONG_FOLDER_NAME = 'Mboa Drive';
 
 /**
  * Service Google Drive pour le stockage des documents
- * Chaque utilisateur possède son propre espace de stockage ("Arlong" sur son compte Drive personnel)
+ * Chaque utilisateur possède son propre espace de stockage ("Mboa Drive" sur son compte Drive personnel)
  */
 class GoogleDriveService {
   constructor() {

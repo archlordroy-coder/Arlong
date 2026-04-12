@@ -3,7 +3,7 @@
   "private": true,
   "version": "1.0.1",
   "type": "module",
-  "author": "Arlong Team <support@arlong.app>",
+  "author": "Mboa Drive Team <support@mboadrive.app>",
   "homepage": "https://arlong-gamma.vercel.app",
   "main": "electron/main.cjs",
   "scripts": {
@@ -15,8 +15,8 @@
     "preview": "vite preview"
   },
   "build": {
-    "appId": "com.arlong.app",
-    "productName": "ARLONG",
+    "appId": "com.mboadrive.app",
+    "productName": "Mboa Drive",
     "directories": {
       "output": "dist_electron"
     },

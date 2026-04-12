@@ -1,8 +1,8 @@
 import type { CapacitorConfig } from '@capacitor/cli';
 
 const config: CapacitorConfig = {
-  appId: 'org.arlong.app',
-  appName: 'ARLONG',
+  appId: 'org.mboadrive.app',
+  appName: 'Mboa Drive',
   webDir: 'dist'
 };
 

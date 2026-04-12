@@ -1,7 +1,7 @@
 {
-  "name": "arlong-backend",
+  "name": "mboadrive-backend",
   "version": "1.0.1",
-  "description": "ARLONG - Système de Gestion d'Archives (Backend API)",
+  "description": "Mboa Drive - Système de Gestion d'Archives (Backend API)",
   "main": "src/server.js",
   "scripts": {
     "dev": "node --watch src/server.js",
@@ -11,11 +11,11 @@
     "prisma:studio": "npx prisma studio"
   },
   "keywords": [
-    "arlong",
+    "mboadrive",
     "archives",
     "gestion"
   ],
-  "author": "ARLONG Team",
+  "author": "Mboa Drive Team",
   "license": "ISC",
   "dependencies": {
     "@supabase/supabase-js": "^2.102.1",

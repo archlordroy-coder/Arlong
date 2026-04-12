@@ -104,8 +104,8 @@ const Home: React.FC = () => {
       <nav className="home-nav">
         <div className="home-nav-inner">
           <div className="home-nav-brand">
-            <img src="/logo.png" alt="Arlong" className="home-nav-logo" />
-            <span className="home-nav-name">ARLONG</span>
+            <img src="/logo.png" alt="Mboa Drive" className="home-nav-logo" />
+            <span className="home-nav-name">Mboa Drive</span>
           </div>
           <div className="home-nav-links">
             <Link to="/privacy" className="home-nav-link">Confidentialité</Link>
@@ -117,7 +117,7 @@ const Home: React.FC = () => {
 
       {/* ===== HERO ===== */}
       <section className="home-hero" ref={heroRef}>
-        <img src="/logo.png" alt="Arlong Logo Central" className="home-hero-logo" />
+        <img src="/logo.png" alt="Mboa Drive Logo Central" className="home-hero-logo" />
         <div className="home-hero-badge">
           <span className="home-hero-badge-dot"></span>
           Sécurisé · Chiffré · Open Source
@@ -127,7 +127,7 @@ const Home: React.FC = () => {
           <span className="home-hero-gradient">Protégées. Partout.</span>
         </h1>
         <p className="home-hero-subtitle">
-          ARLONG est la plateforme de gestion documentaire qui chiffre vos fichiers côté client
+          Mboa Drive est la plateforme de gestion documentaire qui chiffre vos fichiers côté client
           et les synchronise sur votre espace Google Drive personnel — sans jamais y accéder.
         </p>
         <div className="home-hero-actions">
@@ -187,7 +187,7 @@ const Home: React.FC = () => {
 
       {/* ===== FOOTER ===== */}
       <footer className="home-footer">
-        <span>© 2025 ARLONG — Tous droits réservés</span>
+        <span>© 2026 Mboa Drive — Tous droits réservés</span>
         <div className="home-footer-links">
           <Link to="/privacy">Politique de confidentialité</Link>
           <Link to="/terms">Conditions d'utilisation</Link>

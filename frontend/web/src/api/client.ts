@@ -13,7 +13,7 @@ const api = axios.create({
 // Intercepteur pour injecter le token JWT
 api.interceptors.request.use(
   (config) => {
-    const token = localStorage.getItem('arlong_token');
+    const token = localStorage.getItem('mboadrive_token');
     if (token && config.headers) {
       config.headers.Authorization = `Bearer ${token}`;
     }
@@ -27,7 +27,7 @@ api.interceptors.response.use(
   (response) => response,
   (error) => {
     if (error.response?.status === 401) {
-      localStorage.removeItem('arlong_token');
+      localStorage.removeItem('mboadrive_token');
       // Rediriger vers le login si on n'y est pas
       if (window.location.pathname !== '/login' && window.location.pathname !== '/register') {
         window.location.href = '/login';

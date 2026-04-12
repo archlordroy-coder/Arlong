@@ -2,6 +2,8 @@
   "name": "mobile",
   "private": true,
   "version": "1.0.1",
+  "description": "Mboa Drive - Système de Gestion d'Archives (Mobile App)",
+  "author": "Mboa Drive Team",
   "type": "module",
   "scripts": {
     "dev": "vite",
