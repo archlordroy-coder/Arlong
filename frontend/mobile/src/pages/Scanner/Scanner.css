@@ -17,13 +17,13 @@
 .scanner-header h1 {
   font-size: 1.5rem;
   font-weight: 700;
-  color: #F8FAFC;
+  color: var(--text-primary);
   margin-bottom: 0.25rem;
 }
 
 .scanner-header p {
   font-size: 0.8rem;
-  color: #94A3B8;
+  color: var(--text-secondary);
 }
 
 .scanner-main-view {
@@ -68,7 +68,7 @@
 
 .scanner-permission p {
   font-size: 0.85rem;
-  color: #94A3B8;
+  color: var(--text-secondary);
   margin-bottom: 2rem;
 }
 
@@ -207,7 +207,7 @@
   justify-content: center;
   gap: 0.5rem;
   background: rgba(255,255,255,0.1);
-  color: #F8FAFC;
+  color: var(--text-primary);
   border: none;
   padding: 0.8rem;
   border-radius: 0.75rem;
@@ -311,7 +311,7 @@
 .queue-name {
   font-size: 0.85rem;
   font-weight: 600;
-  color: #F8FAFC;
+  color: var(--text-primary);
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -319,7 +319,7 @@
 
 .queue-meta {
   font-size: 0.75rem;
-  color: #94A3B8;
+  color: var(--text-secondary);
   display: flex;
   align-items: center;
   gap: 0.5rem;
@@ -469,7 +469,7 @@
 .scanner-upload-header h3 {
   font-size: 1rem;
   font-weight: 600;
-  color: #F8FAFC;
+  color: var(--text-primary);
   margin: 0;
 }
 
@@ -511,7 +511,7 @@
   align-items: center;
   gap: 0.4rem;
   font-size: 0.8rem;
-  color: #94A3B8;
+  color: var(--text-secondary);
   margin-bottom: 0.5rem;
 }
 
@@ -617,7 +617,7 @@
 .scanner-progress-modal h3 {
   font-size: 1.2rem;
   font-weight: 700;
-  color: #F8FAFC;
+  color: var(--text-primary);
   margin: 0 0 1rem;
 }
 
@@ -627,7 +627,7 @@
   justify-content: center;
   gap: 0.4rem;
   font-size: 0.85rem;
-  color: #94A3B8;
+  color: var(--text-secondary);
   margin-bottom: 1.5rem;
 }
 
@@ -650,13 +650,13 @@
 .progress-text {
   font-size: 0.9rem;
   font-weight: 600;
-  color: #F8FAFC;
+  color: var(--text-primary);
   margin-bottom: 0.5rem;
 }
 
 .progress-current-file {
   font-size: 0.75rem;
-  color: #94A3B8;
+  color: var(--text-secondary);
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;

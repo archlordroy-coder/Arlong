@@ -23,7 +23,7 @@
 .history-header-content h1 {
   font-size: 1.5rem;
   font-weight: 700;
-  color: #F8FAFC;
+  color: var(--text-primary);
   margin-bottom: 0.25rem;
 }
 
@@ -118,11 +118,11 @@
 
 .history-user-name {
   font-weight: 700;
-  color: #F8FAFC;
+  color: var(--text-primary);
 }
 
 .history-verb {
-  color: #94A3B8;
+  color: var(--text-secondary);
   font-size: 0.8rem;
   margin: 0 4px;
 }
@@ -135,8 +135,8 @@
 .history-doc-name {
   font-style: italic;
   text-decoration: underline;
-  text-decoration-color: rgba(255, 255, 255, 0.2);
-  color: #F8FAFC;
+  text-decoration-color: var(--border-default);
+  color: var(--text-primary);
 }
 
 .history-meta {
@@ -144,7 +144,7 @@
   align-items: center;
   gap: 0.4rem;
   font-size: 0.75rem;
-  color: #94A3B8;
+  color: var(--text-secondary);
 }
 
 .history-user-email {
@@ -278,7 +278,7 @@
 }
 
 .delete-modal {
-  background: #12141D;
+  background: var(--bg-secondary);
   width: 100%;
   max-width: 340px;
   padding: 2rem 1.5rem;
@@ -301,30 +301,30 @@
   align-items: center;
   justify-content: center;
   margin: 0 auto 1.5rem;
-  color: #F87171;
+  color: var(--accent-danger);
 }
 
 .delete-modal-icon.warning {
   background: rgba(245, 158, 11, 0.12);
-  color: #F59E0B;
+  color: var(--accent-warning);
 }
 
 .delete-modal h3 {
   font-size: 1.2rem;
   font-weight: 700;
-  color: #F8FAFC;
+  color: var(--text-primary);
   margin-bottom: 0.75rem;
 }
 
 .delete-modal p {
   font-size: 0.9rem;
-  color: #94A3B8;
+  color: var(--text-secondary);
   line-height: 1.5;
   margin-bottom: 1.75rem;
 }
 
 .delete-modal p strong {
-  color: #F87171;
+  color: var(--accent-danger);
 }
 
 .delete-modal-actions {
@@ -336,7 +336,7 @@
   flex: 1;
   padding: 0.875rem;
   background: transparent;
-  color: #94A3B8;
+  color: var(--text-secondary);
   border: 1px solid rgba(255, 255, 255, 0.08);
   border-radius: 0.875rem;
   font-weight: 600;

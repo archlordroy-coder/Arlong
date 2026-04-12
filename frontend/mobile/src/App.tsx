@@ -1,6 +1,7 @@
 import React, { useEffect } from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { useAuth } from './contexts/AuthContext';
+import { ThemeProvider, useTheme } from './contexts/ThemeContext';
 import { SplashScreen as CapSplashScreen } from '@capacitor/splash-screen';
 import { StatusBar, Style } from '@capacitor/status-bar';
 import { Keyboard, KeyboardResize } from '@capacitor/keyboard';
@@ -33,6 +34,26 @@ const PublicRoute = ({ children }: { children: React.ReactNode }) => {
   return !isAuthenticated ? children : <Navigate to="/dashboard" />;
 };
 
+const StatusBarThemeHandler = () => {
+  const { theme } = useTheme();
+  
+  useEffect(() => {
+    const updateStatusBar = async () => {
+      try {
+        await StatusBar.setStyle({ 
+          style: theme === 'dark' ? Style.Dark : Style.Light 
+        });
+        await StatusBar.setBackgroundColor({ 
+          color: theme === 'dark' ? '#0d1117' : '#F8FAFC' 
+        });
+      } catch (err) {}
+    };
+    updateStatusBar();
+  }, [theme]);
+  
+  return null;
+};
+
 const App = () => {
   const { isLoading } = useAuth();
 
@@ -40,15 +61,9 @@ const App = () => {
     // Initialisation du comportement natif mobile
     const initNativeFeatures = async () => {
       try {
-        await StatusBar.setStyle({ style: Style.Dark });
-        await StatusBar.setBackgroundColor({ color: '#0d1117' });
         await Keyboard.setResizeMode({ mode: KeyboardResize.None });
-        
-        // Mode immersif total : masque les 3 boutons Android (Retour, Accueil, Récents)
         await Fullscreen.activateImmersiveMode();
-      } catch (err) {
-        // Ignorer silencieusement si exécuté sur le web et non sur mobile natif
-      }
+      } catch (err) {}
     };
     initNativeFeatures();
   }, []);
@@ -68,8 +83,10 @@ const App = () => {
   }
 
   return (
-    <Router >
-      <Routes>
+    <ThemeProvider>
+      <StatusBarThemeHandler />
+      <Router >
+        <Routes>
         <Route path="/" element={<Home />} />
         
         {/* Routes publiques */}
@@ -116,6 +133,7 @@ const App = () => {
         <Route path="*" element={<Navigate to="/dashboard" />} />
       </Routes>
     </Router>
+    </ThemeProvider>
   );
 };
 

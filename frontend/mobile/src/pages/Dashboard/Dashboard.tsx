@@ -10,6 +10,16 @@ import {
 import { SkeletonStatCard, SkeletonListItem } from '../../components/Common/Skeleton';
 import './Dashboard.css';
 
+import pdfIcon from '../../assets/pdf.png';
+import docIcon from '../../assets/doc.png';
+import imgIcon from '../../assets/img.png';
+import mdIcon from '../../assets/md.png';
+import zipIcon from '../../assets/zip.png';
+import rarIcon from '../../assets/rar.png';
+import pptIcon from '../../assets/ppt.png';
+import xlsxIcon from '../../assets/xlsx.png';
+import textIcon from '../../assets/text.png';
+
 interface OfflineFile {
   id: string;
   name: string;
@@ -72,6 +82,23 @@ const Dashboard = () => {
     errors: [],
     targetFolder: ''
   });
+
+  const IMAGE_TYPES = ['jpg', 'jpeg', 'png', 'gif', 'webp'];
+
+  const isImageFile = (type: string) => IMAGE_TYPES.includes(type.toLowerCase());
+
+  const getFileIcon = (type: string) => {
+    const t = type.toLowerCase();
+    if (t === 'pdf') return <img src={pdfIcon} alt="PDF" className="file-type-icon-sm" />;
+    if (t === 'doc' || t === 'docx') return <img src={docIcon} alt="Word" className="file-type-icon-sm" />;
+    if (t === 'md') return <img src={mdIcon} alt="Markdown" className="file-type-icon-sm" />;
+    if (t === 'txt' || t === 'js' || t === 'ts' || t === 'css' || t === 'html') return <img src={textIcon} alt="Text" className="file-type-icon-sm" />;
+    if (t === 'zip' || t === 'rar' || t === '7z' || t === 'tar' || t === 'gz') return <img src={t === 'rar' || t === '7z' ? rarIcon : zipIcon} alt="Archive" className="file-type-icon-sm" />;
+    if (t === 'ppt' || t === 'pptx') return <img src={pptIcon} alt="PowerPoint" className="file-type-icon-sm" />;
+    if (t === 'xls' || t === 'xlsx' || t === 'csv') return <img src={xlsxIcon} alt="Excel" className="file-type-icon-sm" />;
+    if (isImageFile(t)) return <img src={imgIcon} alt="Image" className="file-type-icon-sm" />;
+    return <File size={16} className="icon-gray" />;
+  };
 
   useEffect(() => {
     fetchAllData();
@@ -497,7 +524,7 @@ const Dashboard = () => {
             recentDocs.map((doc) => (
               <div key={doc.id} className="mobile-recent-item">
                 <div className="mobile-recent-icon">
-                  <File size={16} />
+                  {getFileIcon(doc.type)}
                 </div>
                 <div className="mobile-recent-info">
                   <div className="mobile-recent-name">{doc.name}</div>

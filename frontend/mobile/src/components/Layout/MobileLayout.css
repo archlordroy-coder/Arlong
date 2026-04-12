@@ -1,6 +1,5 @@
 /* ============================================================
-   MOBILE LAYOUT — Bottom Tab Bar (Classic Design)
-   Structure propre et modifiable.
+   MOBILE LAYOUT — Bottom Tab Bar (Theme Support)
    ============================================================ */
 
 .mobile-layout {
@@ -8,9 +7,10 @@
   flex-direction: column;
   height: 100vh;
   height: 100dvh;
-  background-color: #090A0F;
+  background-color: var(--bg-primary);
   overflow: hidden;
   position: relative;
+  transition: background-color 0.3s ease;
 }
 
 /* ── Content Area ────────────────────────────────────────── */
@@ -36,10 +36,11 @@
   justify-content: space-around;
   padding: 10px 10px env(safe-area-inset-bottom, 0px) 10px;
   
-  background: #12141D;
-  border-top: 1px solid rgba(255, 255, 255, 0.05);
-  box-shadow: 0 -5px 15px rgba(0, 0, 0, 0.4);
+  background: var(--bg-secondary);
+  border-top: 1px solid var(--border-default);
+  box-shadow: 0 -5px 15px rgba(0, 0, 0, 0.3);
   z-index: 1000;
+  transition: background-color 0.3s ease, border-color 0.3s ease;
 }
 
 /* ── Tab Items ───────────────────────────────────────────── */
@@ -51,13 +52,13 @@
   flex: 1;
   gap: 4px;
   text-decoration: none;
-  color: #475569;
+  color: var(--text-muted);
   transition: all 0.2s ease-in-out;
   -webkit-tap-highlight-color: transparent;
 }
 
 .mobile-tab-item.active {
-  color: #6366F1;
+  color: var(--accent-primary);
 }
 
 .mobile-tab-icon-wrap {

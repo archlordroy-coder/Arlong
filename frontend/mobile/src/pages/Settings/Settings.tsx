@@ -1,11 +1,13 @@
 import { useState, useEffect, type FormEvent } from 'react';
 import { useAuth } from '../../contexts/AuthContext';
+import { useTheme } from '../../contexts/ThemeContext';
 import api from '../../api/client';
-import { User, Mail, Shield, Cloud, Save, Loader2, LogOut } from 'lucide-react';
+import { User, Mail, Shield, Cloud, Save, Loader2, LogOut, Sun, Moon } from 'lucide-react';
 import './Settings.css';
 
 const Settings = () => {
   const { user, logout } = useAuth();
+  const { theme, toggleTheme } = useTheme();
   const [name, setName] = useState(user?.name || '');
   const [loading, setLoading] = useState(false);
   const [success, setSuccess] = useState(false);
@@ -126,6 +128,35 @@ const Settings = () => {
               <span>Connecter Drive</span>
             </button>
           )}
+        </div>
+      </section>
+
+      <section className="mobile-settings-section">
+        <div className="mobile-settings-card theme-card">
+          <div className="mobile-card-header">
+            <div className="mobile-card-icon primary">
+              {theme === 'dark' ? <Moon size={20} /> : <Sun size={20} />}
+            </div>
+            <h3>Apparence</h3>
+          </div>
+          <p className="mobile-card-desc">Personnalisez le thème de l'application.</p>
+          
+          <div className="theme-toggle-container">
+            <button 
+              className={`theme-option ${theme === 'dark' ? 'active' : ''}`}
+              onClick={() => theme !== 'dark' && toggleTheme()}
+            >
+              <Moon size={18} />
+              <span>Sombre</span>
+            </button>
+            <button 
+              className={`theme-option ${theme === 'light' ? 'active' : ''}`}
+              onClick={() => theme !== 'light' && toggleTheme()}
+            >
+              <Sun size={18} />
+              <span>Clair</span>
+            </button>
+          </div>
         </div>
       </section>
 

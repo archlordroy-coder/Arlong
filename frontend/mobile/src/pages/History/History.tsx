@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
 import api from '../../api/client';
-import { Clock, User, FileText, Download, Import, Trash2, Shield, MoreVertical, X, AlertTriangle, Loader2 } from 'lucide-react';
+import { Clock, User, FileText, Download, Import, Trash2, Shield, MoreVertical, AlertTriangle, Loader2 } from 'lucide-react';
 import { format } from 'date-fns';
 import { fr } from 'date-fns/locale';
 import './History.css';
@@ -80,7 +80,7 @@ const History = () => {
       const res = await api.delete('/historique/clear-all');
       if (res.data.success) {
         setHistory([]);
-        setShowClearAllModal(null);
+        setShowClearAllModal(false);
       }
     } catch (error) {
       alert('Erreur lors de la suppression');
@@ -240,7 +240,7 @@ const History = () => {
 
       {/* Clear All Modal */}
       {showClearAllModal && (
-        <div className="modal-overlay" onClick={() => !isClearingAll && setShowClearAllModal(null)}>
+        <div className="modal-overlay" onClick={() => !isClearingAll && setShowClearAllModal(false)}>
           <div className="delete-modal" onClick={e => e.stopPropagation()}>
             <div className="delete-modal-icon warning">
               <AlertTriangle size={32} />
@@ -253,7 +253,7 @@ const History = () => {
             <div className="delete-modal-actions">
               <button 
                 className="btn-cancel"
-                onClick={() => setShowClearAllModal(null)}
+                onClick={() => setShowClearAllModal(false)}
                 disabled={isClearingAll}
               >
                 Annuler
