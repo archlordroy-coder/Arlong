@@ -1,7 +1,7 @@
 /* =========================================================
-   ESPACES MOBILE CSS
-   Design moderne avec cartes améliorées et menu d'options
-   ========================================================= */
+    ESPACES MOBILE CSS - Theme Support
+    Design moderne avec cartes améliorées et menu d'options
+    ========================================================= */
 
 .espaces-container {
   padding: env(safe-area-inset-top, 16px) 1.25rem 1.25rem;
@@ -22,14 +22,14 @@
 .espaces-title-group h1 {
   font-size: 1.6rem;
   font-weight: 800;
-  color: #F8FAFC;
+  color: var(--text-primary);
   margin-bottom: 0.15rem;
   letter-spacing: -0.02em;
 }
 
 .espaces-title-group p {
   font-size: 0.8rem;
-  color: #6366F1;
+  color: var(--accent-primary);
   font-weight: 500;
 }
 
@@ -37,7 +37,7 @@
   display: flex;
   align-items: center;
   gap: 0.4rem;
-  background: linear-gradient(135deg, #6366F1, #8B5CF6);
+  background: linear-gradient(135deg, var(--accent-primary), #8B5CF6);
   color: white;
   border: none;
   padding: 0.65rem 1rem;
@@ -64,7 +64,7 @@
 }
 
 .search-icon {
-  color: #6366F1;
+  color: var(--accent-primary);
   flex-shrink: 0;
 }
 
@@ -72,13 +72,13 @@
   flex: 1;
   background: transparent;
   border: none;
-  color: #F8FAFC;
+  color: var(--text-primary);
   outline: none;
   font-size: 0.95rem;
 }
 
 .search-input::placeholder {
-  color: #475569;
+  color: var(--text-muted);
 }
 
 /* ── Espace List ────────────────────────────────── */
@@ -120,7 +120,7 @@
 }
 
 .espace-card-main:active {
-  background: rgba(255, 255, 255, 0.03);
+  background: var(--bg-card);
 }
 
 .espace-icon-wrapper {
@@ -167,7 +167,7 @@
 .espace-name {
   font-size: 1rem;
   font-weight: 600;
-  color: #F8FAFC;
+  color: var(--text-primary);
   margin-bottom: 0.3rem;
   white-space: nowrap;
   overflow: hidden;
@@ -185,7 +185,7 @@
   align-items: center;
   gap: 0.3rem;
   font-size: 0.7rem;
-  color: #64748B;
+  color: var(--text-muted);
 }
 
 /* ── Menu Options ───────────────────────────────── */
@@ -202,15 +202,15 @@
   justify-content: center;
   background: transparent;
   border: none;
-  color: #64748B;
+  color: var(--text-muted);
   cursor: pointer;
   border-radius: 0.5rem;
   transition: all 0.2s;
 }
 
 .espace-menu-btn:active {
-  background: rgba(255, 255, 255, 0.05);
-  color: #F8FAFC;
+  background: var(--bg-card);
+  color: var(--text-primary);
 }
 
 .espace-options-menu {
@@ -237,7 +237,7 @@
   padding: 0.75rem 1rem;
   background: transparent;
   border: none;
-  color: #F8FAFC;
+  color: var(--text-primary);
   font-size: 0.875rem;
   font-weight: 500;
   border-radius: 0.75rem;
@@ -246,11 +246,11 @@
 }
 
 .espace-option:active {
-  background: rgba(255, 255, 255, 0.05);
+  background: var(--bg-card);
 }
 
 .espace-option.danger {
-  color: #F87171;
+  color: var(--accent-danger);
 }
 
 .espace-option.danger:active {
@@ -261,8 +261,8 @@
 .spinner {
   width: 20px;
   height: 20px;
-  border: 2px solid rgba(255, 255, 255, 0.1);
-  border-top-color: #6366F1;
+  border: 2px solid var(--border-default);
+  border-top-color: var(--accent-primary);
   border-radius: 50%;
   animation: spin 0.8s linear infinite;
 }
@@ -287,20 +287,20 @@
   align-items: center;
   justify-content: center;
   margin: 0 auto 1.5rem;
-  color: #6366F1;
+  color: var(--accent-primary);
   opacity: 0.5;
 }
 
 .folder-empty h3 {
   font-size: 1.1rem;
   font-weight: 600;
-  color: #F8FAFC;
+  color: var(--text-primary);
   margin-bottom: 0.5rem;
 }
 
 .folder-empty p {
   font-size: 0.875rem;
-  color: #94A3B8;
+  color: var(--text-secondary);
   line-height: 1.5;
 }
 
@@ -310,7 +310,7 @@
   gap: 0.5rem;
   margin-top: 1.5rem;
   padding: 0.75rem 1.25rem;
-  background: #6366F1;
+  background: var(--accent-primary);
   color: white;
   border: none;
   border-radius: 0.75rem;
@@ -323,7 +323,7 @@
 .modal-overlay {
   position: fixed;
   inset: 0;
-  background: rgba(0, 0, 0, 0.8);
+  background: var(--overlay-dark);
   backdrop-filter: blur(4px);
   z-index: 2000;
   display: flex;
@@ -334,7 +334,7 @@
 }
 
 .modal-content {
-  background: #12141D;
+  background: var(--bg-secondary);
   width: 100%;
   max-width: 380px;
   padding: 1.5rem;
@@ -351,7 +351,7 @@
 .modal-header-custom h2 {
   font-size: 1.25rem;
   font-weight: 700;
-  color: #F8FAFC;
+  color: var(--text-primary);
 }
 
 .modal-close {
@@ -360,17 +360,17 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  background: rgba(255, 255, 255, 0.05);
+  background: var(--border-default);
   border: none;
-  color: #94A3B8;
+  color: var(--text-secondary);
   border-radius: 0.75rem;
   cursor: pointer;
   transition: all 0.2s;
 }
 
 .modal-close:active {
-  background: rgba(255, 255, 255, 0.1);
-  color: #F8FAFC;
+  background: var(--border-hover);
+  color: var(--text-primary);
 }
 
 .input-group {
@@ -381,15 +381,15 @@
   display: block;
   font-size: 0.8rem;
   font-weight: 500;
-  color: #94A3B8;
+  color: var(--text-secondary);
   margin-bottom: 0.5rem;
 }
 
 .input-field {
   width: 100%;
-  background: rgba(0, 0, 0, 0.3);
-  border: 1px solid rgba(255, 255, 255, 0.08);
-  color: #F8FAFC;
+  background: var(--bg-input);
+  border: 1px solid var(--border-hover);
+  color: var(--text-primary);
   padding: 0.875rem 1rem;
   border-radius: 0.875rem;
   font-size: 0.95rem;
@@ -398,12 +398,12 @@
 
 .input-field:focus {
   outline: none;
-  border-color: #6366F1;
+  border-color: var(--accent-primary);
   box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.15);
 }
 
 .input-field::placeholder {
-  color: #475569;
+  color: var(--text-muted);
 }
 
 .modal-actions {
@@ -416,8 +416,8 @@
   flex: 1;
   padding: 0.875rem;
   background: transparent;
-  color: #94A3B8;
-  border: 1px solid rgba(255, 255, 255, 0.08);
+  color: var(--text-secondary);
+  border: 1px solid var(--border-hover);
   border-radius: 0.875rem;
   font-weight: 600;
   font-size: 0.9rem;
@@ -426,7 +426,7 @@
 }
 
 .btn-cancel:active {
-  background: rgba(255, 255, 255, 0.05);
+  background: var(--bg-card);
 }
 
 .btn-confirm {
@@ -436,7 +436,7 @@
   justify-content: center;
   gap: 0.5rem;
   padding: 0.875rem;
-  background: linear-gradient(135deg, #6366F1, #8B5CF6);
+  background: linear-gradient(135deg, var(--accent-primary), #8B5CF6);
   color: white;
   border: none;
   border-radius: 0.875rem;
@@ -457,7 +457,7 @@
 
 /* ── Delete Confirmation Modal ────────────────────── */
 .delete-confirm-modal {
-  background: #12141D;
+  background: var(--bg-secondary);
   width: 100%;
   max-width: 340px;
   padding: 2rem 1.5rem;
@@ -486,25 +486,25 @@
   align-items: center;
   justify-content: center;
   margin: 0 auto 1.5rem;
-  color: #F87171;
+  color: var(--accent-danger);
 }
 
 .delete-confirm-modal h2 {
   font-size: 1.25rem;
   font-weight: 700;
-  color: #F8FAFC;
+  color: var(--text-primary);
   margin-bottom: 0.75rem;
 }
 
 .delete-confirm-modal p {
   font-size: 0.9rem;
-  color: #94A3B8;
+  color: var(--text-secondary);
   line-height: 1.5;
   margin-bottom: 1.75rem;
 }
 
 .delete-confirm-modal p strong {
-  color: #F8FAFC;
+  color: var(--text-primary);
 }
 
 .delete-confirm-actions {
@@ -519,7 +519,7 @@
   justify-content: center;
   gap: 0.5rem;
   padding: 0.875rem;
-  background: linear-gradient(135deg, #EF4444, #DC2626);
+  background: linear-gradient(135deg, var(--accent-danger), #DC2626);
   color: white;
   border: none;
   border-radius: 0.875rem;
@@ -536,4 +536,102 @@
 .btn-delete-confirm:disabled {
   opacity: 0.6;
   cursor: not-allowed;
+}
+
+/* ── Progress Modal ─────────────────────────────────── */
+.espaces-progress-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: var(--overlay-dark);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+}
+
+.espaces-progress-modal {
+  background: var(--bg-secondary);
+  border-radius: 1.5rem;
+  padding: 2rem;
+  width: 85%;
+  max-width: 300px;
+  text-align: center;
+}
+
+.espaces-progress-icon {
+  width: 80px;
+  height: 80px;
+  margin: 0 auto 1.5rem;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.espaces-progress-icon.loading {
+  background: rgba(99, 102, 241, 0.12);
+  color: var(--accent-primary);
+}
+
+.espaces-progress-icon.success {
+  background: rgba(16, 185, 129, 0.12);
+  color: var(--accent-success);
+  animation: successPop 0.4s ease-out;
+}
+
+.espaces-progress-icon.error {
+  background: rgba(239, 68, 68, 0.12);
+  color: var(--accent-danger);
+}
+
+@keyframes successPop {
+  0% { transform: scale(0.5); opacity: 0; }
+  60% { transform: scale(1.15); }
+  100% { transform: scale(1); opacity: 1; }
+}
+
+@keyframes spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+.spin {
+  animation: spin 1s linear infinite;
+}
+
+.espaces-progress-modal h3 {
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: var(--text-primary);
+  margin: 0 0 0.75rem;
+}
+
+.espaces-progress-item {
+  font-size: 0.85rem;
+  color: var(--text-secondary);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  max-width: 100%;
+}
+
+.espaces-progress-close {
+  width: 100%;
+  padding: 0.75rem;
+  background: var(--bg-card);
+  border: 1px solid var(--border-default);
+  border-radius: 0.75rem;
+  color: var(--text-primary);
+  font-weight: 600;
+  font-size: 0.9rem;
+  cursor: pointer;
+  margin-top: 1.25rem;
+  transition: all 0.2s;
+}
+
+.espaces-progress-close:hover {
+  background: var(--bg-card-hover);
 }

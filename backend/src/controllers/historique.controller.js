@@ -26,10 +26,11 @@ const getHistorique = async (req, res) => {
     if (error) throw error;
 
     // Filtrage pour la sécurité: On ne voit que les historiques des docs auxquels on a accès
+    // On inclut les documents supprimés pour voir l'historique des suppressions
     const filteredHist = historiques.filter(h => {
         if (!h.document) return false;
-        if (h.document.isDeleted) return false;
         const d = h.document.dossier;
+        if (!d) return false;
         return d.createdById === req.user.id || d.isPublic === true;
     }).map(h => ({
       ...h,

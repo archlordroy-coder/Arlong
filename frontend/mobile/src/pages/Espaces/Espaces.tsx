@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef, type FormEvent } from 'react';
 import api from '../../api/client';
-import { Plus, Search, FolderOpen, MoreVertical, Pencil, Trash2, Users, Calendar, X, Check } from 'lucide-react';
+import { Plus, Search, FolderOpen, MoreVertical, Pencil, Trash2, Users, Calendar, X, Check, Loader2, AlertCircle } from 'lucide-react';
 import { SkeletonCard } from '../../components/Common/Skeleton';
 import './Espaces.css';
 
@@ -25,6 +25,14 @@ interface Espace {
   }>;
 }
 
+type OperationStatus = 'idle' | 'loading' | 'success' | 'error';
+
+interface OperationProgress {
+  status: OperationStatus;
+  operation: string;
+  itemName: string;
+}
+
 const Espaces = () => {
   const [espaces, setEspaces] = useState<Espace[]>([]);
   const [loading, setLoading] = useState(true);
@@ -35,6 +43,12 @@ const Espaces = () => {
   const [showDeleteModal, setShowDeleteModal] = useState<Espace | null>(null);
   const [newName, setNewName] = useState('');
   const [isDeleting, setIsDeleting] = useState<number | null>(null);
+  const [showProgressModal, setShowProgressModal] = useState(false);
+  const [progress, setProgress] = useState<OperationProgress>({
+    status: 'idle',
+    operation: '',
+    itemName: ''
+  });
   const optionsMenuRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -75,7 +89,7 @@ const Espaces = () => {
         setShowCreateModal(false);
         setNewName('');
       }
-    } catch (error) {
+    } catch {
       alert('Erreur lors de la création');
     }
   };
@@ -92,7 +106,7 @@ const Espaces = () => {
         setShowRenameModal(null);
         setNewName('');
       }
-    } catch (error) {
+    } catch {
       alert('Erreur lors du renommage');
     }
   };
@@ -100,18 +114,38 @@ const Espaces = () => {
   const handleDelete = async () => {
     if (!showDeleteModal) return;
     
-    setIsDeleting(showDeleteModal.id);
+    setShowDeleteModal(null);
+    setProgress({
+      status: 'loading',
+      operation: 'Suppression',
+      itemName: showDeleteModal.name
+    });
+    setShowProgressModal(true);
+    
     try {
       const res = await api.delete(`/espaces/${showDeleteModal.id}`);
       if (res.data.success) {
+        setProgress(prev => ({ ...prev, status: 'success' }));
         setEspaces(espaces.filter(e => e.id !== showDeleteModal.id));
-        setShowDeleteModal(null);
+        setTimeout(() => {
+          setShowProgressModal(false);
+          setProgress({ status: 'idle', operation: '', itemName: '' });
+        }, 1500);
+      } else {
+        throw new Error('Erreur');
       }
-    } catch (error) {
-      alert('Erreur lors de la suppression');
+    } catch {
+      setProgress(prev => ({ ...prev, status: 'error' }));
     } finally {
       setIsDeleting(null);
       setShowOptionsMenu(null);
+    }
+  };
+
+  const closeProgressModal = () => {
+    if (progress.status !== 'loading') {
+      setShowProgressModal(false);
+      setProgress({ status: 'idle', operation: '', itemName: '' });
     }
   };
 
@@ -364,6 +398,46 @@ const Espaces = () => {
                 )}
               </button>
             </div>
+          </div>
+        </div>
+      )}
+
+      {/* Progress Modal */}
+      {showProgressModal && (
+        <div className="espaces-progress-overlay">
+          <div className="espaces-progress-modal">
+            {progress.status === 'loading' && (
+              <>
+                <div className="espaces-progress-icon loading">
+                  <Loader2 size={48} className="spin" />
+                </div>
+                <h3>{progress.operation} en cours</h3>
+                <p className="espaces-progress-item">{progress.itemName}</p>
+              </>
+            )}
+
+            {progress.status === 'success' && (
+              <>
+                <div className="espaces-progress-icon success">
+                  <Check size={48} />
+                </div>
+                <h3>{progress.operation} réussie !</h3>
+                <p className="espaces-progress-item">{progress.itemName}</p>
+              </>
+            )}
+
+            {progress.status === 'error' && (
+              <>
+                <div className="espaces-progress-icon error">
+                  <AlertCircle size={48} />
+                </div>
+                <h3>{progress.operation} échouée</h3>
+                <p className="espaces-progress-item">{progress.itemName}</p>
+                <button className="espaces-progress-close" onClick={closeProgressModal}>
+                  Fermer
+                </button>
+              </>
+            )}
           </div>
         </div>
       )}

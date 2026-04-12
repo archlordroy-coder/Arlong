@@ -1,6 +1,6 @@
 /* =========================================================
-   SETTINGS MOBILE CSS
-   ========================================================= */
+    SETTINGS MOBILE CSS - Theme Support
+    ========================================================= */
 
 .mobile-settings {
   padding: env(safe-area-inset-top, 16px) 1.25rem 1.25rem;
@@ -16,13 +16,13 @@
 .mobile-settings-title {
   font-size: 1.5rem;
   font-weight: 700;
-  color: #F8FAFC;
+  color: var(--text-primary);
   margin-bottom: 0.25rem;
 }
 
 .mobile-settings-subtitle {
   font-size: 0.8rem;
-  color: #94A3B8;
+  color: var(--text-secondary);
 }
 
 .mobile-settings-section {
@@ -31,17 +31,18 @@
 }
 
 .mobile-settings-card {
-  background: rgba(18, 20, 29, 0.45);
-  border: 1px solid rgba(255, 255, 255, 0.05);
+  background: var(--bg-card);
+  border: 1px solid var(--border-default);
   border-radius: 1.5rem;
   padding: 1.25rem;
   display: flex;
   flex-direction: column;
   gap: 1rem;
+  transition: all 0.3s ease, background 0.3s ease;
 }
 
 .drive-card {
-  border-left: 4px solid #F59E0B;
+  border-left: 4px solid var(--accent-warning);
 }
 
 .mobile-profile-overview {
@@ -54,7 +55,7 @@
 .mobile-avatar {
   width: 60px;
   height: 60px;
-  background: linear-gradient(135deg, #6366F1, #9333ea);
+  background: linear-gradient(135deg, var(--accent-primary), #9333ea);
   border-radius: 16px;
   display: flex;
   align-items: center;
@@ -68,13 +69,13 @@
 .mobile-profile-info h2 {
   font-size: 1.1rem;
   font-weight: 600;
-  color: #F8FAFC;
+  color: var(--text-primary);
   margin-bottom: 0.1rem;
 }
 
 .mobile-profile-info p {
   font-size: 0.75rem;
-  color: #94A3B8;
+  color: var(--text-secondary);
 }
 
 .mobile-settings-form {
@@ -99,15 +100,15 @@
   gap: 0.4rem;
   font-size: 0.75rem;
   font-weight: 500;
-  color: #94A3B8;
+  color: var(--text-secondary);
 }
 
 .mobile-form-group input {
   padding: 0.75rem;
-  background: rgba(0, 0, 0, 0.2);
-  border: 1px solid rgba(255, 255, 255, 0.1);
+  background: var(--bg-input);
+  border: 1px solid var(--border-default);
   border-radius: 0.75rem;
-  color: #F8FAFC;
+  color: var(--text-primary);
   font-size: 0.9rem;
 }
 
@@ -116,7 +117,7 @@
   align-items: center;
   justify-content: center;
   gap: 0.5rem;
-  background: #6366F1;
+  background: var(--accent-primary);
   color: white;
   border: none;
   border-radius: 0.75rem;
@@ -150,18 +151,18 @@
   justify-content: center;
 }
 
-.mobile-card-icon.warning { background: rgba(245, 158, 11, 0.15); color: #F59E0B; }
-.mobile-card-icon.primary { background: rgba(99, 102, 241, 0.15); color: #6366F1; }
+.mobile-card-icon.warning { background: rgba(245, 158, 11, 0.15); color: var(--accent-warning); }
+.mobile-card-icon.primary { background: rgba(99, 102, 241, 0.15); color: var(--accent-primary); }
 
 .mobile-card-header h3 {
   font-size: 1rem;
   font-weight: 600;
-  color: #F8FAFC;
+  color: var(--text-primary);
 }
 
 .mobile-card-desc {
   font-size: 0.8rem;
-  color: #94A3B8;
+  color: var(--text-secondary);
   line-height: 1.4;
 }
 
@@ -170,7 +171,7 @@
   align-items: center;
   justify-content: center;
   gap: 0.5rem;
-  background: #6366F1;
+  background: var(--accent-primary);
   color: white;
   border: none;
   border-radius: 0.75rem;
@@ -186,8 +187,8 @@
   justify-content: center;
   gap: 0.5rem;
   background: transparent;
-  color: #94A3B8;
-  border: 1px solid rgba(255, 255, 255, 0.1);
+  color: var(--text-secondary);
+  border: 1px solid var(--border-default);
   border-radius: 0.75rem;
   padding: 0.8rem;
   font-size: 0.9rem;
@@ -203,7 +204,7 @@
 .mobile-badge-success {
   background: rgba(16, 185, 129, 0.1);
   border: 1px solid rgba(16, 185, 129, 0.3);
-  color: #10B981;
+  color: var(--accent-success);
   text-transform: uppercase;
   font-size: 0.7rem;
   font-weight: 700;
@@ -216,6 +217,45 @@
 .mobile-btn-text {
   background: transparent;
   border: none;
-  color: #94A3B8;
+  color: var(--text-secondary);
   font-size: 0.8rem;
+}
+
+/* Theme Toggle */
+.theme-card {
+  border-left: 4px solid var(--accent-primary);
+}
+
+.theme-toggle-container {
+  display: flex;
+  gap: 0.75rem;
+  margin-top: 0.5rem;
+}
+
+.theme-option {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  padding: 0.75rem;
+  background: var(--bg-card);
+  border: 1px solid var(--border-default);
+  border-radius: 0.75rem;
+  color: var(--text-secondary);
+  font-size: 0.85rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.theme-option:hover {
+  background: var(--bg-card-hover);
+  border-color: var(--border-hover);
+}
+
+.theme-option.active {
+  background: rgba(99, 102, 241, 0.15);
+  border-color: var(--accent-primary);
+  color: #818CF8;
 }

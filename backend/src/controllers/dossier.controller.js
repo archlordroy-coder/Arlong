@@ -123,7 +123,7 @@ const updateDossier = async (req, res) => {
   }
 };
 
-/** Supprimer un dossier */
+/** Supprimer un dossier et tous ses documents */
 const deleteDossier = async (req, res) => {
   try {
     const { id } = req.params;
@@ -138,6 +138,13 @@ const deleteDossier = async (req, res) => {
       return res.status(403).json({ success: false, message: 'Non autorisé' });
     }
 
+    // Supprimer tous les documents du dossier
+    await supabase
+      .from('Document')
+      .update({ isDeleted: true })
+      .eq('dossierId', parseInt(id));
+
+    // Supprimer le dossier
     const { error } = await supabase
       .from('Dossier')
       .delete()
@@ -145,7 +152,7 @@ const deleteDossier = async (req, res) => {
 
     if (error) throw error;
 
-    res.json({ success: true, message: 'Dossier supprimé' });
+    res.json({ success: true, message: 'Dossier et fichiers supprimés' });
   } catch (error) {
     res.status(500).json({ success: false, message: 'Erreur lors de la suppression' });
   }

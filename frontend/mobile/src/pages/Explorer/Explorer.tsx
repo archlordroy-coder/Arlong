@@ -2,14 +2,23 @@ import { useState, useEffect, useRef, type ChangeEvent, Fragment } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import api from '../../api/client';
 import { 
-  File, FileText, Image as ImageIcon, FileCode,
-  Download, Trash2, Search, Filter, Folder, UploadCloud,
-  MoreVertical, Eye, Pencil, X, Check, Loader2
+  File, Download, Trash2, Search, Filter, Folder, UploadCloud,
+  MoreVertical, Eye, Pencil, X, Check, Loader2, Image as ImageIcon
 } from 'lucide-react';
 import { format } from 'date-fns';
 import { fr } from 'date-fns/locale';
 import { SkeletonCard } from '../../components/Common/Skeleton';
 import './Explorer.css';
+
+import pdfIcon from '../../assets/pdf.png';
+import docIcon from '../../assets/doc.png';
+import imgIcon from '../../assets/img.png';
+import mdIcon from '../../assets/md.png';
+import zipIcon from '../../assets/zip.png';
+import rarIcon from '../../assets/rar.png';
+import pptIcon from '../../assets/ppt.png';
+import xlsxIcon from '../../assets/xlsx.png';
+import textIcon from '../../assets/text.png';
 
 interface Espace {
   id: number;
@@ -72,12 +81,25 @@ const Explorer = () => {
   const [isRenaming, setIsRenaming] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
   const [isDownloading, setIsDownloading] = useState<number | null>(null);
+  
+  // Folder states
+  const [folderMenuId, setFolderMenuId] = useState<number | null>(null);
+  const [showFolderRenameModal, setShowFolderRenameModal] = useState<Dossier | null>(null);
+  const [showFolderDeleteModal, setShowFolderDeleteModal] = useState<Dossier | null>(null);
+  const [folderDocCount, setFolderDocCount] = useState<number>(0);
+  const [isDeletingFolder, setIsDeletingFolder] = useState(false);
+  const [isRenamingFolder, setIsRenamingFolder] = useState(false);
+  
   const menuRef = useRef<HTMLDivElement>(null);
+  const folderMenuRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       if (menuRef.current && !menuRef.current.contains(event.target as Node)) {
         setActiveMenu(null);
+      }
+      if (folderMenuRef.current && !folderMenuRef.current.contains(event.target as Node)) {
+        setFolderMenuId(null);
       }
     };
     document.addEventListener('mousedown', handleClickOutside);
@@ -324,12 +346,86 @@ const Explorer = () => {
 
   const isImageFile = (type: string) => IMAGE_TYPES.includes(type.toLowerCase());
 
+  // Folder handlers
+  const handleFolderMenuClick = async (dos: Dossier, e: React.MouseEvent) => {
+    e.stopPropagation();
+    setFolderMenuId(folderMenuId === dos.id ? null : dos.id);
+    
+    // Check document count in folder
+    if (folderMenuId !== dos.id) {
+      try {
+        const res = await api.get(`/documents`, { params: { dossierId: dos.id } });
+        if (res.data.success) {
+          setFolderDocCount(res.data.data.length);
+        }
+      } catch {
+        setFolderDocCount(0);
+      }
+    }
+  };
+
+  const openFolderRename = (dos: Dossier) => {
+    setRenameValue(dos.name);
+    setShowFolderRenameModal(dos);
+    setFolderMenuId(null);
+  };
+
+  const handleFolderRename = async () => {
+    if (!showFolderRenameModal || !renameValue.trim()) return;
+    setIsRenamingFolder(true);
+    try {
+      const res = await api.put(`/dossiers/${showFolderRenameModal.id}`, { name: renameValue.trim() });
+      if (res.data.success) {
+        setDossiers(dossiers.map(d => d.id === showFolderRenameModal.id ? { ...d, name: renameValue.trim() } : d));
+        setShowFolderRenameModal(null);
+        setRenameValue('');
+      }
+    } catch {
+      alert('Erreur lors du renommage');
+    } finally {
+      setIsRenamingFolder(false);
+    }
+  };
+
+  const openFolderDelete = async (dos: Dossier) => {
+    setFolderMenuId(null);
+    try {
+      const res = await api.get(`/documents`, { params: { dossierId: dos.id } });
+      if (res.data.success) {
+        setFolderDocCount(res.data.data.length);
+      }
+    } catch {
+      setFolderDocCount(0);
+    }
+    setShowFolderDeleteModal(dos);
+  };
+
+  const handleFolderDelete = async () => {
+    if (!showFolderDeleteModal) return;
+    setIsDeletingFolder(true);
+    try {
+      const res = await api.delete(`/dossiers/${showFolderDeleteModal.id}`);
+      if (res.data.success) {
+        setDossiers(dossiers.filter(d => d.id !== showFolderDeleteModal.id));
+        setShowFolderDeleteModal(null);
+      }
+    } catch {
+      alert('Erreur lors de la suppression');
+    } finally {
+      setIsDeletingFolder(false);
+    }
+  };
+
   const getFileIcon = (type: string) => {
     const t = type.toLowerCase();
-    if (['pdf'].includes(t)) return <FileText size={32} className="icon-red" />;
-    if (['doc', 'docx'].includes(t)) return <File size={32} className="icon-blue-dark" />;
-    if (['txt', 'js', 'ts', 'css', 'html'].includes(t)) return <FileCode size={32} className="icon-green" />;
-    if (isImageFile(t)) return <ImageIcon size={32} className="icon-purple" />;
+    if (t === 'pdf') return <img src={pdfIcon} alt="PDF" className="file-type-icon" />;
+    if (t === 'doc' || t === 'docx') return <img src={docIcon} alt="Word" className="file-type-icon" />;
+    if (t === 'md') return <img src={mdIcon} alt="Markdown" className="file-type-icon" />;
+    if (t === 'txt' || t === 'js' || t === 'ts' || t === 'css' || t === 'html') return <img src={textIcon} alt="Text" className="file-type-icon" />;
+    if (t === 'zip' || t === 'rar' || t === '7z' || t === 'tar' || t === 'gz') return <img src={t === 'rar' || t === '7z' ? rarIcon : zipIcon} alt="Archive" className="file-type-icon" />;
+    if (t === 'ppt' || t === 'pptx') return <img src={pptIcon} alt="PowerPoint" className="file-type-icon" />;
+    if (t === 'xls' || t === 'xlsx' || t === 'csv') return <img src={xlsxIcon} alt="Excel" className="file-type-icon" />;
+    if (isImageFile(t)) return <img src={imgIcon} alt="Image" className="file-type-icon" />;
     return <File size={32} className="icon-gray" />;
   };
 
@@ -368,6 +464,7 @@ const Explorer = () => {
             type="file" 
             id="explorer-upload" 
             multiple 
+            accept="image/*,.pdf,.doc,.docx,.txt,.md,.zip,.ppt,.pptx,.xls,.xlsx"
             hidden 
             onChange={(e) => handleFileUpload(e)} 
           />
@@ -444,9 +541,29 @@ const Explorer = () => {
           {currentScope === 'dossiers' && (
             <div className="folder-grid">
               {dossiers.map(dos => (
-                <div key={dos.id} className="folder-card glass-panel" onClick={() => navigateTo(dos.id, 'dossier')}>
-                  <div className="folder-icon icon-bg-purple"><Folder size={40} /></div>
-                  <div className="folder-name">{dos.name}</div>
+                <div key={dos.id} className={`folder-card glass-panel ${folderMenuId === dos.id ? 'menu-active' : ''}`}>
+                  <div className="folder-card-main" onClick={() => navigateTo(dos.id, 'dossier')}>
+                    <div className="folder-icon icon-bg-purple"><Folder size={40} /></div>
+                    <div className="folder-name">{dos.name}</div>
+                  </div>
+                  <button 
+                    className="folder-menu-btn"
+                    onClick={(e) => handleFolderMenuClick(dos, e)}
+                  >
+                    <MoreVertical size={18} />
+                  </button>
+                  {folderMenuId === dos.id && (
+                    <div className="folder-options-menu glass-panel" ref={folderMenuRef}>
+                      <button className="folder-option" onClick={() => openFolderRename(dos)}>
+                        <Pencil size={16} />
+                        <span>Renommer</span>
+                      </button>
+                      <button className="folder-option danger" onClick={() => openFolderDelete(dos)}>
+                        <Trash2 size={16} />
+                        <span>Supprimer</span>
+                      </button>
+                    </div>
+                  )}
                 </div>
               ))}
               {dossiers.length === 0 && (
@@ -630,7 +747,7 @@ const Explorer = () => {
         </div>
       )}
 
-      {/* Modal Renommage */}
+      {/* Modal Renommage Fichier */}
       {showRenameModal && (
         <div className="modal-overlay" onClick={() => setShowRenameModal(null)}>
           <div className="rename-modal" onClick={e => e.stopPropagation()}>
@@ -667,7 +784,7 @@ const Explorer = () => {
         </div>
       )}
 
-      {/* Modal Suppression */}
+      {/* Modal Suppression Fichier */}
       {showDeleteModal && (
         <div className="modal-overlay" onClick={() => !isDeleting && setShowDeleteModal(null)}>
           <div className="delete-confirm-modal" onClick={e => e.stopPropagation()}>
@@ -690,6 +807,86 @@ const Explorer = () => {
                 disabled={isDeleting}
               >
                 {isDeleting ? (
+                  <>
+                    <div className="spinner" />
+                    Suppression...
+                  </>
+                ) : (
+                  <>
+                    <Trash2 size={16} />
+                    Supprimer
+                  </>
+                )}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Modal Renommage Dossier */}
+      {showFolderRenameModal && (
+        <div className="modal-overlay" onClick={() => setShowFolderRenameModal(null)}>
+          <div className="rename-modal" onClick={e => e.stopPropagation()}>
+            <div className="rename-header">
+              <h3>Renommer le dossier</h3>
+              <button className="modal-close-btn" onClick={() => setShowFolderRenameModal(null)}>
+                <X size={20} />
+              </button>
+            </div>
+            <div className="rename-preview">
+              <Folder size={32} className="icon-purple" />
+              <span>{showFolderRenameModal.name}</span>
+            </div>
+            <input
+              type="text"
+              className="rename-input"
+              value={renameValue}
+              onChange={(e) => setRenameValue(e.target.value)}
+              autoFocus
+              onKeyDown={(e) => e.key === 'Enter' && handleFolderRename()}
+            />
+            <div className="rename-actions">
+              <button className="btn-cancel" onClick={() => setShowFolderRenameModal(null)}>Annuler</button>
+              <button 
+                className="btn-confirm" 
+                onClick={handleFolderRename}
+                disabled={isRenamingFolder || !renameValue.trim() || renameValue === showFolderRenameModal.name}
+              >
+                {isRenamingFolder ? <Loader2 size={16} className="spin" /> : <Check size={16} />}
+                Enregistrer
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Modal Suppression Dossier */}
+      {showFolderDeleteModal && (
+        <div className="modal-overlay" onClick={() => !isDeletingFolder && setShowFolderDeleteModal(null)}>
+          <div className="delete-confirm-modal" onClick={e => e.stopPropagation()}>
+            <div className="delete-confirm-icon warning">
+              <Trash2 size={32} />
+            </div>
+            <h3>Supprimer ce dossier ?</h3>
+            <p>
+              <strong>"{showFolderDeleteModal.name}"</strong> et tous ses fichiers 
+              {folderDocCount > 0 && <span className="text-warning"> ({folderDocCount} fichier(s))</span>} 
+              seront définitivement supprimés.
+            </p>
+            <div className="delete-confirm-actions">
+              <button 
+                className="btn-cancel"
+                onClick={() => setShowFolderDeleteModal(null)}
+                disabled={isDeletingFolder}
+              >
+                Annuler
+              </button>
+              <button 
+                className="btn-delete-confirm"
+                onClick={handleFolderDelete}
+                disabled={isDeletingFolder}
+              >
+                {isDeletingFolder ? (
                   <>
                     <div className="spinner" />
                     Suppression...

@@ -8,7 +8,12 @@ const upload = multer({
   storage: multer.memoryStorage(),
   limits: { fileSize: 50 * 1024 * 1024 }, // 50MB max
   fileFilter: (req, file, cb) => {
-    const allowed = ['.pdf', '.jpg', '.jpeg', '.png', '.gif', '.doc', '.docx', '.txt'];
+    const allowed = [
+      '.pdf', '.jpg', '.jpeg', '.png', '.gif', '.webp',
+      '.doc', '.docx', '.txt', '.md',
+      '.zip', '.rar', '.7z', '.tar', '.gz',
+      '.ppt', '.pptx', '.xls', '.xlsx', '.csv'
+    ];
     const ext = path.extname(file.originalname).toLowerCase();
     if (allowed.includes(ext)) cb(null, true);
     else {
