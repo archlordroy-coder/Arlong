@@ -1,7 +1,7 @@
 const { google } = require('googleapis');
 const stream = require('stream');
 
-const Mboa Drive_FOLDER_NAME = 'Mboa Drive';
+const MBOADRIVE_FOLDER_NAME = 'Mboa Drive';
 
 /**
  * Service Google Drive pour le stockage des documents
@@ -82,7 +82,7 @@ class GoogleDriveService {
    * @param {string} refreshToken
    * @param {string[]} pathSegments - ex: ['Mboa Drive', 'Espace', 'Dossier']
    */
-  async uploadFile(fileBuffer, fileName, mimeType, refreshToken, pathSegments = [Mboa Drive_FOLDER_NAME]) {
+  async uploadFile(fileBuffer, fileName, mimeType, refreshToken, pathSegments = [MBOADRIVE_FOLDER_NAME]) {
     const driveClient = this._getUserDriveClient(refreshToken);
     const parentId = await this._ensurePath(refreshToken, pathSegments);
 
