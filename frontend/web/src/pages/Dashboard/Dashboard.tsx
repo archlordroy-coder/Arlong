@@ -309,7 +309,7 @@ const Dashboard = () => {
       >
         <UploadCloud size={48} className="mx-auto mb-4 text-primary" />
         <h3 className="text-lg font-bold mb-2">Glissez vos fichiers ici</h3>
-        <p className="text-secondary mb-4">ou cliquez sur le bouton pour numériser vers votre Google Drive (Dossier Arlong)</p>
+        <p className="text-secondary mb-4">ou cliquez sur le bouton pour numériser vers votre Google Drive (Dossier Mboa Drive)</p>
         
         <input 
           type="file" 

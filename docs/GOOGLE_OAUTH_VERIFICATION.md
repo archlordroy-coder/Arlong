@@ -1,4 +1,4 @@
-# 🚀 Guide : Soumettre ARLONG à la Vérification Google OAuth
+# 🚀 Guide : Soumettre Mboa Drive à la Vérification Google OAuth
 
 ## Contexte
 
@@ -37,14 +37,14 @@ Avant de commencer le processus, vous devez avoir :
 ## Étape 2 : Configurer l'écran de consentement OAuth
 
 1. Rendez-vous sur [console.cloud.google.com](https://console.cloud.google.com)
-2. Sélectionnez votre projet **ARLONG**
+2. Sélectionnez votre projet **Mboa Drive**
 3. Dans le menu gauche : **APIs & Services → OAuth Consent Screen**
 
 ### Remplissez chaque champ :
 
 | Champ | Valeur à mettre |
 |---|---|
-| **App name** | ARLONG |
+| **App name** | Mboa Drive |
 | **User support email** | Votre email |
 | **App logo** | Votre logo PNG (120×120 min) |
 | **App homepage** | `https://arlong-gamma.vercel.app` |
@@ -75,7 +75,7 @@ https://www.googleapis.com/auth/drive.file
 2. Puis cliquez sur **"Préparer la vérification"**
 3. Google vous posera des questions sur votre utilisation du scope. Répondez :
 
-> *"L'application ARLONG permet aux utilisateurs de sauvegarder leurs archives chiffrées directement dans leur propre espace Google Drive personnel. Seuls les fichiers créés par l'application sont accédés."*
+> *"L'application Mboa Drive permet aux utilisateurs de sauvegarder leurs archives chiffrées directement dans leur propre espace Google Drive personnel. Seuls les fichiers créés par l'application sont accédés."*
 
 4. **Fournissez une vidéo de démonstration** (obligatoire) :
    - Durée : 1 à 5 minutes

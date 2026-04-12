@@ -1,6 +1,6 @@
 # Processus de Compilation et d'Automatisation (CI)
 
-Afin qu'Arlong devienne une suite d’applications achevées, le code doit être impérativement compilé.
+Afin qu'Mboa Drive devienne une suite d’applications achevées, le code doit être impérativement compilé.
 
 ## 1. L'Automatisation dans le Cloud via GitHub Actions
 

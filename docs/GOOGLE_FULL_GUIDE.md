@@ -1,4 +1,4 @@
-# 🌍 Guide Complet : Configuration Google OAuth2 & Validation pour ARLONG
+# 🌍 Guide Complet : Configuration Google OAuth2 & Validation pour Mboa Drive
 
 Ce document récapitule toutes les étapes nécessaires pour configurer l'API Google, valider l'application et gérer l'authentification cross-platform.
 
@@ -6,7 +6,7 @@ Ce document récapitule toutes les étapes nécessaires pour configurer l'API Go
 
 ### 1.1 Création du Projet
 1. Allez sur [Google Cloud Console](https://console.cloud.google.com/).
-2. Créez un nouveau projet nommé **ARLONG**.
+2. Créez un nouveau projet nommé **Mboa Drive**.
 
 ### 1.2 Activation de l'API
 1. Recherchez **"Google Drive API"**.
@@ -16,7 +16,7 @@ Ce document récapitule toutes les étapes nécessaires pour configurer l'API Go
 1. Allez dans **APIs & Services > OAuth consent screen**.
 2. Choisissez **External**.
 3. Remplissez les informations de base :
-   - **App name** : ARLONG
+   - **App name** : Mboa Drive
    - **Support email** : Votre email
    - **Developer contact** : Votre email
 4. **Scopes** : Ajoutez `https://www.googleapis.com/auth/drive.file` (accès aux fichiers créés par l'app).
@@ -28,7 +28,7 @@ Ce document récapitule toutes les étapes nécessaires pour configurer l'API Go
 Google impose des règles strictes pour que votre application ne soit pas bloquée avec un message d'avertissement.
 
 ### 2.1 Critères du Branding (OAuth Consent Screen)
-1. **Nom de l'application** : `ARLONG` (Doit correspondre exactement au nom dans la console).
+1. **Nom de l'application** : `Mboa Drive` (Doit correspondre exactement au nom dans la console).
 2. **Logo de l'application** :
    - Utilisez le fichier `frontend/web/public/logo.png`.
    - **Important** : Google peut demander une validation manuelle si vous changez le logo après la validation initiale.
@@ -73,7 +73,7 @@ Chaque frontend utilise un paramètre unique lors de la demande d'authentificati
 ### 3.2 Réponses Backend Personnalisées
 Le backend (`backend/src/routes/auth.routes.js`) traite le retour de Google différemment :
 - **Web/Desktop** : Envoie un `postMessage` à la fenêtre parente et se ferme automatiquement.
-- **Mobile** : Affiche une interface dédiée **"ARLONG MOBILE"** avec un bouton de retour, évitant ainsi les erreurs de fenêtres orphelines sur smartphone.
+- **Mobile** : Affiche une interface dédiée **"Mboa Drive MOBILE"** avec un bouton de retour, évitant ainsi les erreurs de fenêtres orphelines sur smartphone.
 
 ---
 

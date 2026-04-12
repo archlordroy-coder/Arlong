@@ -1,4 +1,4 @@
-# 📱 Guide du Contributeur — Frontend Mobile (ARLONG)
+# 📱 Guide du Contributeur — Frontend Mobile (Mboa Drive)
 
 > **À lire impérativement avant toute modification du code de `frontend/mobile`.**  
 > Ce document explique l'architecture, les règles et les précautions à respecter pour travailler sur la version mobile sans casser ce qui existe déjà.
@@ -76,7 +76,7 @@ Ces paquets sont **requis** pour que l'APK se comporte comme une vraie applicati
 
 | Paquet | Rôle |
 |---|---|
-| `@capacitor/status-bar` | Colore la barre système haute (heure/batterie) aux couleurs d'ARLONG |
+| `@capacitor/status-bar` | Colore la barre système haute (heure/batterie) aux couleurs d'Mboa Drive |
 | `@capacitor/keyboard` | Empêche le clavier virtuel de déformer l'interface |
 | `@capacitor/splash-screen` | Masque l'écran blanc natif au démarrage |
 | `@capacitor/haptics` | Retour haptique (vibreur) sur les actions importantes |

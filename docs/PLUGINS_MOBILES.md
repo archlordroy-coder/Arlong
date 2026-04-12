@@ -1,4 +1,4 @@
-# 📦 Documentation des Plugins Natifs — ARLONG Mobile
+# 📦 Documentation des Plugins Natifs — Mboa Drive Mobile
 
 > Ce fichier documente tous les plugins Capacitor utilisés dans `frontend/mobile`. Toute modification d'un de ces plugins doit être consignée ici.
 
@@ -20,7 +20,7 @@
 ### Rôle
 Contrôle la barre de statut système en haut (heure, batterie, signal).
 
-### Utilisation dans ARLONG
+### Utilisation dans Mboa Drive
 ```typescript
 import { StatusBar, Style } from '@capacitor/status-bar';
 
@@ -37,7 +37,7 @@ await StatusBar.setBackgroundColor({ color: '#0d1117' }); // Fond assortit au th
 ### Rôle
 Empêche que le clavier virtuel Android ne redimensionne le body, ce qui déformerait l'interface.
 
-### Utilisation dans ARLONG
+### Utilisation dans Mboa Drive
 ```typescript
 import { Keyboard, KeyboardResize } from '@capacitor/keyboard';
 
@@ -53,7 +53,7 @@ await Keyboard.setResizeMode({ mode: KeyboardResize.None });
 ### Rôle
 Contrôle l'écran de démarrage natif Android (l'écran affiché avant que React se charge).
 
-### Utilisation dans ARLONG
+### Utilisation dans Mboa Drive
 ```typescript
 import { SplashScreen as CapSplashScreen } from '@capacitor/splash-screen';
 
@@ -97,7 +97,7 @@ Il active le mode plein écran "Sticky Immersive" qui **cache définitivement le
 
 Contrairement à `@capgo/capacitor-navigation-bar` (qui ne change que la couleur), ce plugin utilise les flags natifs Android `SYSTEM_UI_FLAG_IMMERSIVE_STICKY` et `SYSTEM_UI_FLAG_HIDE_NAVIGATION`.
 
-### Utilisation dans ARLONG
+### Utilisation dans Mboa Drive
 ```typescript
 import { Fullscreen } from '@boengli/capacitor-fullscreen';
 

@@ -1,6 +1,6 @@
-# 🎨 Arlong Design System : Aura Glassmorphism
+# 🎨 Mboa Drive Design System : Aura Glassmorphism
 
-Ce document sert de référence technique pour les développeurs frontend travaillant sur Arlong (Web et Mobile). L'objectif est de maintenir le standard esthétique de très haute qualité défini par le cahier des charges.
+Ce document sert de référence technique pour les développeurs frontend travaillant sur Mboa Drive (Web et Mobile). L'objectif est de maintenir le standard esthétique de très haute qualité défini par le cahier des charges.
 
 ## 1. Philosophie Visuelle
 L'application repose sur le "Aura Glassmorphism". Une combinaison de :

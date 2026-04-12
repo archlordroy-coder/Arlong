@@ -14,7 +14,7 @@ import { StatusBar, Style } from '@capacitor/status-bar';
 // Au lancement de l'application
 const initNative = async () => {
   await StatusBar.setStyle({ style: Style.Dark });
-  await StatusBar.setBackgroundColor({ color: '#0d1117' }); // Couleur de fond ARLONG
+  await StatusBar.setBackgroundColor({ color: '#0d1117' }); // Couleur de fond Mboa Drive
 };
 ```
 

@@ -1,11 +1,11 @@
 # 🛠️ Guide Ultime : De la Configuration Google Cloud au Déploiement Final
 
-Ce guide exhaustif détaille chaque étape pour configurer, sécuriser et déployer l'écosystème **Arlong System**. Il est destiné aux administrateurs et développeurs seniors.
+Ce guide exhaustif détaille chaque étape pour configurer, sécuriser et déployer l'écosystème **Mboa Drive**. Il est destiné aux administrateurs et développeurs seniors.
 
 ---
 
 ## 1. Configuration Google Cloud Platform (GCP)
-Arlong utilise Google Drive comme moteur de stockage miroir. La configuration OAuth est cruciale.
+Mboa Drive utilise Google Drive comme moteur de stockage miroir. La configuration OAuth est cruciale.
 
 ### 1.1 Création et API
 1. Connectez-vous à la [Console Google Cloud](https://console.cloud.google.com/).
@@ -26,17 +26,17 @@ Créez un **ID client OAuth** (Type : Web Application).
   - `https://arlong-gamma.vercel.app` (Production)
 - **URIs de redirection autorisés** :
   - `http://localhost:5000/api/auth/google/callback`
-  - `https://arlong-backend-production.up.railway.app/api/auth/google/callback`
+  - `https://mboadrive-backend-production.up.railway.app/api/auth/google/callback`
 
 ---
 
 ## 2. Infrastructure de Données (Supabase)
-Arlong utilise **Supabase** pour la base de données PostgreSQL et la gestion des utilisateurs (Auth).
+Mboa Drive utilise **Supabase** pour la base de données PostgreSQL et la gestion des utilisateurs (Auth).
 
 1. Créez un projet sur Supabase.
 2. Exécutez le schéma SQL (souvent fourni dans `backend/prisma/schema.prisma` ou via les migrations).
 3. Récupérez votre **SUPABASE_URL** et **SUPABASE_ANON_KEY**.
-4. Configurez les **Redirect URLs** dans Supabase Auth : `arlong://app/login-success` pour le mobile.
+4. Configurez les **Redirect URLs** dans Supabase Auth : `mboadrive://app/login-success` pour le mobile.
 
 ---
 
@@ -67,7 +67,7 @@ Le frontend web est optimisé pour **Vercel**.
 ---
 
 ## 5. Déploiement Mobile (Android)
-Arlong utilise **Capacitor** pour transformer le code React en application native.
+Mboa Drive utilise **Capacitor** pour transformer le code React en application native.
 
 ### 5.1 Préparation
 ```bash
@@ -77,13 +77,13 @@ npx cap sync android
 ```
 
 ### 5.2 Deep Linking (Configuration Native)
-Pour que la redirection Google Drive fonctionne, le fichier `AndroidManifest.xml` doit contenir l'intent-filter pour `arlong://` :
+Pour que la redirection Google Drive fonctionne, le fichier `AndroidManifest.xml` doit contenir l'intent-filter pour `mboadrive://` :
 ```xml
 <intent-filter>
     <action android:name="android.intent.action.VIEW" />
     <category android:name="android.intent.category.DEFAULT" />
     <category android:name="android.intent.category.BROWSABLE" />
-    <data android:scheme="arlong" android:host="app" />
+    <data android:scheme="mboadrive" android:host="app" />
 </intent-filter>
 ```
 

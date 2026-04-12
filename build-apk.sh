@@ -1,6 +1,6 @@
 #!/bin/bash
 set -e
-echo "🚀 Compilation de l'APK Arlong (Android)..."
+echo "🚀 Compilation de l'APK Mboa Drive (Android)..."
 
 # Aller dans le dossier mobile
 cd frontend/mobile
@@ -17,8 +17,8 @@ echo "🔄 Synchronisation Capacitor..."
 npx cap add android 2>/dev/null || true
 npx cap sync android
 
-# Générer les icônes ARLONG
-echo "🎨 Écrasement des logos natifs (ARLONG)..."
+# Générer les icônes Mboa Drive
+echo "🎨 Écrasement des logos natifs (Mboa Drive)..."
 npm install -D @capacitor/assets
 npx @capacitor/assets generate --android
 
@@ -41,12 +41,12 @@ cd android
 chmod +x gradlew
 ./gradlew assembleDebug
 
-# Renommer l'APK en ARLONG.apk
+# Renommer l'APK en MboaDrive.apk
 APK_SRC="app/build/outputs/apk/debug/app-debug.apk"
-APK_DST="app/build/outputs/apk/debug/ARLONG.apk"
+APK_DST="app/build/outputs/apk/debug/MboaDrive.apk"
 if [ -f "$APK_SRC" ]; then
     mv "$APK_SRC" "$APK_DST"
 fi
 
 echo "✅ APK généré avec succès !"
-echo "📍 Chemin : frontend/mobile/android/app/build/outputs/apk/debug/ARLONG.apk"
+echo "📍 Chemin : frontend/mobile/android/app/build/outputs/apk/debug/MboaDrive.apk"

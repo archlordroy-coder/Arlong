@@ -1,6 +1,6 @@
-# 🛠️ Guide d'Installation de l'Écosystème ARLONG
+# 🛠️ Guide d'Installation de l'Écosystème Mboa Drive
 
-ARLONG est divisé en quatre parties totalement indépendantes. Vous pouvez installer chaque partie séparément ou tout configurer d'un seul coup grâce aux scripts préparés pour vous.
+Mboa Drive est divisé en quatre parties totalement indépendantes. Vous pouvez installer chaque partie séparément ou tout configurer d'un seul coup grâce aux scripts préparés pour vous.
 
 ## 🚀 Installation Globale (Recommandée)
 Si vous souhaitez initialiser tout le projet sur votre machine, exécutez simplement cette commande à la racine du projet :
