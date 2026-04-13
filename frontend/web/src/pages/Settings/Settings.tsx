@@ -1,11 +1,13 @@
 import { useState, useEffect, type FormEvent } from 'react';
 import { useAuth } from '../../contexts/AuthContext';
+import { useTheme } from '../../contexts/ThemeContext';
 import api from '../../api/client';
-import { User, Mail, Shield, Cloud, Save, Loader2, LogOut } from 'lucide-react';
+import { User, Mail, Shield, Cloud, Save, Loader2, LogOut, Sun, Moon } from 'lucide-react';
 import './Settings.css';
 
 const Settings = () => {
   const { user, logout } = useAuth();
+  const { theme, toggleTheme } = useTheme();
   const [name, setName] = useState(user?.name || '');
   const [loading, setLoading] = useState(false);
   const [success, setSuccess] = useState(false);
@@ -105,6 +107,33 @@ const Settings = () => {
         </div>
 
         <div className="integrations-section flex flex-col gap-8">
+          <div className="theme-card glass-panel p-8">
+            <div className="flex items-center gap-4 mb-6">
+              <div className="p-3 bg-primary/10 rounded-xl text-primary">
+                {theme === 'dark' ? <Moon size={24} /> : <Sun size={24} />}
+              </div>
+              <h3 className="text-lg font-bold">Apparence</h3>
+            </div>
+            <p className="text-sm text-secondary mb-6">Personnalisez le thème de l'application.</p>
+
+            <div className="flex bg-black/20 p-1 rounded-xl">
+              <button
+                className={`flex-1 flex items-center justify-center gap-2 py-2 rounded-lg transition-all ${theme === 'dark' ? 'bg-primary text-white shadow-lg' : 'text-secondary hover:text-white'}`}
+                onClick={() => theme !== 'dark' && toggleTheme()}
+              >
+                <Moon size={18} />
+                <span className="font-medium">Sombre</span>
+              </button>
+              <button
+                className={`flex-1 flex items-center justify-center gap-2 py-2 rounded-lg transition-all ${theme === 'light' ? 'bg-primary text-white shadow-lg' : 'text-secondary hover:text-white'}`}
+                onClick={() => theme !== 'light' && toggleTheme()}
+              >
+                <Sun size={18} />
+                <span className="font-medium">Clair</span>
+              </button>
+            </div>
+          </div>
+
           <div className="drive-link-card glass-panel p-8 border-l-4 border-warning">
             <div className="flex items-center gap-4 mb-6">
               <div className="p-3 bg-warning/10 rounded-xl text-warning">

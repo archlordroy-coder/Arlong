@@ -1,6 +1,7 @@
 import React from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { useAuth } from './contexts/AuthContext';
+import { ThemeProvider } from './contexts/ThemeContext';
 
 // Pages placeholders
 import Login from './pages/Auth/Login';
@@ -39,8 +40,9 @@ const App = () => {
   }
 
   return (
-    <Router >
-      <Routes>
+    <ThemeProvider>
+      <Router >
+        <Routes>
         <Route path="/" element={<Home />} />
         
         {/* Routes publiques — avec navbar universelle */}
@@ -94,9 +96,10 @@ const App = () => {
         } />
         {/* On ajoutera /espaces/:id etc */}
         
-        <Route path="*" element={<Navigate to="/dashboard" />} />
-      </Routes>
-    </Router>
+          <Route path="*" element={<Navigate to="/dashboard" />} />
+        </Routes>
+      </Router>
+    </ThemeProvider>
   );
 };
 

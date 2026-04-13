@@ -1,13 +1,24 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect, useRef, type ChangeEvent, Fragment } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import api from '../../api/client';
 import { 
-  File, FileText, Image as ImageIcon, FileCode,
-  Download, Trash2, Search, Filter, Folder, UploadCloud
+  File, Download, Trash2, Search, Filter, Folder, UploadCloud,
+  MoreVertical, Eye, Pencil, X, Check, Loader2, Image as ImageIcon
 } from 'lucide-react';
 import { format } from 'date-fns';
 import { fr } from 'date-fns/locale';
+import { SkeletonCard } from '../../components/Common/Skeleton';
 import './Explorer.css';
+
+import pdfIcon from '../../assets/pdf.png';
+import docIcon from '../../assets/doc.png';
+import imgIcon from '../../assets/img.png';
+import mdIcon from '../../assets/md.png';
+import zipIcon from '../../assets/zip.png';
+import rarIcon from '../../assets/rar.png';
+import pptIcon from '../../assets/ppt.png';
+import xlsxIcon from '../../assets/xlsx.png';
+import textIcon from '../../assets/text.png';
 
 interface Espace {
   id: number;
@@ -27,10 +38,13 @@ interface Document {
   type: string;
   path: string;
   driveId: string;
+  size?: number;
   dossierId: number;
   created_at: string;
   dossier: Dossier;
 }
+
+const IMAGE_TYPES = ['jpg', 'jpeg', 'png', 'gif', 'webp'];
 
 const Explorer = () => {
   const [searchParams, setSearchParams] = useSearchParams();
@@ -46,7 +60,6 @@ const Explorer = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [filterType, setFilterType] = useState('all');
 
-  // États pour l'upload
   const [showUploadModal, setShowUploadModal] = useState(false);
   const [tempFiles, setTempFiles] = useState<File[]>([]);
   const [allEspaces, setAllEspaces] = useState<Espace[]>([]);
@@ -57,8 +70,41 @@ const Explorer = () => {
   const [showNewFolderInput, setShowNewFolderInput] = useState(false);
   const [newFolderName, setNewFolderName] = useState("");
 
-  // Titres et fil d'ariane
   const [breadcrumbs, setBreadcrumbs] = useState<any[]>([]);
+  const [activeMenu, setActiveMenu] = useState<number | null>(null);
+  const [showRenameModal, setShowRenameModal] = useState<Document | null>(null);
+  const [showDeleteModal, setShowDeleteModal] = useState<Document | null>(null);
+  const [showPreviewModal, setShowPreviewModal] = useState<Document | null>(null);
+  const [previewImage, setPreviewImage] = useState<string | null>(null);
+  const [isLoadingPreview, setIsLoadingPreview] = useState(false);
+  const [renameValue, setRenameValue] = useState('');
+  const [isRenaming, setIsRenaming] = useState(false);
+  const [isDeleting, setIsDeleting] = useState(false);
+  const [isDownloading, setIsDownloading] = useState<number | null>(null);
+
+  // Folder states
+  const [folderMenuId, setFolderMenuId] = useState<number | null>(null);
+  const [showFolderRenameModal, setShowFolderRenameModal] = useState<Dossier | null>(null);
+  const [showFolderDeleteModal, setShowFolderDeleteModal] = useState<Dossier | null>(null);
+  const [folderDocCount, setFolderDocCount] = useState<number>(0);
+  const [isDeletingFolder, setIsDeletingFolder] = useState(false);
+  const [isRenamingFolder, setIsRenamingFolder] = useState(false);
+
+  const menuRef = useRef<HTMLDivElement>(null);
+  const folderMenuRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (menuRef.current && !menuRef.current.contains(event.target as Node)) {
+        setActiveMenu(null);
+      }
+      if (folderMenuRef.current && !folderMenuRef.current.contains(event.target as Node)) {
+        setFolderMenuId(null);
+      }
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
 
   useEffect(() => {
     loadExplorerContent();
@@ -70,21 +116,28 @@ const Explorer = () => {
       const newBreadcrumbs = [{ name: 'Mes Espaces', id: null, type: 'root' }];
 
       if (dossierId) {
-        // Mode Dossier: Voir les documents
-        const res = await api.get(`/documents`, { params: { dossierId, search: searchTerm } });
-        if (res.data.success) {
-          setDocuments(res.data.data);
-          const detail = res.data.data[0];
-          if (detail && detail.dossier) {
-            if (detail.dossier.espace) {
-              newBreadcrumbs.push({ name: detail.dossier.espace.name, id: detail.dossier.espaceId, type: 'espace' });
-            }
-            newBreadcrumbs.push({ name: detail.dossier.name, id: detail.dossier.id, type: 'dossier' });
+        const [docsRes, dossierRes] = await Promise.all([
+          api.get(`/documents`, { params: { dossierId, search: searchTerm } }),
+          api.get(`/dossiers/${dossierId}`)
+        ]);
+
+        if (docsRes.data.success) {
+          let docs = docsRes.data.data;
+          if (filterType !== 'all') {
+            docs = docs.filter((d: Document) => d.type.toLowerCase().includes(filterType));
           }
+          setDocuments(docs);
           setCurrentScope('documents');
         }
+
+        if (dossierRes.data.success) {
+          const dossier = dossierRes.data.data;
+          if (dossier.espace) {
+            newBreadcrumbs.push({ name: dossier.espace.name, id: dossier.espaceId, type: 'espace' });
+          }
+          newBreadcrumbs.push({ name: dossier.name, id: dossier.id, type: 'dossier' });
+        }
       } else if (espaceId) {
-        // Mode Espace: Voir les dossiers
         const [espacesRes, dossiersRes] = await Promise.all([
           api.get('/espaces'),
           api.get('/dossiers', { params: { espaceId } })
@@ -99,7 +152,6 @@ const Explorer = () => {
           setCurrentScope('dossiers');
         }
       } else {
-        // Mode Racine: Voir les espaces
         const res = await api.get('/espaces');
         if (res.data.success) {
           setEspaces(res.data.data);
@@ -114,19 +166,17 @@ const Explorer = () => {
     }
   };
 
-  const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleFileUpload = async (e: ChangeEvent<HTMLInputElement>) => {
     const files = e.target.files;
     if (!files || files.length === 0) return;
 
     if (dossierId) {
-      // Si on est déjà dans un dossier, on upload direct après confirmation (pour éviter les erreurs)
       setTempFiles(Array.from(files));
       const confirmed = window.confirm(`Voulez-vous importer ${files.length} fichier(s) dans le dossier actuel ?`);
       if (confirmed) {
         uploadFilesToDossier(Array.from(files), parseInt(dossierId));
       }
     } else {
-      // Sinon on ouvre la modale de sélection de destination
       setTempFiles(Array.from(files));
       try {
         const res = await api.get('/espaces');
@@ -141,7 +191,6 @@ const Explorer = () => {
     }
   };
 
-  // Charger les dossiers quand l'espace change dans la modale
   useEffect(() => {
     if (selectedEspaceId && showUploadModal) {
       api.get(`/espaces/${selectedEspaceId}`).then(res => {
@@ -175,7 +224,6 @@ const Explorer = () => {
         return;
       }
     } else if (selectedDossierId === "root" || !selectedDossierId) {
-      // Mode Racine : Chercher ou créer un dossier "Général"
       try {
         setIsSyncing(true);
         const dRes = await api.get(`/dossiers`, { params: { espaceId: selectedEspaceId } });
@@ -209,7 +257,7 @@ const Explorer = () => {
       }
     }
     setIsSyncing(false);
-    loadExplorerContent(); // Rafraîchir
+    loadExplorerContent();
   };
 
   const navigateTo = (id: number | null, type: 'root' | 'espace' | 'dossier') => {
@@ -218,91 +266,237 @@ const Explorer = () => {
     if (type === 'dossier') setSearchParams({ dossierId: id!.toString() });
   };
 
-  const handleDelete = async (id: number) => {
-    if (!window.confirm('Voulez-vous vraiment supprimer ce document ?')) return;
+  const handleRename = async () => {
+    if (!showRenameModal || !renameValue.trim()) return;
+    setIsRenaming(true);
     try {
-      const res = await api.delete(`/documents/${id}`);
+      const res = await api.put(`/documents/${showRenameModal.id}`, { name: renameValue.trim() });
       if (res.data.success) {
-        setDocuments(documents.filter(d => d.id !== id));
+        setDocuments(documents.map(d => d.id === showRenameModal.id ? { ...d, name: renameValue.trim() } : d));
+        setShowRenameModal(null);
+      }
+    } catch (error) {
+      alert('Erreur lors du renommage');
+    } finally {
+      setIsRenaming(false);
+    }
+  };
+
+  const handleDelete = async () => {
+    if (!showDeleteModal) return;
+    setIsDeleting(true);
+    try {
+      const res = await api.delete(`/documents/${showDeleteModal.id}`);
+      if (res.data.success) {
+        setDocuments(documents.filter(d => d.id !== showDeleteModal.id));
+        setShowDeleteModal(null);
       }
     } catch (error) {
       alert('Erreur lors de la suppression');
+    } finally {
+      setIsDeleting(false);
+    }
+  };
+
+  const handlePreview = async (doc: Document) => {
+    const isImage = IMAGE_TYPES.includes(doc.type.toLowerCase());
+
+    if (isImage) {
+      setShowPreviewModal(doc);
+      setIsLoadingPreview(true);
+      setPreviewImage(null);
+
+      try {
+        const response = await api.get(`/documents/${doc.id}/download`, {
+          responseType: 'blob',
+        });
+        const imageUrl = URL.createObjectURL(response.data);
+        setPreviewImage(imageUrl);
+      } catch (error) {
+        console.error('Erreur chargement image:', error);
+        alert('Impossible de charger l\'image');
+      } finally {
+        setIsLoadingPreview(false);
+      }
+    } else {
+      window.open(doc.path, '_blank');
+    }
+    setActiveMenu(null);
+  };
+
+  const handleDownload = async (doc: Document) => {
+    setIsDownloading(doc.id);
+    setActiveMenu(null);
+
+    try {
+      const response = await api.get(`/documents/${doc.id}/download`, {
+        responseType: 'blob',
+      });
+
+      const url = window.URL.createObjectURL(new Blob([response.data]));
+      const link = document.createElement('a');
+      link.href = url;
+      link.setAttribute('download', doc.name);
+      document.body.appendChild(link);
+      link.click();
+      link.parentNode?.removeChild(link);
+      window.URL.revokeObjectURL(url);
+    } catch (error) {
+      console.error('Erreur téléchargement:', error);
+      alert('Erreur lors du téléchargement');
+    } finally {
+      setIsDownloading(null);
+    }
+  };
+
+  const isImageFile = (type: string) => IMAGE_TYPES.includes(type.toLowerCase());
+
+  // Folder handlers
+  const handleFolderMenuClick = async (dos: Dossier, e: React.MouseEvent) => {
+    e.stopPropagation();
+    setFolderMenuId(folderMenuId === dos.id ? null : dos.id);
+
+    // Check document count in folder
+    if (folderMenuId !== dos.id) {
+      try {
+        const res = await api.get(`/documents`, { params: { dossierId: dos.id } });
+        if (res.data.success) {
+          setFolderDocCount(res.data.data.length);
+        }
+      } catch {
+        setFolderDocCount(0);
+      }
+    }
+  };
+
+  const openFolderRename = (dos: Dossier) => {
+    setRenameValue(dos.name);
+    setShowFolderRenameModal(dos);
+    setFolderMenuId(null);
+  };
+
+  const handleFolderRename = async () => {
+    if (!showFolderRenameModal || !renameValue.trim()) return;
+    setIsRenamingFolder(true);
+    try {
+      const res = await api.put(`/dossiers/${showFolderRenameModal.id}`, { name: renameValue.trim() });
+      if (res.data.success) {
+        setDossiers(dossiers.map(d => d.id === showFolderRenameModal.id ? { ...d, name: renameValue.trim() } : d));
+        setShowFolderRenameModal(null);
+        setRenameValue('');
+      }
+    } catch {
+      alert('Erreur lors du renommage');
+    } finally {
+      setIsRenamingFolder(false);
+    }
+  };
+
+  const openFolderDelete = async (dos: Dossier) => {
+    setFolderMenuId(null);
+    try {
+      const res = await api.get(`/documents`, { params: { dossierId: dos.id } });
+      if (res.data.success) {
+        setFolderDocCount(res.data.data.length);
+      }
+    } catch {
+      setFolderDocCount(0);
+    }
+    setShowFolderDeleteModal(dos);
+  };
+
+  const handleFolderDelete = async () => {
+    if (!showFolderDeleteModal) return;
+    setIsDeletingFolder(true);
+    try {
+      const res = await api.delete(`/dossiers/${showFolderDeleteModal.id}`);
+      if (res.data.success) {
+        setDossiers(dossiers.filter(d => d.id !== showFolderDeleteModal.id));
+        setShowFolderDeleteModal(null);
+      }
+    } catch {
+      alert('Erreur lors de la suppression');
+    } finally {
+      setIsDeletingFolder(false);
     }
   };
 
   const getFileIcon = (type: string) => {
     const t = type.toLowerCase();
-    if (['jpg', 'jpeg', 'png', 'gif'].includes(t)) return <ImageIcon size={20} className="text-blue-400" />;
-    if (['pdf'].includes(t)) return <FileText size={20} className="text-red-400" />;
-    if (['doc', 'docx'].includes(t)) return <File size={20} className="text-blue-500" />;
-    if (['txt', 'js', 'ts', 'css', 'html'].includes(t)) return <FileCode size={20} className="text-green-400" />;
-    return <File size={20} className="text-gray-400" />;
+    if (t === 'pdf') return <img src={pdfIcon} alt="PDF" className="file-type-icon" />;
+    if (t === 'doc' || t === 'docx') return <img src={docIcon} alt="Word" className="file-type-icon" />;
+    if (t === 'md') return <img src={mdIcon} alt="Markdown" className="file-type-icon" />;
+    if (t === 'txt' || t === 'js' || t === 'ts' || t === 'css' || t === 'html') return <img src={textIcon} alt="Text" className="file-type-icon" />;
+    if (t === 'zip' || t === 'rar' || t === '7z' || t === 'tar' || t === 'gz') return <img src={t === 'rar' || t === '7z' ? rarIcon : zipIcon} alt="Archive" className="file-type-icon" />;
+    if (t === 'ppt' || t === 'pptx') return <img src={pptIcon} alt="PowerPoint" className="file-type-icon" />;
+    if (t === 'xls' || t === 'xlsx' || t === 'csv') return <img src={xlsxIcon} alt="Excel" className="file-type-icon" />;
+    if (isImageFile(t)) return <img src={imgIcon} alt="Image" className="file-type-icon" />;
+    return <File size={32} className="icon-gray" />;
   };
 
   return (
-    <div className="explorer-container animate-fade-in">
-      {/* Header & Breadcrumbs */}
-      <div className="explorer-header mb-6">
-        <h1 className="text-3xl font-bold mb-4">Explorateur</h1>
+    <div className="explorer-container">
+      <header className="explorer-header">
+        <h1 className="explorer-title">Explorateur</h1>
         
-        <nav className="flex items-center gap-2 text-sm text-secondary mb-4 bg-white/5 p-3 rounded-lg border border-white/5">
+        <nav className="breadcrumb-nav glass-panel">
           {breadcrumbs.map((crumb, idx) => (
-            <React.Fragment key={`${crumb.type}-${crumb.id}-${idx}`}>
+            <Fragment key={`${crumb.type}-${crumb.id}-${idx}`}>
               <button 
                 onClick={() => navigateTo(crumb.id, crumb.type)}
-                className={`hover:text-primary transition-colors ${idx === breadcrumbs.length - 1 ? 'text-white font-bold' : ''}`}
+                className={`breadcrumb-btn ${idx === breadcrumbs.length - 1 ? 'is-active' : ''}`}
               >
                 {crumb.name}
               </button>
-              {idx < breadcrumbs.length - 1 && <span className="opacity-30">/</span>}
-            </React.Fragment>
+              {idx < breadcrumbs.length - 1 && <span className="breadcrumb-separator">/</span>}
+            </Fragment>
           ))}
         </nav>
 
-        <div className="flex justify-between items-center bg-white/5 p-4 rounded-xl border border-white/5">
-          <div className="flex items-center gap-2">
-            <Folder size={20} className="text-primary" />
-            <span className="font-bold">{breadcrumbs[breadcrumbs.length - 1]?.name}</span>
+        <div className="explorer-action-bar glass-panel">
+          <div className="current-location">
+            <Folder size={20} className="icon-primary" />
+            <span className="location-name">{breadcrumbs[breadcrumbs.length - 1]?.name}</span>
           </div>
           <button 
-            className="btn btn-primary flex items-center gap-2"
+            className="btn-import-here"
             onClick={() => document.getElementById('explorer-upload')?.click()}
           >
             <UploadCloud size={18} />
-            <span>Importer ici</span>
+            <span>Importer</span>
           </button>
           <input 
             type="file" 
             id="explorer-upload" 
             multiple 
+            accept="image/*,.pdf,.doc,.docx,.txt,.md,.zip,.ppt,.pptx,.xls,.xlsx"
             hidden 
             onChange={(e) => handleFileUpload(e)} 
           />
         </div>
-      </div>
+      </header>
 
-      {/* Barre de recherche et filtres */}
-      <div className="filters-container glass-panel mb-8 flex flex-wrap gap-4 items-center">
-        <div className="search-box flex-1 min-w-[200px] flex items-center gap-2 px-4 py-2 bg-black/20 rounded-lg">
-          <Search size={18} className="text-secondary" />
+      <div className="explorer-filters-bar glass-panel">
+        <div className="search-box-wrap">
+          <Search size={18} className="search-icon" />
           <input 
             type="text" 
             placeholder={`Rechercher dans ${breadcrumbs[breadcrumbs.length-1]?.name}...`} 
-            className="bg-transparent border-none outline-none text-white w-full text-sm"
+            className="search-input"
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
           />
         </div>
 
         {currentScope === 'documents' && (
-          <div className="filter-item flex items-center gap-2">
-            <Filter size={18} className="text-secondary" />
+          <div className="filter-select-wrap">
+            <Filter size={18} className="filter-icon" />
             <select 
-              className="bg-black/20 text-white border-none rounded-lg px-3 py-2 text-sm outline-none cursor-pointer"
+              className="filter-select"
               value={filterType}
               onChange={(e) => setFilterType(e.target.value)}
             >
-              <option value="all">Tous les types</option>
+              <option value="all">Tous</option>
               <option value="pdf">PDF</option>
               <option value="image">Images</option>
               <option value="doc">Documents</option>
@@ -312,104 +506,186 @@ const Explorer = () => {
       </div>
 
       {loading ? (
-        <div className="flex justify-center py-20">
-          <div className="loading-spinner"></div>
+        <div className="explorer-main-content">
+          {currentScope === 'espaces' && (
+            <div className="folder-grid">
+              {[1, 2, 3, 4].map((i) => (
+                <SkeletonCard key={i} />
+              ))}
+            </div>
+          )}
+          {currentScope === 'dossiers' && (
+            <div className="folder-grid">
+              {[1, 2, 3, 4].map((i) => (
+                <SkeletonCard key={i} />
+              ))}
+            </div>
+          )}
+          {currentScope === 'documents' && (
+            <div className="doc-grid">
+              {[1, 2, 3, 4].map((i) => (
+                <SkeletonCard key={i} />
+              ))}
+            </div>
+          )}
         </div>
       ) : (
-        <div className="explorer-content">
+        <div className="explorer-main-content">
           
-          {/* VUE ESPACES */}
           {currentScope === 'espaces' && (
             <div className="folder-grid">
               {espaces.map(esp => (
-                <div key={esp.id} className="folder-card glass-panel hover:scale-105 transition-all cursor-pointer" onClick={() => navigateTo(esp.id, 'espace')}>
-                  <div className="folder-icon blue"><Folder size={40} /></div>
+                <div key={esp.id} className="folder-card glass-panel" onClick={() => navigateTo(esp.id, 'espace')}>
+                  <div className="folder-icon icon-bg-blue"><Folder size={40} /></div>
                   <div className="folder-name">{esp.name}</div>
                 </div>
               ))}
             </div>
           )}
 
-          {/* VUE DOSSIERS */}
           {currentScope === 'dossiers' && (
             <div className="folder-grid">
               {dossiers.map(dos => (
-                <div key={dos.id} className="folder-card glass-panel hover:scale-105 transition-all cursor-pointer" onClick={() => navigateTo(dos.id, 'dossier')}>
-                  <div className="folder-icon purple"><Folder size={40} /></div>
-                  <div className="folder-name">{dos.name}</div>
+                <div key={dos.id} className={`folder-card glass-panel ${folderMenuId === dos.id ? 'menu-active' : ''}`}>
+                  <div className="folder-card-main" onClick={() => navigateTo(dos.id, 'dossier')}>
+                    <div className="folder-icon icon-bg-purple"><Folder size={40} /></div>
+                    <div className="folder-name">{dos.name}</div>
+                  </div>
+                  <button
+                    className="folder-menu-btn"
+                    onClick={(e) => handleFolderMenuClick(dos, e)}
+                  >
+                    <MoreVertical size={18} />
+                  </button>
+                  {folderMenuId === dos.id && (
+                    <div className="folder-options-menu glass-panel" ref={folderMenuRef}>
+                      <button className="folder-option" onClick={() => openFolderRename(dos)}>
+                        <Pencil size={16} />
+                        <span>Renommer</span>
+                      </button>
+                      <button className="folder-option danger" onClick={() => openFolderDelete(dos)}>
+                        <Trash2 size={16} />
+                        <span>Supprimer</span>
+                      </button>
+                    </div>
+                  )}
                 </div>
               ))}
               {dossiers.length === 0 && (
-                <div className="col-span-full py-20 text-center text-secondary">Cet espace est vide.</div>
+                <div className="empty-state-full">
+                  <Folder size={48} />
+                  <p>Cet espace est vide.</p>
+                </div>
               )}
             </div>
           )}
 
-          {/* VUE DOCUMENTS */}
           {currentScope === 'documents' && (
-            <div className="documents-list-container glass-panel">
-              <div className="document-grid-header border-b border-white/5 pb-4 px-4 text-xs font-bold text-secondary uppercase tracking-wider hidden md:grid grid-cols-[1fr_200px_180px_100px]">
-                <div>Nom</div>
-                <div>ID Drive</div>
-                <div>Date</div>
-                <div className="text-right">Actions</div>
-              </div>
-
-              <div className="document-rows">
-                {documents.map(doc => (
-                  <div key={doc.id} className="document-row grid md:grid-cols-[1fr_200px_180px_100px] items-center p-4 hover:bg-white/5 transition-colors border-b border-white/5 last:border-0 group">
-                    <div className="flex items-center gap-3">
-                      <div className="doc-icon-wrapper p-2 rounded-lg bg-white/5">
+            <div className="doc-grid">
+              {documents.map((doc) => (
+                <div
+                  key={doc.id}
+                  className={`doc-card glass-panel ${activeMenu === doc.id ? 'active' : ''}`}
+                >
+                  <div
+                    className="doc-card-preview"
+                    onClick={() => isImageFile(doc.type) && handlePreview(doc)}
+                  >
+                    {isImageFile(doc.type) ? (
+                      <img
+                        className="doc-image-display"
+                        src={doc.path}
+                        alt={doc.name}
+                        onError={(e) => {
+                          (e.target as HTMLImageElement).style.display = 'none';
+                          (e.target as HTMLImageElement).nextElementSibling?.classList.remove('hidden');
+                        }}
+                      />
+                    ) : (
+                      <div className="doc-file-preview">
+                        <div className="doc-type-badge">{doc.type.toUpperCase()}</div>
                         {getFileIcon(doc.type)}
                       </div>
-                      <div className="flex flex-col">
-                        <span className="doc-name font-medium text-white truncate max-w-[250px]">{doc.name}</span>
-                        <span className="md:hidden text-xs text-secondary">{format(new Date(doc.created_at), 'dd MMM yyyy', { locale: fr })}</span>
-                      </div>
-                    </div>
-
-                    <div className="hidden md:flex items-center gap-2 text-xs text-secondary opacity-50 truncate">
-                      {doc.driveId}
-                    </div>
-
-                    <div className="hidden md:block text-sm text-secondary">
-                      {format(new Date(doc.created_at), 'dd MMM yyyy', { locale: fr })}
-                    </div>
-
-                    <div className="flex justify-end gap-2">
-                      <a href={doc.path} target="_blank" rel="noreferrer" className="btn btn-ghost p-2 text-secondary hover:text-primary transition-colors">
-                        <Download size={18} />
-                      </a>
-                      <button onClick={() => handleDelete(doc.id)} className="btn btn-ghost p-2 text-secondary hover:text-red-400 transition-colors">
-                        <Trash2 size={18} />
-                      </button>
-                    </div>
+                    )}
                   </div>
-                ))}
-                {documents.length === 0 && (
-                  <div className="py-20 text-center text-secondary">Aucun document dans ce dossier.</div>
-                )}
-              </div>
+                  <div className="doc-card-info">
+                    <span className="doc-card-name" title={doc.name}>{doc.name}</span>
+                    <span className="doc-card-meta">
+                      {format(new Date(doc.created_at), 'dd MMM yyyy', { locale: fr })}
+                    </span>
+                  </div>
+                  <div className="doc-card-actions">
+                    <button
+                      className="doc-menu-btn"
+                      onClick={() => setActiveMenu(activeMenu === doc.id ? null : doc.id)}
+                    >
+                      <MoreVertical size={18} />
+                    </button>
+
+                    {activeMenu === doc.id && (
+                      <div className="doc-options-menu glass-panel" ref={menuRef}>
+                        <button className="doc-option" onClick={() => handlePreview(doc)}>
+                          <Eye size={16} />
+                          <span>{isImageFile(doc.type) ? 'Aperçu' : 'Ouvrir'}</span>
+                        </button>
+                        <button className="doc-option" onClick={() => {
+                          setRenameValue(doc.name);
+                          setShowRenameModal(doc);
+                          setActiveMenu(null);
+                        }}>
+                          <Pencil size={16} />
+                          <span>Renommer</span>
+                        </button>
+                        <button
+                          className="doc-option"
+                          onClick={() => handleDownload(doc)}
+                          disabled={isDownloading === doc.id}
+                        >
+                          {isDownloading === doc.id ? (
+                            <Loader2 size={16} className="spin" />
+                          ) : (
+                            <Download size={16} />
+                          )}
+                          <span>{isDownloading === doc.id ? 'Téléchargement...' : 'Télécharger'}</span>
+                        </button>
+                        <button className="doc-option danger" onClick={() => {
+                          setShowDeleteModal(doc);
+                          setActiveMenu(null);
+                        }}>
+                          <Trash2 size={16} />
+                          <span>Supprimer</span>
+                        </button>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              ))}
+              {documents.length === 0 && (
+                <div className="empty-state-full">
+                  <File size={48} />
+                  <p>Aucun document dans ce dossier.</p>
+                </div>
+              )}
             </div>
           )}
         </div>
       )}
-      {/* Modale Destination d'Upload (similaire au Dashboard) */}
+
       {showUploadModal && (
-        <div className="modal-overlay animate-fade-in" onClick={() => setShowUploadModal(false)}>
-          <div className="modal-content glass-panel max-w-md w-full" onClick={e => e.stopPropagation()}>
-            <div className="mb-6 text-center">
-              <div className="w-16 h-16 bg-primary/10 rounded-full flex items-center justify-center mx-auto mb-4">
-                <UploadCloud size={32} className="text-primary" />
+        <div className="modal-overlay" onClick={() => setShowUploadModal(false)}>
+          <div className="modal-content glass-panel" onClick={e => e.stopPropagation()}>
+            <div className="modal-header">
+              <div className="modal-icon-wrap">
+                <UploadCloud size={32} />
               </div>
-              <h2 className="text-xl font-bold">Où archiver ces fichiers ?</h2>
+              <h2 className="modal-title">Où archiver ces fichiers ?</h2>
             </div>
 
-            <div className="space-y-4 mb-8">
+            <div className="modal-form">
               <div className="input-group">
                 <label className="input-label">Espace de travail</label>
                 <select 
-                  className="input-field bg-black/40"
+                  className="input-select"
                   value={selectedEspaceId}
                   onChange={(e) => setSelectedEspaceId(e.target.value)}
                 >
@@ -422,7 +698,7 @@ const Explorer = () => {
               <div className="input-group">
                 <label className="input-label">Dossier de destination</label>
                 <select 
-                  className="input-field bg-black/40"
+                  className="input-select"
                   value={showNewFolderInput ? "new" : selectedDossierId}
                   onChange={(e) => {
                     if (e.target.value === "new") {
@@ -443,11 +719,11 @@ const Explorer = () => {
               </div>
 
               {showNewFolderInput && (
-                <div className="input-group animate-slide-down">
-                  <label className="input-label font-bold text-primary">Nom du nouveau dossier</label>
+                <div className="input-group">
+                  <label className="input-label highlight">Nom du nouveau dossier</label>
                   <input 
                     type="text" 
-                    className="input-field bg-primary/5 border-primary/20 focus:border-primary"
+                    className="input-field-highlight"
                     placeholder="Nom du dossier..."
                     value={newFolderName}
                     onChange={(e) => setNewFolderName(e.target.value)}
@@ -456,20 +732,230 @@ const Explorer = () => {
                 </div>
               )}
 
-              <div className="bg-white/5 p-3 rounded-lg max-h-32 overflow-y-auto">
-                <div className="text-xs font-bold text-secondary uppercase mb-2">Fichiers ({tempFiles.length})</div>
+              <div className="files-preview-list">
+                <div className="preview-header">Fichiers ({tempFiles.length})</div>
                 {tempFiles.map((f, i) => (
-                  <div key={i} className="text-xs truncate flex items-center gap-2 mb-1">
-                    <File size={12} className="text-primary" /> {f.name}
+                  <div key={i} className="preview-item">
+                    <File size={12} className="icon-primary" /> <span>{f.name}</span>
                   </div>
                 ))}
               </div>
             </div>
 
-            <div className="flex gap-4">
-              <button className="btn btn-secondary flex-1" onClick={() => setShowUploadModal(false)}>Annuler</button>
-              <button className="btn btn-primary flex-1" onClick={confirmUpload} disabled={isSyncing}>
-                {isSyncing ? "Envoi..." : "Confirmer l'archivage"}
+            <div className="modal-actions">
+              <button className="btn-cancel" onClick={() => setShowUploadModal(false)}>Annuler</button>
+              <button className="btn-confirm" onClick={confirmUpload} disabled={isSyncing}>
+                {isSyncing ? "Envoi..." : "Confirmer"}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Modal Renommage Fichier */}
+      {showRenameModal && (
+        <div className="modal-overlay" onClick={() => setShowRenameModal(null)}>
+          <div className="rename-modal" onClick={e => e.stopPropagation()}>
+            <div className="rename-header">
+              <h3>Renommer le fichier</h3>
+              <button className="modal-close-btn" onClick={() => setShowRenameModal(null)}>
+                <X size={20} />
+              </button>
+            </div>
+            <div className="rename-preview">
+              {getFileIcon(showRenameModal.type)}
+              <span>{showRenameModal.name}</span>
+            </div>
+            <input
+              type="text"
+              className="rename-input"
+              value={renameValue}
+              onChange={(e) => setRenameValue(e.target.value)}
+              autoFocus
+              onKeyDown={(e) => e.key === 'Enter' && handleRename()}
+            />
+            <div className="rename-actions">
+              <button className="btn-cancel" onClick={() => setShowRenameModal(null)}>Annuler</button>
+              <button
+                className="btn-confirm"
+                onClick={handleRename}
+                disabled={isRenaming || !renameValue.trim() || renameValue === showRenameModal.name}
+              >
+                {isRenaming ? <Loader2 size={16} className="spin" /> : <Check size={16} />}
+                Enregistrer
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Modal Suppression Fichier */}
+      {showDeleteModal && (
+        <div className="modal-overlay" onClick={() => !isDeleting && setShowDeleteModal(null)}>
+          <div className="delete-confirm-modal" onClick={e => e.stopPropagation()}>
+            <div className="delete-confirm-icon">
+              <Trash2 size={32} />
+            </div>
+            <h3>Supprimer ce fichier ?</h3>
+            <p><strong>"{showDeleteModal.name}"</strong> sera définitivement supprimé.</p>
+            <div className="delete-confirm-actions">
+              <button
+                className="btn-cancel"
+                onClick={() => setShowDeleteModal(null)}
+                disabled={isDeleting}
+              >
+                Annuler
+              </button>
+              <button
+                className="btn-delete-confirm"
+                onClick={handleDelete}
+                disabled={isDeleting}
+              >
+                {isDeleting ? (
+                  <>
+                    <div className="spinner" />
+                    Suppression...
+                  </>
+                ) : (
+                  <>
+                    <Trash2 size={16} />
+                    Supprimer
+                  </>
+                )}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Modal Renommage Dossier */}
+      {showFolderRenameModal && (
+        <div className="modal-overlay" onClick={() => setShowFolderRenameModal(null)}>
+          <div className="rename-modal" onClick={e => e.stopPropagation()}>
+            <div className="rename-header">
+              <h3>Renommer le dossier</h3>
+              <button className="modal-close-btn" onClick={() => setShowFolderRenameModal(null)}>
+                <X size={20} />
+              </button>
+            </div>
+            <div className="rename-preview">
+              <Folder size={32} className="icon-purple" />
+              <span>{showFolderRenameModal.name}</span>
+            </div>
+            <input
+              type="text"
+              className="rename-input"
+              value={renameValue}
+              onChange={(e) => setRenameValue(e.target.value)}
+              autoFocus
+              onKeyDown={(e) => e.key === 'Enter' && handleFolderRename()}
+            />
+            <div className="rename-actions">
+              <button className="btn-cancel" onClick={() => setShowFolderRenameModal(null)}>Annuler</button>
+              <button
+                className="btn-confirm"
+                onClick={handleFolderRename}
+                disabled={isRenamingFolder || !renameValue.trim() || renameValue === showFolderRenameModal.name}
+              >
+                {isRenamingFolder ? <Loader2 size={16} className="spin" /> : <Check size={16} />}
+                Enregistrer
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Modal Suppression Dossier */}
+      {showFolderDeleteModal && (
+        <div className="modal-overlay" onClick={() => !isDeletingFolder && setShowFolderDeleteModal(null)}>
+          <div className="delete-confirm-modal" onClick={e => e.stopPropagation()}>
+            <div className="delete-confirm-icon warning">
+              <Trash2 size={32} />
+            </div>
+            <h3>Supprimer ce dossier ?</h3>
+            <p>
+              <strong>"{showFolderDeleteModal.name}"</strong> et tous ses fichiers
+              {folderDocCount > 0 && <span className="text-warning"> ({folderDocCount} fichier(s))</span>}
+              seront définitivement supprimés.
+            </p>
+            <div className="delete-confirm-actions">
+              <button
+                className="btn-cancel"
+                onClick={() => setShowFolderDeleteModal(null)}
+                disabled={isDeletingFolder}
+              >
+                Annuler
+              </button>
+              <button
+                className="btn-delete-confirm"
+                onClick={handleFolderDelete}
+                disabled={isDeletingFolder}
+              >
+                {isDeletingFolder ? (
+                  <>
+                    <div className="spinner" />
+                    Suppression...
+                  </>
+                ) : (
+                  <>
+                    <Trash2 size={16} />
+                    Supprimer
+                  </>
+                )}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Modal Aperçu Image */}
+      {showPreviewModal && (
+        <div className="preview-modal-overlay" onClick={() => {
+          setShowPreviewModal(null);
+          if (previewImage) URL.revokeObjectURL(previewImage);
+          setPreviewImage(null);
+        }}>
+          <div className="preview-modal-content" onClick={e => e.stopPropagation()}>
+            <div className="preview-modal-header">
+              <span className="preview-modal-title">{showPreviewModal.name}</span>
+              <button
+                className="preview-modal-close"
+                onClick={() => {
+                  setShowPreviewModal(null);
+                  if (previewImage) URL.revokeObjectURL(previewImage);
+                  setPreviewImage(null);
+                }}
+              >
+                <X size={24} />
+              </button>
+            </div>
+            <div className="preview-modal-body">
+              {isLoadingPreview ? (
+                <div className="preview-loading">
+                  <Loader2 size={40} className="spin" />
+                  <span>Chargement...</span>
+                </div>
+              ) : previewImage ? (
+                <img src={previewImage} alt={showPreviewModal.name} className="preview-image" />
+              ) : (
+                <div className="preview-error">
+                  <ImageIcon size={48} />
+                  <span>Impossible de charger l'image</span>
+                </div>
+              )}
+            </div>
+            <div className="preview-modal-footer">
+              <button
+                className="preview-download-btn"
+                onClick={() => handleDownload(showPreviewModal)}
+                disabled={isDownloading === showPreviewModal.id}
+              >
+                {isDownloading === showPreviewModal.id ? (
+                  <Loader2 size={18} className="spin" />
+                ) : (
+                  <Download size={18} />
+                )}
+                <span>Télécharger</span>
               </button>
             </div>
           </div>
