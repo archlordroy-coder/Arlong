@@ -1,6 +1,6 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import api from '../../api/client';
-import { History as HistoryIcon, Clock, User, FileText, Download, Import, Trash2 } from 'lucide-react';
+import { Clock, User, FileText, Download, Import, Trash2, Shield, MoreVertical, AlertTriangle, Loader2 } from 'lucide-react';
 import { format } from 'date-fns';
 import { fr } from 'date-fns/locale';
 import './History.css';
@@ -24,9 +24,25 @@ interface HistoryItem {
 const History = () => {
   const [history, setHistory] = useState<HistoryItem[]>([]);
   const [loading, setLoading] = useState(true);
+  const [activeMenu, setActiveMenu] = useState<number | null>(null);
+  const [showDeleteModal, setShowDeleteModal] = useState<HistoryItem | null>(null);
+  const [showClearAllModal, setShowClearAllModal] = useState(false);
+  const [isDeleting, setIsDeleting] = useState(false);
+  const [isClearingAll, setIsClearingAll] = useState(false);
+  const menuRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     fetchHistory();
+  }, []);
+
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (menuRef.current && !menuRef.current.contains(event.target as Node)) {
+        setActiveMenu(null);
+      }
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
   const fetchHistory = async () => {
@@ -42,13 +58,44 @@ const History = () => {
     }
   };
 
+  const handleDeleteItem = async () => {
+    if (!showDeleteModal) return;
+    setIsDeleting(true);
+    try {
+      const res = await api.delete(`/historique/${showDeleteModal.id}`);
+      if (res.data.success) {
+        setHistory(history.filter(h => h.id !== showDeleteModal.id));
+        setShowDeleteModal(null);
+      }
+    } catch (error) {
+      alert('Erreur lors de la suppression');
+    } finally {
+      setIsDeleting(false);
+    }
+  };
+
+  const handleClearAll = async () => {
+    setIsClearingAll(true);
+    try {
+      const res = await api.delete('/historique/clear-all');
+      if (res.data.success) {
+        setHistory([]);
+        setShowClearAllModal(false);
+      }
+    } catch (error) {
+      alert('Erreur lors de la suppression');
+    } finally {
+      setIsClearingAll(false);
+    }
+  };
+
   const getActionIcon = (actionType: string) => {
     switch (actionType) {
-      case 'Importation': return <Import size={18} className="text-primary" />;
-      case 'Consultation': return <FileText size={18} className="text-blue-400" />;
-      case 'Téléchargement': return <Download size={18} className="text-green-400" />;
-      case 'Suppression': return <Trash2 size={18} className="text-red-400" />;
-      default: return <Clock size={18} className="text-secondary" />;
+      case 'Importation': return <Import size={18} className="icon-import" />;
+      case 'Consultation': return <FileText size={18} className="icon-view" />;
+      case 'Téléchargement': return <Download size={18} className="icon-download" />;
+      case 'Suppression': return <Trash2 size={18} className="icon-delete" />;
+      default: return <Clock size={18} className="icon-default" />;
     }
   };
 
@@ -64,55 +111,171 @@ const History = () => {
 
   return (
     <div className="history-container animate-fade-in">
-      <div className="history-header mb-8">
-        <h1 className="text-3xl font-bold mb-2">Historique d'audit</h1>
-        <p className="text-secondary">Suivi complet des actions effectuées sur vos archives sécurisées.</p>
-      </div>
+      <header className="history-header">
+        <div className="history-header-content">
+          <h1>Historique d'audit</h1>
+          <p>{history.length} action{history.length !== 1 ? 's' : ''} enregistrée{history.length !== 1 ? 's' : ''}</p>
+        </div>
+        {history.length > 0 && (
+          <button
+            className="history-clear-btn"
+            onClick={() => setShowClearAllModal(true)}
+          >
+            <Trash2 size={16} />
+            Tout effacer
+          </button>
+        )}
+      </header>
 
       {loading ? (
-        <div className="flex justify-center py-20">
+        <div className="history-loader-wrapper">
           <div className="loader"></div>
         </div>
       ) : (
-        <div className="history-list-container glass-panel">
-          <div className="history-rows">
-            {history.map((item) => (
-              <div key={item.id} className="history-row flex items-center gap-6 p-4 border-b border-white/5 last:border-0 hover:bg-white/5 transition-colors">
-                <div className="action-icon-wrapper p-3 rounded-full bg-white/5">
+        <div className="history-list glass-panel">
+          {history.length > 0 ? (
+            history.map((item) => (
+              <div key={item.id} className="history-item">
+                <div className="history-action-icon">
                   {getActionIcon(item.actionType)}
                 </div>
 
-                <div className="flex-1">
-                  <div className="flex flex-wrap items-center gap-x-2 gap-y-1">
-                    <span className="font-bold text-white">{item.user?.name || "Utilisateur inconnu"}</span>
-                    <span className="text-secondary text-sm">a effectué une</span>
-                    <span className="font-semibold text-primary">{item.actionType}</span>
+                <div className="history-content">
+                  <div className="history-text">
+                    <span className="history-user-name">{item.user?.name || "Utilisateur inconnu"}</span>
+                    <span className="history-verb">a effectué une</span>
+                    <span className="history-type">{item.actionType}</span>
+
                     {item.document && (
                       <>
-                        <span className="text-secondary text-sm">sur</span>
-                        <span className="text-white italic underline decoration-white/20">{item.document?.name || "Document inconnu"}</span>
+                        <span className="history-verb">sur</span>
+                        <span className="history-doc-name">{item.document?.name || "Document inconnu"}</span>
                       </>
                     )}
                   </div>
-                  <div className="flex items-center gap-2 mt-1 text-xs text-secondary">
+                  <div className="history-meta">
                     <Clock size={12} />
-                    {formatDate(item.created_at)}
+                    <span>{formatDate(item.created_at)}</span>
                   </div>
                 </div>
 
-                <div className="hidden md:flex items-center gap-2 text-xs text-secondary opacity-50 px-3 py-1 bg-white/5 rounded-full">
+                <div className="history-user-email hidden md:flex">
                   <User size={12} />
-                  {item.user.email}
+                  <span>{item.user.email}</span>
+                </div>
+
+                <div className="history-item-actions">
+                  <button
+                    className="history-menu-btn"
+                    onClick={() => setActiveMenu(activeMenu === item.id ? null : item.id)}
+                  >
+                    <MoreVertical size={18} />
+                  </button>
+
+                  {activeMenu === item.id && (
+                    <div className="history-options-menu glass-panel" ref={menuRef}>
+                      <button
+                        className="history-option danger"
+                        onClick={() => {
+                          setShowDeleteModal(item);
+                          setActiveMenu(null);
+                        }}
+                      >
+                        <Trash2 size={16} />
+                        <span>Supprimer</span>
+                      </button>
+                    </div>
+                  )}
                 </div>
               </div>
-            ))}
+            ))
+          ) : (
+            <div className="history-empty">
+              <Shield size={48} className="history-empty-icon" />
+              <h3>Aucun historique</h3>
+              <p>Vos activités seront enregistrées ici.</p>
+            </div>
+          )}
+        </div>
+      )}
 
-            {history.length === 0 && (
-              <div className="py-20 text-center text-secondary">
-                <HistoryIcon size={48} className="mx-auto mb-4 opacity-10" />
-                <p>Aucune activité enregistrée pour le moment.</p>
-              </div>
-            )}
+      {/* Delete Single Item Modal */}
+      {showDeleteModal && (
+        <div className="modal-overlay" onClick={() => !isDeleting && setShowDeleteModal(null)}>
+          <div className="delete-modal glass-panel" onClick={e => e.stopPropagation()}>
+            <div className="delete-modal-icon">
+              <Trash2 size={32} />
+            </div>
+            <h3>Supprimer cette entrée ?</h3>
+            <p>Cette action de l'historique sera définitivement supprimée.</p>
+            <div className="delete-modal-actions">
+              <button
+                className="btn-cancel"
+                onClick={() => setShowDeleteModal(null)}
+                disabled={isDeleting}
+              >
+                Annuler
+              </button>
+              <button
+                className="btn-delete-confirm"
+                onClick={handleDeleteItem}
+                disabled={isDeleting}
+              >
+                {isDeleting ? (
+                  <>
+                    <Loader2 size={16} className="spin" />
+                    Suppression...
+                  </>
+                ) : (
+                  <>
+                    <Trash2 size={16} />
+                    Supprimer
+                  </>
+                )}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Clear All Modal */}
+      {showClearAllModal && (
+        <div className="modal-overlay" onClick={() => !isClearingAll && setShowClearAllModal(false)}>
+          <div className="delete-modal glass-panel" onClick={e => e.stopPropagation()}>
+            <div className="delete-modal-icon warning">
+              <AlertTriangle size={32} />
+            </div>
+            <h3>Tout effacer ?</h3>
+            <p>
+              Les {history.length} entrées de l'historique seront <strong>définitivement supprimées</strong>.
+              Cette action est irréversible.
+            </p>
+            <div className="delete-modal-actions">
+              <button
+                className="btn-cancel"
+                onClick={() => setShowClearAllModal(false)}
+                disabled={isClearingAll}
+              >
+                Annuler
+              </button>
+              <button
+                className="btn-delete-confirm"
+                onClick={handleClearAll}
+                disabled={isClearingAll}
+              >
+                {isClearingAll ? (
+                  <>
+                    <Loader2 size={16} className="spin" />
+                    Suppression...
+                  </>
+                ) : (
+                  <>
+                    <Trash2 size={16} />
+                    Tout supprimer
+                  </>
+                )}
+              </button>
+            </div>
           </div>
         </div>
       )}

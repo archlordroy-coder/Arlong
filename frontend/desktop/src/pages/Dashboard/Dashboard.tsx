@@ -2,7 +2,10 @@ import React, { useState, useEffect } from 'react';
 import { useAuth } from '../../contexts/AuthContext';
 import api from '../../api/client';
 import localforage from 'localforage';
-import { UploadCloud, Folder, File, WifiOff, RefreshCw, CheckCircle, Clock } from 'lucide-react';
+import {
+  UploadCloud, Folder, File, WifiOff, RefreshCw, CheckCircle, Clock,
+  Activity, Eye, Download, Trash2, Import, ChevronRight
+} from 'lucide-react';
 import './Dashboard.css';
 
 interface OfflineFile {
@@ -12,6 +15,15 @@ interface OfflineFile {
   blob: Blob;
   dossierId: number;
   timestamp: number;
+}
+
+interface HistoryItem {
+  id: number;
+  actionType: string;
+  docId: number | null;
+  created_at: string;
+  document: { name: string; type: string } | null;
+  user: { name: string };
 }
 
 const Dashboard = () => {
@@ -28,6 +40,7 @@ const Dashboard = () => {
   });
 
   const [recentDocs, setRecentDocs] = useState<any[]>([]);
+  const [history, setHistory] = useState<HistoryItem[]>([]);
 
   // États pour la modale d'importation
   const [showUploadModal, setShowUploadModal] = useState(false);
@@ -43,13 +56,15 @@ const Dashboard = () => {
   useEffect(() => {
     const fetchDashboardData = async () => {
       try {
-        const [statsRes, docsRes] = await Promise.all([
+        const [statsRes, docsRes, historyRes] = await Promise.all([
           api.get('/espaces/stats'),
-          api.get('/documents', { params: { limit: 5 } })
+          api.get('/documents', { params: { limit: 5 } }),
+          api.get('/historique', { params: { limit: 5 } })
         ]);
         
         if (statsRes.data.success) setStats(statsRes.data.data);
         if (docsRes.data.success) setRecentDocs(docsRes.data.data.slice(0, 5));
+        if (historyRes.data.success) setHistory(historyRes.data.data.slice(0, 5));
       } catch (error) {
         console.error("Échec du chargement du dashboard:", error);
       }
@@ -260,6 +275,31 @@ const Dashboard = () => {
     }
   };
 
+  const getActionIcon = (actionType: string) => {
+    switch (actionType) {
+      case 'Importation': return <Import size={14} className="text-primary" />;
+      case 'Consultation': return <Eye size={14} className="text-secondary" />;
+      case 'Téléchargement': return <Download size={14} className="text-success" />;
+      case 'Suppression': return <Trash2 size={14} className="text-danger" />;
+      default: return <Activity size={14} className="text-muted" />;
+    }
+  };
+
+  const formatTimeAgo = (dateString: string) => {
+    const date = new Date(dateString);
+    const now = new Date();
+    const diff = now.getTime() - date.getTime();
+    const minutes = Math.floor(diff / 60000);
+    const hours = Math.floor(diff / 3600000);
+    const days = Math.floor(diff / 86400000);
+
+    if (minutes < 1) return "À l'instant";
+    if (minutes < 60) return `Il y a ${minutes}min`;
+    if (hours < 24) return `Il y a ${hours}h`;
+    if (days < 7) return `Il y a ${days}j`;
+    return date.toLocaleDateString('fr-FR', { day: '2-digit', month: 'short' });
+  };
+
   return (
     <div>
       <div className="flex justify-between items-start mb-6">
@@ -352,37 +392,87 @@ const Dashboard = () => {
         </div>
       )}
 
-      {/* Liste des documents récents */}
-      <div className="mt-8 transition-all">
-        <h2 className="text-xl font-bold mb-4 flex items-center gap-2">
-          <Clock size={20} className="text-primary" />
-          Dernières archives
-        </h2>
-        <div className="glass-panel overflow-hidden">
-          {recentDocs.length > 0 ? (
-            <div className="flex flex-col">
-              {recentDocs.map((doc) => (
-                <div key={doc.id} className="p-4 border-b border-white/5 flex items-center justify-between hover:bg-white/5 transition-all">
-                  <div className="flex items-center gap-3">
-                    <div className="p-2 bg-white/5 rounded-lg text-secondary">
-                      <File size={18} />
+      {/* Grille Documents & Activité */}
+      <div className="grid lg:grid-cols-2 gap-8 mt-8">
+        {/* Liste des documents récents */}
+        <div className="transition-all">
+          <div className="flex items-center justify-between mb-4">
+            <h2 className="text-xl font-bold flex items-center gap-2">
+              <Clock size={20} className="text-primary" />
+              Dernières archives
+            </h2>
+            <a href="/explorer" className="text-sm text-primary hover:underline flex items-center gap-1">
+              Voir tout <ChevronRight size={14} />
+            </a>
+          </div>
+          <div className="glass-panel overflow-hidden">
+            {recentDocs.length > 0 ? (
+              <div className="flex flex-col">
+                {recentDocs.map((doc) => (
+                  <div key={doc.id} className="p-4 border-b border-white/5 flex items-center justify-between hover:bg-white/5 transition-all">
+                    <div className="flex items-center gap-3">
+                      <div className="p-2 bg-white/5 rounded-lg text-secondary">
+                        <File size={18} />
+                      </div>
+                      <div>
+                        <div className="text-sm font-medium">{doc.name}</div>
+                        <div className="text-xs text-muted">Dossier: {doc.dossier.name}</div>
+                      </div>
                     </div>
-                    <div>
-                      <div className="text-sm font-medium">{doc.name}</div>
-                      <div className="text-xs text-muted">Dossier: {doc.dossier.name}</div>
+                    <div className="text-xs text-muted">
+                      {new Date(doc.created_at).toLocaleDateString()}
                     </div>
                   </div>
-                  <div className="text-xs text-muted">
-                    {new Date(doc.created_at).toLocaleDateString()}
+                ))}
+              </div>
+            ) : (
+              <div className="p-10 text-center text-secondary text-sm">
+                Aucun document importé récemment.
+              </div>
+            )}
+          </div>
+        </div>
+
+        {/* Historique d'activité */}
+        <div className="transition-all">
+          <div className="flex items-center justify-between mb-4">
+            <h2 className="text-xl font-bold flex items-center gap-2">
+              <Activity size={20} className="text-secondary" />
+              Activité récente
+            </h2>
+            <a href="/history" className="text-sm text-primary hover:underline flex items-center gap-1">
+              Voir tout <ChevronRight size={14} />
+            </a>
+          </div>
+          <div className="glass-panel overflow-hidden">
+            {history.length > 0 ? (
+              <div className="flex flex-col">
+                {history.map((item) => (
+                  <div key={item.id} className="p-4 border-b border-white/5 flex items-center justify-between hover:bg-white/5 transition-all">
+                    <div className="flex items-center gap-3">
+                      <div className="p-2 bg-white/5 rounded-lg">
+                        {getActionIcon(item.actionType)}
+                      </div>
+                      <div>
+                        <div className="text-sm font-medium">
+                          {item.actionType}
+                          {item.document && <span className="text-muted font-normal"> sur {item.document.name}</span>}
+                        </div>
+                        <div className="text-xs text-muted">Par {item.user.name}</div>
+                      </div>
+                    </div>
+                    <div className="text-xs text-muted">
+                      {formatTimeAgo(item.created_at)}
+                    </div>
                   </div>
-                </div>
-              ))}
-            </div>
-          ) : (
-            <div className="p-10 text-center text-secondary text-sm">
-              Aucun document importé récemment.
-            </div>
-          )}
+                ))}
+              </div>
+            ) : (
+              <div className="p-10 text-center text-secondary text-sm">
+                Aucune activité enregistrée.
+              </div>
+            )}
+          </div>
         </div>
       </div>
 

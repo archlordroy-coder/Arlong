@@ -3,7 +3,7 @@
 }
 
 .avatar-large {
-  background: linear-gradient(135deg, #6366F1, #9333ea);
+  background: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary));
   color: white;
 }
 

@@ -1,12 +1,16 @@
 import React, { useState, useEffect } from 'react';
 import api from '../../api/client';
-import { Plus, Search, FolderOpen } from 'lucide-react';
+import {
+  Plus, Search, FolderOpen, MoreVertical, Pencil, Trash2,
+  Users, Calendar, X, Check, Loader2
+} from 'lucide-react';
 import './Espaces.css';
 
 interface Espace {
   id: number;
   name: string;
   createdById: string;
+  created_at?: string;
   isDeleted: boolean;
   createdBy: {
     id: string;
@@ -29,6 +33,11 @@ const Espaces = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [showModal, setShowModal] = useState(false);
   const [newName, setNewName] = useState('');
+
+  const [showOptionsMenu, setShowOptionsMenu] = useState<number | null>(null);
+  const [showRenameModal, setShowRenameModal] = useState<Espace | null>(null);
+  const [showDeleteModal, setShowDeleteModal] = useState<Espace | null>(null);
+  const [isDeleting, setIsDeleting] = useState<number | null>(null);
 
   useEffect(() => {
     fetchEspaces();
@@ -61,6 +70,42 @@ const Espaces = () => {
     } catch (error) {
       alert('Erreur lors de la création');
     }
+  };
+
+  const handleRename = async () => {
+    if (!showRenameModal || !newName.trim()) return;
+    try {
+      const res = await api.put(`/espaces/${showRenameModal.id}`, { name: newName.trim() });
+      if (res.data.success) {
+        setEspaces(espaces.map(e => e.id === showRenameModal.id ? { ...e, name: newName.trim() } : e));
+        setShowRenameModal(null);
+        setNewName('');
+      }
+    } catch (error) {
+      alert('Erreur lors du renommage');
+    }
+  };
+
+  const handleDelete = async () => {
+    if (!showDeleteModal) return;
+    setIsDeleting(showDeleteModal.id);
+    try {
+      const res = await api.delete(`/espaces/${showDeleteModal.id}`);
+      if (res.data.success) {
+        setEspaces(espaces.filter(e => e.id !== showDeleteModal.id));
+        setShowDeleteModal(null);
+      }
+    } catch (error) {
+      alert('Erreur lors de la suppression');
+    } finally {
+      setIsDeleting(null);
+    }
+  };
+
+  const openRenameModal = (espace: Espace) => {
+    setNewName(espace.name);
+    setShowRenameModal(espace);
+    setShowOptionsMenu(null);
   };
 
   const filteredEspaces = espaces.filter(e => 
@@ -100,15 +145,48 @@ const Espaces = () => {
           {filteredEspaces.map(espace => (
             <div 
               key={espace.id} 
-              className="folder-card glass-panel hover:scale-105 transition-all cursor-pointer"
+              className="folder-card glass-panel group hover:scale-105 transition-all cursor-pointer relative"
               onClick={() => window.location.href = `/explorer?espaceId=${espace.id}`}
             >
+              <div className="absolute top-4 right-4 z-10">
+                <button
+                  className="p-1 hover:bg-white/10 rounded-full text-secondary opacity-0 group-hover:opacity-100 transition-opacity"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setShowOptionsMenu(showOptionsMenu === espace.id ? null : espace.id);
+                  }}
+                >
+                  <MoreVertical size={18} />
+                </button>
+                {showOptionsMenu === espace.id && (
+                  <div className="absolute right-0 mt-1 bg-secondary/90 backdrop-blur-xl border border-white/10 rounded-xl p-1 shadow-2xl min-w-[140px] z-20">
+                    <button
+                      className="w-full flex items-center gap-2 p-2 hover:bg-white/10 rounded-lg text-xs"
+                      onClick={(e) => { e.stopPropagation(); openRenameModal(espace); }}
+                    >
+                      <Pencil size={14} /> Renommer
+                    </button>
+                    <button
+                      className="w-full flex items-center gap-2 p-2 hover:bg-red-500/20 text-red-400 rounded-lg text-xs"
+                      onClick={(e) => { e.stopPropagation(); setShowDeleteModal(espace); setShowOptionsMenu(null); }}
+                    >
+                      <Trash2 size={14} /> Supprimer
+                    </button>
+                  </div>
+                )}
+              </div>
               <div className="folder-icon blue">
                 <FolderOpen size={40} />
               </div>
               <div className="folder-name">{espace.name}</div>
-              <div className="text-[10px] text-secondary mt-1">
-                {(espace.users?.length || 0) + 1} membres
+              <div className="flex items-center gap-3 mt-2 text-[10px] text-secondary">
+                <span className="flex items-center gap-1"><Users size={12} /> {(espace.users?.length || 0) + 1}</span>
+                {espace.created_at && (
+                  <span className="flex items-center gap-1">
+                    <Calendar size={12} />
+                    {new Date(espace.created_at).toLocaleDateString()}
+                  </span>
+                )}
               </div>
             </div>
           ))}
@@ -126,7 +204,10 @@ const Espaces = () => {
       {showModal && (
         <div className="modal-overlay animate-fade-in" onClick={() => setShowModal(false)}>
           <div className="modal-content glass-panel" onClick={e => e.stopPropagation()}>
-            <h2 className="text-xl font-bold mb-4">Nouvel Espace</h2>
+            <div className="flex justify-between items-center mb-6">
+              <h2 className="text-xl font-bold">Nouvel Espace</h2>
+              <button onClick={() => setShowModal(false)} className="text-secondary hover:text-white"><X size={20} /></button>
+            </div>
             <form onSubmit={handleCreate}>
               <div className="input-group mb-6">
                 <label className="input-label">Nom de l'espace</label>
@@ -144,6 +225,70 @@ const Espaces = () => {
                 <button type="submit" className="btn btn-primary flex-1">Créer l'Espace</button>
               </div>
             </form>
+          </div>
+        </div>
+      )}
+
+      {/* Modal Renommage */}
+      {showRenameModal && (
+        <div className="modal-overlay animate-fade-in" onClick={() => setShowRenameModal(null)}>
+          <div className="modal-content glass-panel" onClick={e => e.stopPropagation()}>
+            <div className="flex justify-between items-center mb-6">
+              <h2 className="text-xl font-bold">Renommer l'espace</h2>
+              <button onClick={() => setShowRenameModal(null)} className="text-secondary hover:text-white"><X size={20} /></button>
+            </div>
+            <div className="input-group mb-6">
+              <label className="input-label">Nouveau nom</label>
+              <input
+                type="text"
+                className="input-field"
+                autoFocus
+                value={newName}
+                onChange={e => setNewName(e.target.value)}
+              />
+            </div>
+            <div className="flex gap-4">
+              <button type="button" className="btn btn-secondary flex-1" onClick={() => setShowRenameModal(null)}>Annuler</button>
+              <button
+                type="button"
+                className="btn btn-primary flex-1"
+                onClick={handleRename}
+                disabled={!newName.trim() || newName === showRenameModal.name}
+              >
+                <Check size={18} /> Enregistrer
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Modal Confirmation Suppression */}
+      {showDeleteModal && (
+        <div className="modal-overlay animate-fade-in" onClick={() => !isDeleting && setShowDeleteModal(null)}>
+          <div className="modal-content glass-panel max-w-sm text-center" onClick={e => e.stopPropagation()}>
+            <div className="w-16 h-16 bg-red-500/10 text-red-500 rounded-full flex items-center justify-center mx-auto mb-4">
+              <Trash2 size={32} />
+            </div>
+            <h2 className="text-xl font-bold mb-2">Supprimer l'espace ?</h2>
+            <p className="text-secondary text-sm mb-8">
+              L'espace <strong>"{showDeleteModal.name}"</strong> sera définitivement supprimé.
+            </p>
+            <div className="flex gap-4">
+              <button
+                className="btn btn-secondary flex-1"
+                onClick={() => setShowDeleteModal(null)}
+                disabled={!!isDeleting}
+              >
+                Annuler
+              </button>
+              <button
+                className="btn bg-red-500 hover:bg-red-600 text-white flex-1"
+                onClick={handleDelete}
+                disabled={!!isDeleting}
+              >
+                {isDeleting ? <Loader2 size={18} className="animate-spin" /> : "Supprimer"}
+              </button>
+            </div>
           </div>
         </div>
       )}
