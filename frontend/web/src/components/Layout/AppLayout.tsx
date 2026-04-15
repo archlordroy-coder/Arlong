@@ -1,7 +1,7 @@
 import React from 'react';
 import { NavLink, useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
-import { LayoutDashboard, FolderOpen, History, Settings, LogOut, Cloud } from 'lucide-react';
+import { LayoutDashboard, FolderOpen, History, Settings, LogOut, Cloud, ShieldCheck } from 'lucide-react';
 import './AppLayout.css';
 import api from '../../api/client';
 

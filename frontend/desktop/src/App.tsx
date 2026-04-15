@@ -15,10 +15,14 @@ import Settings from './pages/Settings/Settings';
 import Scanner from './pages/Scanner/Scanner';
 import Privacy from './pages/Legal/Privacy';
 import Terms from './pages/Legal/Terms';
+import AdminDashboard from './pages/Admin/AdminDashboard';
+import Gmail from './pages/Workspace/Gmail';
+import AIAssistant from './pages/AI/AIAssistant';
 
 // Layout global englobant
 import AppLayout from './components/Layout/AppLayout';
 import SplashScreen from './components/Common/SplashScreen';
+import UpdateChecker from './components/Common/UpdateChecker';
 
 const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
   const { isAuthenticated } = useAuth();
@@ -40,6 +44,7 @@ const App = () => {
 
   return (
     <ThemeProvider>
+      <UpdateChecker />
       <Router >
         <Routes>
         <Route path="/" element={<Home />} />

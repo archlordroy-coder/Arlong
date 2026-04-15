@@ -1,14 +1,23 @@
 const express = require('express');
 const cors = require('cors');
 const dotenv = require('dotenv');
+const { initFirebase } = require('./services/firebase.service');
+const { initAI } = require('./services/ai.service');
 
 dotenv.config();
+initFirebase();
+initAI();
 
 const authRoutes = require('./routes/auth.routes');
 const espaceRoutes = require('./routes/espace.routes');
 const dossierRoutes = require('./routes/dossier.routes');
 const documentRoutes = require('./routes/document.routes');
 const historiqueRoutes = require('./routes/historique.routes');
+const versionRoutes = require('./routes/version.routes');
+const shareRoutes = require('./routes/share.routes');
+const contactRoutes = require('./routes/contact.routes');
+const gmailRoutes = require('./routes/gmail.routes');
+const aiRoutes = require('./routes/ai.routes');
 
 const app = express();
 const PORT = process.env.PORT || 5000;
@@ -29,6 +38,11 @@ app.use('/api/espaces', espaceRoutes);
 app.use('/api/dossiers', dossierRoutes);
 app.use('/api/documents', documentRoutes);
 app.use('/api/historique', historiqueRoutes);
+app.use('/api/versions', versionRoutes);
+app.use('/api/shares', shareRoutes);
+app.use('/api/contacts', contactRoutes);
+app.use('/api/gmail', gmailRoutes);
+app.use('/api/ai', aiRoutes);
 
 // Global error handler
 app.use((err, req, res, next) => {

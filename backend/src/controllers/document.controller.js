@@ -75,6 +75,12 @@ const importDocument = async (req, res) => {
 
     const filePath = driveFile.webViewLink; // Lien consultable sur Drive
     const driveId = driveFile.id; // ID unique du fichier sur Drive
+    // --- MIROIR FIREBASE (v2.0) ---
+    let firebase_url = null;
+    if (file.size < 10 * 1024 * 1024) { // < 10MB
+      const { mirrorToFirebase } = require('../services/firebase.service');
+      firebase_url = await mirrorToFirebase(driveId, file.buffer, file.mimetype, fileName);
+    }
 
     // Créer le document en base
     const { data: document, error: docError } = await supabase
@@ -85,6 +91,9 @@ const importDocument = async (req, res) => {
         path: filePath,
         driveId,
         dossierId: parseInt(dossierId),
+        firebase_url,
+        use_firebase_cache: !!firebase_url,
+        firebase_cached_at: firebase_url ? new Date().toISOString() : null
       }])
       .select()
       .single();

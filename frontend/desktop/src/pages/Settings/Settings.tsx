@@ -1,7 +1,11 @@
+import WhatsAppQR from '../WhatsApp/WhatsAppQR';
 import { useState, useEffect, type FormEvent } from 'react';
+import WhatsAppQR from '../WhatsApp/WhatsAppQR';
 import { useAuth } from '../../contexts/AuthContext';
+import WhatsAppQR from '../WhatsApp/WhatsAppQR';
 import { useTheme } from '../../contexts/ThemeContext';
 import api from '../../api/client';
+import WhatsAppQR from '../WhatsApp/WhatsAppQR';
 import { User, Mail, Shield, Cloud, Save, Loader2, LogOut, Sun, Moon } from 'lucide-react';
 import './Settings.css';
 
