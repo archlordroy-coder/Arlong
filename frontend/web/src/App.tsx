@@ -95,7 +95,13 @@ const App = () => {
             <Scanner />
           </ProtectedRoute>
         } />
-        {/* On ajoutera /espaces/:id etc */}
+        <Route path="/admin" element={
+          <ProtectedRoute>
+            <AppLayout>
+              <AdminDashboard />
+            </AppLayout>
+          </ProtectedRoute>
+        } />
         
           <Route path="*" element={<Navigate to="/dashboard" />} />
         </Routes>

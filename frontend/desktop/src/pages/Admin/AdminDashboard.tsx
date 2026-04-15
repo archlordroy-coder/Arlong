@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import api from '../../api/client';
 import { useAuth } from '../../contexts/AuthContext';
-import { Plus, Trash2, Edit2, CheckCircle, XCircle, Download, ExternalLink, Loader2 } from 'lucide-react';
+import { Plus, Trash2, Edit2, CheckCircle, XCircle, Download, Loader2 } from 'lucide-react';
 import './Admin.css';
 
 interface AppVersion {

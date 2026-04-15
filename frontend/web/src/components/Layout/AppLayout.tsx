@@ -23,6 +23,7 @@ const AppLayout = ({ children }: AppLayoutProps) => {
     if (location.pathname.includes('/dashboard')) return 'Tableau de bord';
     if (location.pathname.includes('/espaces')) return 'Espaces de travail';
     if (location.pathname.includes('/settings')) return 'Paramètres';
+    if (location.pathname.includes('/admin')) return 'Administration';
     return 'Mboa Drive';
   };
 
@@ -30,7 +31,6 @@ const AppLayout = ({ children }: AppLayoutProps) => {
     try {
       const res = await api.get('/auth/google/url');
       if (res.data.success && res.data.url) {
-        // Fenêtre centrée pour une expérience premium
         const width = 500, height = 650;
         const left = (window.innerWidth / 2) - (width / 2);
         const top = (window.innerHeight / 2) - (height / 2);
@@ -46,9 +46,7 @@ const AppLayout = ({ children }: AppLayoutProps) => {
           return;
         }
 
-        // --- GESTION ÉVÉNEMENT MESSAGE (FIX COOP) ---
         const handleMessage = (event: MessageEvent) => {
-          // On accepte le message drive-linked
           if (event.data?.type === 'drive-linked' && event.data.success) {
             window.removeEventListener('message', handleMessage);
             window.location.reload(); 
@@ -62,9 +60,10 @@ const AppLayout = ({ children }: AppLayoutProps) => {
     }
   };
 
+  const isAdmin = ['ravel@mboa.com', 'tchinda@mboa.com', 'william@mboa.com'].includes(user?.email || '');
+
   return (
     <div className="layout-container">
-      {/* Sidebar / Bottom Nav */}
       <aside className="app-sidebar">
         <div className="sidebar-header">
           <img src="/logo.png" alt="Mboa Drive" className="sidebar-logo" />
@@ -84,8 +83,15 @@ const AppLayout = ({ children }: AppLayoutProps) => {
             <History size={20} />
             <span>Historique</span>
           </NavLink>
+
+          {isAdmin && (
+            <NavLink to="/admin" className={({ isActive }) => `nav-item ${isActive ? 'active' : ''}`}>
+              <ShieldCheck size={20} />
+              <span>Admin</span>
+            </NavLink>
+          )}
+
           <div className="flex-1 hidden md:block"></div>
-          {/* Settings available on mobile bottom nav too */}
           <NavLink to="/settings" className={({ isActive }) => `nav-item ${isActive ? 'active' : ''}`}>
             <Settings size={20} />
             <span>Paramètres</span>
@@ -106,7 +112,6 @@ const AppLayout = ({ children }: AppLayoutProps) => {
         </div>
       </aside>
 
-      {/* Main Container */}
       <main className="main-content">
         <header className="top-bar">
           <h2 className="top-bar-title">{getPageTitle()}</h2>
