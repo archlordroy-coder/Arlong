@@ -1,0 +1,35 @@
+.workspace-container {
+  padding: 2rem;
+}
+.workspace-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 2rem;
+}
+.workspace-header h1 {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+.email-list {
+  display: flex;
+  flex-direction: column;
+}
+.email-item {
+  padding: 1rem;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  cursor: pointer;
+  transition: background 0.2s;
+}
+.email-item:hover {
+  background: rgba(255, 255, 255, 0.05);
+}
+.email-sender {
+  font-weight: 600;
+  margin-bottom: 0.25rem;
+}
+.email-snippet {
+  font-size: 0.85rem;
+  opacity: 0.7;
+}

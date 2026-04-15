@@ -15,6 +15,7 @@ import Settings from './pages/Settings/Settings';
 import Scanner from './pages/Scanner/Scanner';
 import Privacy from './pages/Legal/Privacy';
 import Terms from './pages/Legal/Terms';
+import AdminDashboard from './pages/Admin/AdminDashboard';
 
 // Layouts
 import AppLayout from './components/Layout/AppLayout';
@@ -94,7 +95,13 @@ const App = () => {
             <Scanner />
           </ProtectedRoute>
         } />
-        {/* On ajoutera /espaces/:id etc */}
+        <Route path="/admin" element={
+          <ProtectedRoute>
+            <AppLayout>
+              <AdminDashboard />
+            </AppLayout>
+          </ProtectedRoute>
+        } />
         
           <Route path="*" element={<Navigate to="/dashboard" />} />
         </Routes>
