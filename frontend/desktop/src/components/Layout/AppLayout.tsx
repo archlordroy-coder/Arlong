@@ -1,7 +1,7 @@
 import React from 'react';
 import { NavLink, useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
-import { LayoutDashboard, FolderOpen, History, Settings, LogOut, Cloud } from 'lucide-react';
+import { LayoutDashboard, FolderOpen, History, Settings, LogOut, Cloud, ShieldCheck } from 'lucide-react';
 import './AppLayout.css';
 import api from '../../api/client';
 
@@ -12,6 +12,7 @@ interface AppLayoutProps {
 const AppLayout = ({ children }: AppLayoutProps) => {
   const { user, logout } = useAuth();
   const navigate = useNavigate();
+  const isAdmin = ['ravel@mboa.com', 'tchinda@mboa.com', 'william@mboa.com'].includes(user?.email || '');
   const location = useLocation();
 
   const handleLogout = () => {
@@ -81,6 +82,12 @@ const AppLayout = ({ children }: AppLayoutProps) => {
             <span>Espaces</span>
           </NavLink>
           <NavLink to="/history" className={({ isActive }) => `nav-item ${isActive ? 'active' : ''}`}>
+          {isAdmin && (
+            <NavLink to="/admin" className={({ isActive }) => `nav-item ${isActive ? 'active' : ''}`}>
+              <ShieldCheck size={20} />
+              <span>Admin</span>
+            </NavLink>
+          )}
             <History size={20} />
             <span>Historique</span>
           </NavLink>

@@ -42,6 +42,8 @@ Mboa Drive n'est pas qu'un simple gestionnaire de fichiers. C'est un **coffre-fo
 ---
 
 ## ✨ Fonctionnalités Clés
+- 🔄 **Système de Mise à Jour Automatique** : Les clients Desktop reçoivent une notification dès qu'une nouvelle version valide est publiée.
+- 🛠️ **Interface Admin Web** : Gestion centralisée des versions applicatives par les administrateurs (ravel, tchinda, william).
 - 📸 **Scanner Intelligent** : Détection automatique des bords et optimisation des contrastes pour les documents papier.
 - 📁 **Gestion Multi-Niveaux** : Organisation par Espaces de travail et Dossiers illimités.
 - 🔐 **Sécurité Granulaire** : Contrôle total sur qui peut voir ou modifier chaque archive.
@@ -103,6 +105,8 @@ Utilisez des terminaux séparés pour :
 ---
 
 ## 🔐 Liaison Google Drive & OAuth
+
+> **Note Sécurité** : Nous utilisons désormais des scopes **Sensibles** (comme `drive.file`) au lieu de **Restreints** pour faciliter le processus d'approbation Google Cloud sans audit tiers.
 
 La gestion de Google Drive est l'élément le plus sensible d'Mboa Drive. 
 

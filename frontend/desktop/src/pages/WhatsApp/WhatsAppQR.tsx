@@ -18,12 +18,12 @@ const WhatsAppQR = () => {
       setQr('');
     };
 
-    if (window.arlong?.whatsapp) {
-      window.arlong.whatsapp.onQR(handleQR);
-      window.arlong.whatsapp.onReady(handleReady);
+    if ((window as any).arlong?.whatsapp) {
+      (window as any).arlong.whatsapp.onQR(handleQR);
+      (window as any).arlong.whatsapp.onReady(handleReady);
 
       // Vérifier le statut initial
-      window.arlong.whatsapp.getStatus().then((res: any) => {
+      (window as any).arlong.whatsapp.getStatus().then((res: any) => {
         if (res.connected) setStatus('ready');
       });
     }
@@ -31,7 +31,7 @@ const WhatsAppQR = () => {
 
   const connect = async () => {
     setStatus('connecting');
-    await window.arlong.whatsapp.connect();
+    await (window as any).arlong.whatsapp.connect();
   };
 
   return (
@@ -67,7 +67,7 @@ const WhatsAppQR = () => {
         <div className="flex flex-col items-center gap-4 p-6 text-success">
           <CheckCircle size={60} />
           <p>WhatsApp est connecté et prêt !</p>
-          <button className="btn btn-ghost btn-sm" onClick={() => window.arlong.whatsapp.connect()}>
+          <button className="btn btn-ghost btn-sm" onClick={() => (window as any).arlong.whatsapp.connect()}>
             <RefreshCw size={14} /> Reconnecter
           </button>
         </div>

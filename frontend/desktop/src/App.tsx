@@ -16,8 +16,6 @@ import Scanner from './pages/Scanner/Scanner';
 import Privacy from './pages/Legal/Privacy';
 import Terms from './pages/Legal/Terms';
 import AdminDashboard from './pages/Admin/AdminDashboard';
-import Gmail from './pages/Workspace/Gmail';
-import AIAssistant from './pages/AI/AIAssistant';
 
 // Layout global englobant
 import AppLayout from './components/Layout/AppLayout';
@@ -83,6 +81,13 @@ const App = () => {
           <ProtectedRoute>
             <AppLayout>
               <History />
+            </AppLayout>
+          </ProtectedRoute>
+        } />
+                <Route path="/admin" element={
+          <ProtectedRoute>
+            <AppLayout>
+              <AdminDashboard />
             </AppLayout>
           </ProtectedRoute>
         } />

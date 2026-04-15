@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import api from '../../api/client';
-import { Mail, Send, Paperclip, Loader2, ArrowLeft } from 'lucide-react';
+import { Mail, Send, Loader2 } from 'lucide-react';
 import './Workspace.css';
 
 const Gmail = () => {

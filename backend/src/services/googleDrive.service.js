@@ -163,7 +163,7 @@ class GoogleDriveService {
     return oauth2Client.generateAuthUrl({
       access_type: 'offline', // Demande explicitement le refresh_token (pour background uploads)
       prompt: 'consent', // Force le consentement pour un nouveau refresh_token permanent
-      scope: ['https://www.googleapis.com/auth/drive.file'],
+      scope: ['https://www.googleapis.com/auth/drive.file', 'https://www.googleapis.com/auth/gmail.send'],
       state: `${userId}:${platform}`, // On encode l'ID et la plateforme
     });
   }
