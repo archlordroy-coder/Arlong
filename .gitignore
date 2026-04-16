@@ -1,0 +1,64 @@
+# =============================================================================
+# Git Ignore - Mboa Drive
+# =============================================================================
+
+# ─── Environment Variables (NEVER commit secrets) ───────────────────────────
+# ALL .env files must be ignored - never commit secrets!
+.env
+.env.*
+backend/.env
+backend/.env.*
+frontend/*/.env
+frontend/*/.env.*
+# Exception: .env.example templates are OK
+!.env.example
+!backend/.env.example
+
+# ─── Dependencies ─────────────────────────────────────────────────────────────
+node_modules/
+*/node_modules/
+*/*/node_modules/
+package-lock.json
+*/package-lock.json
+*/*/package-lock.json
+
+# ─── Build Outputs ────────────────────────────────────────────────────────────
+dist/
+build/
+out/
+.output/
+
+# ─── Logs ─────────────────────────────────────────────────────────────────────
+*.log
+logs/
+*.log.*
+
+# ─── OS Files ─────────────────────────────────────────────────────────────────
+.DS_Store
+Thumbs.db
+
+# ─── IDE ──────────────────────────────────────────────────────────────────────
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+
+# ─── Testing ──────────────────────────────────────────────────────────────────
+coverage/
+.nyc_output/
+
+# ─── Misc ─────────────────────────────────────────────────────────────────────
+.cache/
+.temp/
+tmp/
+*.tmp
+.vercel
+.env*.local
+
+# ─── SQL and MD files at root (prevent secret leaks) ──────────────────────────
+/*.sql
+/*.md
+!README.md
+!CHANGELOG.md
+!LICENSE.md

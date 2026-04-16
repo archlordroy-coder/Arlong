@@ -1,0 +1,23 @@
+
+> mboadrive-backend@1.0.1 dev
+> node --watch src/server.js
+
+◇ injected env (0) from .env // tip: ⌘ multiple files { path: ['.env.local', '.env'] }
+/app/backend/src/config/supabase.js:7
+  throw new Error('Les variables d\'environnement Supabase sont manquantes.');
+  ^
+
+Error: Les variables d'environnement Supabase sont manquantes.
+    at Object.<anonymous> (/app/backend/src/config/supabase.js:7:9)
+    at Module._compile (node:internal/modules/cjs/loader:1705:14)
+    at Object..js (node:internal/modules/cjs/loader:1838:10)
+    at Module.load (node:internal/modules/cjs/loader:1441:32)
+    at Function._load (node:internal/modules/cjs/loader:1263:12)
+    at TracingChannel.traceSync (node:diagnostics_channel:328:14)
+    at wrapModuleLoad (node:internal/modules/cjs/loader:237:24)
+    at Module.require (node:internal/modules/cjs/loader:1463:12)
+    at require (node:internal/modules/helpers:147:16)
+    at Object.<anonymous> (/app/backend/src/controllers/auth.controller.js:3:18)
+
+Node.js v22.22.1
+Failed running 'src/server.js'. Waiting for file changes before restarting...

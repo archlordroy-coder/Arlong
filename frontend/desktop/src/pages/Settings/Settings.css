@@ -1,0 +1,22 @@
+.settings-container {
+  padding: 1rem;
+}
+
+.avatar-large {
+  background: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary));
+  color: white;
+}
+
+.settings-grid {
+  align-items: start;
+}
+
+.drive-link-card {
+  position: relative;
+}
+
+@media (max-width: 900px) {
+  .settings-grid {
+    grid-template-columns: 1fr;
+  }
+}

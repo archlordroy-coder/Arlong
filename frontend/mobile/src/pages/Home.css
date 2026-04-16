@@ -1,0 +1,171 @@
+/* ============================================================
+   MOBILE HOME PAGE — Adapté au viewport phone
+   Éléments proportionnés, Safe-area respectée
+   ============================================================ */
+
+.mobile-home {
+  display: flex;
+  flex-direction: column;
+  min-height: calc(100dvh - 64px); /* 64px = hauteur de la bottom nav */
+  padding:
+    env(safe-area-inset-top, 16px)
+    1.25rem
+    1.25rem
+    1.25rem;
+  gap: 1.25rem;
+  background-color: #090A0F;
+  overflow-y: auto;
+}
+
+/* ── En-tête ─────────────────────────────────────────────── */
+.mobile-home-header {
+  padding-top: 0.5rem;
+}
+
+.mobile-home-brand {
+  display: flex;
+  align-items: center;
+  gap: 0.875rem;
+}
+
+.mobile-home-logo {
+  width: 44px;
+  height: 44px;
+  object-fit: contain;
+  filter: drop-shadow(0 0 10px rgba(99, 102, 241, 0.55));
+  flex-shrink: 0;
+}
+
+.mobile-home-title {
+  font-size: 1.25rem;
+  font-weight: 800;
+  color: #F8FAFC;
+  letter-spacing: -0.025em;
+  margin: 0;
+}
+
+.mobile-home-tagline {
+  font-size: 0.72rem;
+  color: #475569;
+  margin: 0;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+/* ── Hero Card ───────────────────────────────────────────── */
+.mobile-home-hero {
+  position: relative;
+  background: rgba(21, 26, 34, 0.7);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  border-radius: 1.25rem;
+  padding: 1.75rem 1.25rem;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+}
+
+.mobile-home-hero-glow {
+  position: absolute;
+  top: -40px;
+  right: -40px;
+  width: 200px;
+  height: 200px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(99,102,241,0.2), transparent 70%);
+  pointer-events: none;
+}
+
+.mobile-home-hero-text {
+  font-size: 1.3rem;
+  font-weight: 700;
+  color: #F8FAFC;
+  line-height: 1.35;
+  letter-spacing: -0.025em;
+  margin: 0;
+  white-space: pre-line;
+}
+
+.mobile-home-gradient {
+  background: linear-gradient(90deg, #6366F1, #06B6D4);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.mobile-home-cta {
+  align-self: flex-start;
+  padding: 0.75rem 1.75rem;
+  font-size: 0.9rem;
+  font-weight: 600;
+  border-radius: 0.75rem;
+  box-shadow: 0 0 20px rgba(99,102,241,0.3);
+}
+
+/* ── Feature Cards ───────────────────────────────────────── */
+.mobile-home-features {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.mobile-feat-card {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  background: rgba(21, 26, 34, 0.6);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  border-radius: 1rem;
+  padding: 1rem 1.125rem;
+  transition: background 0.2s, transform 0.2s;
+  cursor: default;
+}
+
+.mobile-feat-card:active {
+  transform: scale(0.98);
+  background: rgba(30, 37, 48, 0.8);
+}
+
+.mobile-feat-icon {
+  width: 40px;
+  height: 40px;
+  border-radius: 0.75rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.mobile-feat-title {
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: #F8FAFC;
+  margin: 0 0 0.125rem;
+}
+
+.mobile-feat-desc {
+  font-size: 0.75rem;
+  color: #94A3B8;
+  margin: 0;
+}
+
+/* ── Footer ─────────────────────────────────────────────── */
+.mobile-home-footer {
+  margin-top: auto;
+  display: flex;
+  justify-content: center;
+  gap: 0.875rem;
+  align-items: center;
+  font-size: 0.72rem;
+  color: #475569;
+  padding-bottom: 0.5rem;
+}
+
+.mobile-home-footer a {
+  color: #475569;
+  text-decoration: none;
+  transition: color 0.15s;
+}
+
+.mobile-home-footer a:hover { color: #6366F1; }
+.mobile-home-footer span { opacity: 0.4; }
