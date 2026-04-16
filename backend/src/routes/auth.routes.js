@@ -85,7 +85,7 @@ router.get('/google/callback', async (req, res) => {
     if (DRIVE_PLATFORMS.has(platform)) {
       // Pour le Web/Desktop, retourner vers le frontend classique (remplacer par VERCEL_URL si besoin en prod)
       const redirectUrl = process.env.FRONTEND_URL || 'https://arlong-gamma.vercel.app';
-      res.redirect(`${redirectUrl}/dashboard?drive_linked=true`);
+      res.redirect(`${redirectUrl}/settings?drive_linked=true`);
     } else {
       return res.status(403).send('Google Drive est disponible uniquement sur les versions web et desktop');
     }
