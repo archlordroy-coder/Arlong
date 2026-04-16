@@ -10,11 +10,15 @@ const api = axios.create({
   },
 });
 
-// Intercepteur pour injecter le token JWT
+// Intercepteur pour injecter le token JWT (sauf sur endpoints publics)
 api.interceptors.request.use(
   (config) => {
     const token = localStorage.getItem('mboadrive_token');
-    if (token && config.headers) {
+    const isPublicEndpoint = config.url?.includes('/auth/login') || 
+                             config.url?.includes('/auth/register') ||
+                             config.url?.includes('/auth/google');
+    
+    if (token && config.headers && !isPublicEndpoint) {
       config.headers.Authorization = `Bearer ${token}`;
     }
     return config;
