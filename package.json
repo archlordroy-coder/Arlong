@@ -8,6 +8,7 @@
     "start:web": "npm run dev --prefix frontend/web",
     "start:mobile": "npm run dev --prefix frontend/mobile",
     "start:desktop": "npm run dev --prefix frontend/desktop",
+    "build": "cd frontend/web && npm run build",
     "build:web": "npm run build --prefix frontend/web",
     "build:mobile": "npm run build --prefix frontend/mobile",
     "build:electron": "npm run build --prefix frontend/desktop && npm run build:exe --prefix frontend/desktop",
