@@ -5,6 +5,7 @@ const path = require('path');
 const { initFirebase } = require('./services/firebase.service');
 const { initAI } = require('./services/ai.service');
 const supabase = require('./config/supabase');
+const authMiddleware = require('./middlewares/auth.middleware');
 
 dotenv.config({ path: path.resolve(__dirname, '../.env') });
 // initFirebase(); // DÉSACTIVÉ: On utilise uniquement Google Drive pour le stockage
@@ -24,8 +25,30 @@ const aiRoutes = require('./routes/ai.routes');
 const app = express();
 const PORT = process.env.PORT || 5000;
 
-// Middlewares
-app.use(cors());
+// Middleware - CORS restrictif
+const allowedOrigins = [
+  'http://localhost:5173',
+  'http://localhost:3000',
+  'https://arlong-gamma.vercel.app',
+  process.env.FRONTEND_URL
+].filter(Boolean);
+
+app.use(cors({
+  origin: function (origin, callback) {
+    // allow requests with no origin (like mobile apps, curl, etc.)
+    if (!origin) return callback(null, true);
+    if (allowedOrigins.indexOf(origin) !== -1 || allowedOrigins.includes('*')) {
+      callback(null, true);
+    } else {
+      console.warn('CORS blocked origin:', origin);
+      callback(new Error('Not allowed by CORS'));
+    }
+  },
+  credentials: true,
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With']
+}));
+
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
@@ -34,8 +57,8 @@ app.get('/api/health', (req, res) => {
   res.json({ status: 'ok', message: 'MboaDrive API is running 🚀', timestamp: new Date().toISOString() });
 });
 
-// Database connection test
-app.get('/api/db-test', async (req, res) => {
+// Database connection test (PROTECTED)
+app.get('/api/db-test', authMiddleware, async (req, res) => {
   try {
     console.log('🔵 Testing database connection...');
     console.log('🔵 SUPABASE_URL:', process.env.SUPABASE_URL ? 'Set' : 'NOT SET');
@@ -70,8 +93,8 @@ app.get('/api/db-test', async (req, res) => {
   }
 });
 
-// Environment variables check (safe - no values exposed)
-app.get('/api/env-check', (req, res) => {
+// Environment variables check (safe - no values exposed) (PROTECTED)
+app.get('/api/env-check', authMiddleware, (req, res) => {
   const requiredVars = [
     'VITE_SUPABASE_URL',
     'VITE_SUPABASE_PUBLISHABLE_KEY',
@@ -104,8 +127,8 @@ app.get('/api/env-check', (req, res) => {
   });
 });
 
-// Check actual database schema
-app.get('/api/db-schema', async (req, res) => {
+// Check actual database schema (PROTECTED)
+app.get('/api/db-schema', authMiddleware, async (req, res) => {
   try {
     // Get User table columns
     const { data: userCols, error: userError } = await supabase

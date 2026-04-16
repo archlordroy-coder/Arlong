@@ -97,8 +97,8 @@ const register = async (req, res) => {
         }, 
         token 
       } 
-    console.log("🔵 Register successful");
     });
+    console.log("🔵 Register successful");
   } catch (error) {
     console.error('❌ Register error:', error);
     console.error('❌ Error stack:', error.stack);
@@ -133,18 +133,10 @@ const login = async (req, res) => {
     }
     console.log("🔵 User found, checking password...");
 
-    // Compare password (supports both bcrypt hash and plain text)
+    // Compare password with bcrypt only
     let isValid = false;
-    try {
-      // Try bcrypt compare first
-      if (user.password.startsWith('$2')) {
-        isValid = await bcrypt.compare(password, user.password);
-      } else {
-        // Plain text compare (for debugging only - NOT SECURE)
-        isValid = password === user.password;
-      }
-    } catch (e) {
-      isValid = password === user.password;
+    if (user.password && user.password.startsWith('$2')) {
+      isValid = await bcrypt.compare(password, user.password);
     }
     
     if (!isValid) {
