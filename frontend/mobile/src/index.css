@@ -12,29 +12,29 @@
   --bg-card-hover: rgba(25, 28, 41, 0.65);
   --bg-input: rgba(0, 0, 0, 0.2);
   --bg-input-focus: rgba(0, 0, 0, 0.4);
-  
+
   --text-primary: #F8FAFC;
   --text-secondary: #94A3B8;
   --text-muted: #64748B;
-  
+
   --border-default: rgba(255, 255, 255, 0.05);
   --border-hover: rgba(255, 255, 255, 0.1);
   --border-focus: rgba(99, 102, 241, 0.6);
-  
+
   --accent-primary: #6366F1;
   --accent-primary-hover: #4F46E5;
   --accent-secondary: #06B6D4;
   --accent-success: #10B981;
   --accent-warning: #F59E0B;
   --accent-danger: #EF4444;
-  
+
   --shadow-sm: 0 4px 10px rgba(0, 0, 0, 0.5);
   --shadow-md: 0 8px 16px rgba(0, 0, 0, 0.5);
   --shadow-lg: 0 0 40px rgba(99, 102, 241, 0.15);
-  
+
   --gradient-start: rgba(99, 102, 241, 0.08);
   --gradient-end: rgba(6, 182, 212, 0.06);
-  
+
   --overlay-dark: rgba(0, 0, 0, 0.8);
 }
 
@@ -45,29 +45,29 @@
   --bg-card-hover: rgba(255, 255, 255, 0.95);
   --bg-input: rgba(0, 0, 0, 0.05);
   --bg-input-focus: rgba(0, 0, 0, 0.08);
-  
+
   --text-primary: #0F172A;
   --text-secondary: #64748B;
   --text-muted: #94A3B8;
-  
+
   --border-default: rgba(0, 0, 0, 0.08);
   --border-hover: rgba(0, 0, 0, 0.15);
   --border-focus: rgba(99, 102, 241, 0.6);
-  
+
   --accent-primary: #6366F1;
   --accent-primary-hover: #4F46E5;
   --accent-secondary: #0891B2;
   --accent-success: #059669;
   --accent-warning: #D97706;
   --accent-danger: #DC2626;
-  
+
   --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.08);
   --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.1);
   --shadow-lg: 0 0 30px rgba(99, 102, 241, 0.1);
-  
+
   --gradient-start: rgba(99, 102, 241, 0.05);
   --gradient-end: rgba(6, 182, 212, 0.03);
-  
+
   --overlay-dark: rgba(0, 0, 0, 0.5);
 }
 
@@ -84,7 +84,7 @@
 body {
   font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
   background-color: var(--bg-primary);
-  background-image: 
+  background-image:
     radial-gradient(circle at 0% 0%, var(--gradient-start), transparent 40%),
     radial-gradient(circle at 100% 100%, var(--gradient-end), transparent 40%);
   background-attachment: fixed;
@@ -113,7 +113,7 @@ h1, h2, h3, h4, h5, h6 {
   transition: color 0.3s ease;
 }
 
-p { 
+p {
   color: var(--text-secondary);
   transition: color 0.3s ease;
 }

@@ -1,4 +1,4 @@
-name: Desktop Build (Linux)
+name: Desktop Build (Multi-platform)
 
 on:
   push:
@@ -7,7 +7,12 @@ on:
 
 jobs:
   build_desktop:
-    runs-on: ubuntu-latest
+    name: Build Desktop (${{ matrix.os }})
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [ubuntu-latest, windows-latest]
+
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v4
@@ -18,21 +23,31 @@ jobs:
           node-version: 25
           cache: 'npm'
 
-      - name: Install Dependencies
-        run: |
-          npm install
-          cd frontend/desktop && npm install
+      - name: Install Root Dependencies
+        run: npm install
 
-      - name: Build Web Assets & Package App
+      - name: Install Desktop Dependencies
+        run: |
+          cd frontend/desktop
+          npm install
+
+      - name: Build & Package Desktop App
         run: |
           cd frontend/desktop
           npm run build
-          npx electron-builder build --linux
+          if [ "${{ matrix.os }}" = "windows-latest" ]; then
+            npx electron-builder build --windows --x64
+          else
+            npx electron-builder build --linux --AppImage
+          fi
+        shell: bash
         env:
-          GITHUB_ACTIONS: true
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Upload Linux AppImage Artifact
+      - name: Upload Artifacts
         uses: actions/upload-artifact@v4
         with:
-          name: mboadrive-linux-appimage
-          path: frontend/desktop/dist_electron/*.AppImage
+          name: mboadrive-desktop-${{ matrix.os }}
+          path: |
+            frontend/desktop/dist_electron/*.exe
+            frontend/desktop/dist_electron/*.AppImage

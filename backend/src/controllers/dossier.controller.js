@@ -1,191 +1,74 @@
 const supabase = require('../config/supabase');
 
-/** Créer un dossier */
-const createDossier = async (req, res) => {
+const createDossier = async (req, res, next) => {
   try {
-    const { name, isPublic, espaceId } = req.body;
-    if (!name) return res.status(400).json({ success: false, message: 'Le nom du dossier est requis' });
-
-    const dossierData = {
-      name,
-      isPublic: isPublic || false,
-      createdById: req.user.id,
-      ...(espaceId && { espaceId: espaceId }),
-    };
-
+    const { name, espaceId, isPublic = false } = req.body;
     const { data: dossier, error } = await supabase
       .from('Dossier')
-      .insert([dossierData])
-      .select('*, createdBy:User(id, name)')
+      .insert([{ name, espaceId, createdById: req.user.id, isPublic }])
+      .select()
       .single();
-
     if (error) throw error;
-
     res.status(201).json({ success: true, data: dossier });
   } catch (error) {
-    console.error('Create Dossier error:', error);
-    res.status(500).json({ success: false, message: 'Erreur lors de la création' });
+    next(error);
   }
 };
 
-/** Lister les dossiers accessibles par l'utilisateur */
-const getDossiers = async (req, res) => {
+const getDossiers = async (req, res, next) => {
   try {
-    const { espaceId } = req.query;
-
-    let query = supabase
-      .from('Dossier')
-      .select(`
-        *,
-        createdBy:User(id, name, email)
-      `)
-      .order('created_at', { ascending: false });
-
-    if (espaceId) {
-      query = query.eq('espaceId', espaceId);
-    }
-
-    // Filtre: Possédé par l'user OU Public
-    query = query.or(`createdById.eq.${req.user.id},isPublic.eq.true`);
-
-    const { data: dossiers, error } = await query;
-
+    const { data, error } = await supabase.from('Dossier').select('*').eq('createdById', req.user.id).eq('isDeleted', false);
     if (error) throw error;
-
-    // Supabase ne fait pas de count query automatique sur les relations dans le select simple
-    // On pourrait en faire une séparée, mais pour simplifier ici on renvoie juste les dossiers.
-    res.json({ success: true, data: dossiers });
+    res.json({ success: true, data });
   } catch (error) {
-    console.error('Get Dossiers error:', error);
-    res.status(500).json({ success: false, message: 'Erreur serveur' });
+    next(error);
   }
 };
 
-/** Obtenir un dossier par ID */
-const getDossierById = async (req, res) => {
+const getDossierById = async (req, res, next) => {
   try {
     const { id } = req.params;
-    const { data: dossier, error } = await supabase
-      .from('Dossier')
-      .select(`
-        *,
-        createdBy:User(id, name),
-        documents:Document(*)
-      `)
-      .eq('id', id)
-      .eq('documents.isDeleted', false)
-      .or(`createdById.eq.${req.user.id},isPublic.eq.true`)
-      .single();
-
-    if (error || !dossier) {
-      return res.status(404).json({ success: false, message: 'Dossier non trouvé' });
-    }
-
-    res.json({ success: true, data: dossier });
+    const { data, error } = await supabase.from('Dossier').select('*').eq('id', id).single();
+    if (error) throw error;
+    res.json({ success: true, data });
   } catch (error) {
-    console.error('Get DossierById error:', error);
-    res.status(500).json({ success: false, message: 'Erreur serveur' });
+    next(error);
   }
 };
 
-/** Modifier un dossier (nom ou visibilité) */
-const updateDossier = async (req, res) => {
+const updateDossier = async (req, res, next) => {
   try {
     const { id } = req.params;
     const { name, isPublic } = req.body;
-
-    // Vérifier si créateur
-    const { data: check, error: checkError } = await supabase
-      .from('Dossier')
-      .select('createdById')
-      .eq('id', id)
-      .single();
-
-    if (checkError || !check || check.createdById !== req.user.id) {
-      return res.status(403).json({ success: false, message: 'Non autorisé' });
-    }
-
-    const { data: updated, error } = await supabase
-      .from('Dossier')
-      .update({ 
-        ...(name !== undefined && { name }), 
-        ...(isPublic !== undefined && { isPublic }) 
-      })
-      .eq('id', id)
-      .select()
-      .single();
-
+    const { data, error } = await supabase.from('Dossier').update({ name, isPublic }).eq('id', id).select().single();
     if (error) throw error;
-
-    res.json({ success: true, data: updated });
+    res.json({ success: true, data });
   } catch (error) {
-    res.status(500).json({ success: false, message: 'Erreur lors de la modification' });
+    next(error);
   }
 };
 
-/** Supprimer un dossier et tous ses documents */
-const deleteDossier = async (req, res) => {
+const deleteDossier = async (req, res, next) => {
   try {
     const { id } = req.params;
-
-    const { data: check, error: checkError } = await supabase
-      .from('Dossier')
-      .select('createdById')
-      .eq('id', id)
-      .single();
-
-    if (checkError || !check || check.createdById !== req.user.id) {
-      return res.status(403).json({ success: false, message: 'Non autorisé' });
-    }
-
-    // Supprimer tous les documents du dossier
-    await supabase
-      .from('Document')
-      .update({ isDeleted: true })
-      .eq('dossierId', id);
-
-    // Supprimer le dossier
-    const { error } = await supabase
-      .from('Dossier')
-      .delete()
-      .eq('id', id);
-
+    const { error } = await supabase.from('Dossier').update({ isDeleted: true }).eq('id', id);
     if (error) throw error;
-
-    res.json({ success: true, message: 'Dossier et fichiers supprimés' });
+    res.json({ success: true, message: 'Dossier supprimé' });
   } catch (error) {
-    res.status(500).json({ success: false, message: 'Erreur lors de la suppression' });
+    next(error);
   }
 };
 
-/** Changer la visibilité public/privé */
-const toggleVisibility = async (req, res) => {
-  try {
-    const { id } = req.params;
-
-    const { data: dossier, error: checkError } = await supabase
-      .from('Dossier')
-      .select('createdById, isPublic')
-      .eq('id', id)
-      .single();
-
-    if (checkError || !dossier || dossier.createdById !== req.user.id) {
-      return res.status(403).json({ success: false, message: 'Non autorisé' });
+const toggleVisibility = async (req, res, next) => {
+    try {
+        const { id } = req.params;
+        const { isPublic } = req.body;
+        const { data, error } = await supabase.from('Dossier').update({ isPublic }).eq('id', id).select().single();
+        if (error) throw error;
+        res.json({ success: true, data });
+    } catch (error) {
+        next(error);
     }
-
-    const { data: updated, error } = await supabase
-      .from('Dossier')
-      .update({ isPublic: !dossier.isPublic })
-      .eq('id', id)
-      .select()
-      .single();
-
-    if (error) throw error;
-
-    res.json({ success: true, data: updated, message: `Dossier rendu ${updated.isPublic ? 'public' : 'privé'}` });
-  } catch (error) {
-    res.status(500).json({ success: false, message: 'Erreur lors de la modification' });
-  }
 };
 
 module.exports = { createDossier, getDossiers, getDossierById, updateDossier, deleteDossier, toggleVisibility };
