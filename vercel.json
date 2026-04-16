@@ -17,8 +17,8 @@
       "dest": "backend/src/server.js"
     },
     {
-      "src": "/(.*)",
-      "dest": "frontend/web/$1"
+      "src": "/assets/(.*)",
+      "dest": "frontend/web/assets/$1"
     },
     {
       "src": "/(.*)",

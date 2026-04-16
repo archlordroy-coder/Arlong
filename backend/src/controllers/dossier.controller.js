@@ -148,7 +148,7 @@ const deleteDossier = async (req, res) => {
     const { error } = await supabase
       .from('Dossier')
       .delete()
-      .eq('id', parseInt(id));
+      .eq('id', id);
 
     if (error) throw error;
 

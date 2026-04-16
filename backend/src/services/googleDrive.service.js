@@ -175,9 +175,7 @@ class GoogleDriveService {
       access_type: 'offline', // Demande explicitement le refresh_token (pour background uploads)
       prompt: 'consent', // Force le consentement pour un nouveau refresh_token permanent
       scope: [
-        'https://www.googleapis.com/auth/drive.file',      // Gérer les fichiers créés par l'app
-        'https://www.googleapis.com/auth/drive.appdata',   // Données de configuration
-        'https://www.googleapis.com/auth/drive.install',   // Connexion à Drive
+        'https://www.googleapis.com/auth/drive.file',      // Gérer les fichiers créés par l'app (NON SENSIBLE)
         'https://www.googleapis.com/auth/userinfo.email',  // Email utilisateur
         'https://www.googleapis.com/auth/userinfo.profile', // Profil utilisateur
         'openid'                                           // Authentification OpenID

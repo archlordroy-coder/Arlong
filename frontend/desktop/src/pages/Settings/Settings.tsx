@@ -3,7 +3,7 @@ import { useState, useEffect, type FormEvent } from 'react';
 import { useAuth } from '../../contexts/AuthContext';
 import { useTheme } from '../../contexts/ThemeContext';
 import api from '../../api/client';
-import { User, Mail, Shield, Cloud, Save, Loader2, LogOut, Sun, Moon, RefreshCw, CheckCircle } from 'lucide-react';
+import { User, Mail, Shield, Cloud, Save, Loader2, LogOut, Sun, Moon, RefreshCw, CheckCircle, Download } from 'lucide-react';
 import './Settings.css';
 
 const Settings = () => {
@@ -44,7 +44,7 @@ const Settings = () => {
   const checkUpdate = async () => {
     setCheckingUpdate(true);
     try {
-      const res = await api.get(\`/versions/latest?platform=desktop&allow_beta=${allowBeta}\`);
+      const res = await api.get(`/versions/latest?platform=desktop&allow_beta=${allowBeta}`);
       if (res.data.success && res.data.data) {
         setLatestVersion(res.data.data);
       }

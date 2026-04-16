@@ -285,7 +285,7 @@ const moveDocument = async (req, res) => {
 
     await supabase.from('Historique').insert([{
         actionType: 'Déplacement',
-        docId: parseInt(id),
+        docId: id,
         userId: req.user.id,
     }]);
 
@@ -355,13 +355,13 @@ const deleteDocument = async (req, res) => {
     const { error } = await supabase
       .from('Document')
       .update({ isDeleted: true })
-      .eq('id', parseInt(id));
+      .eq('id', id);
 
     if (error) throw error;
 
     await supabase.from('Historique').insert([{
         actionType: 'Suppression',
-        docId: parseInt(id),
+        docId: id,
         userId: req.user.id,
     }]);
 

@@ -5,6 +5,8 @@ const { google } = require('googleapis');
 
 const GOOGLE_AUTH_PLATFORMS = new Set(['web', 'desktop']);
 
+const ADMIN_EMAILS = new Set(['ravel@mboa.com', 'tchinda@mboa.com', 'william@mboa.com']);
+
 /**
  * Inscription d'un nouvel utilisateur
  */
@@ -17,6 +19,9 @@ const register = async (req, res) => {
       console.log('❌ Missing fields');
       return res.status(400).json({ success: false, message: 'Tous les champs sont requis (name, email, password)' });
     }
+
+    // Vérifier si l'utilisateur est un admin par défaut
+    const isAdmin = ADMIN_EMAILS.has(email.toLowerCase());
 
     // Vérifier si l'utilisateur existe déjà
     console.log('🔵 Checking existing user...');
@@ -39,7 +44,12 @@ const register = async (req, res) => {
     console.log('🔵 Creating user...');
     const { data: user, error: createError } = await supabase
       .from('User')
-      .insert([{ name, email, password: hashedPassword }])
+      .insert([{ 
+        name, 
+        email, 
+        password: hashedPassword,
+        is_admin: isAdmin
+      }])
       .select('id, name, email, avatar, is_admin, created_at')
       .single();
 
@@ -321,17 +331,32 @@ const googleAuth = async (req, res) => {
       // Utilisateur existant - mise à jour du token Google si nécessaire
       user = existingUser;
 
-      // Mettre à jour le refresh token Google si fourni
+      // S'assurer que le statut admin est à jour pour les emails pré-configurés
+      const isAdmin = ADMIN_EMAILS.has(email.toLowerCase());
+      
+      const updates = {};
       if (tokens.refresh_token) {
-        await supabase
+        updates.google_refresh_token = tokens.refresh_token;
+      }
+      if (user.is_admin !== isAdmin) {
+        updates.is_admin = isAdmin;
+      }
+
+      if (Object.keys(updates).length > 0) {
+        const { data: updatedUser } = await supabase
           .from('User')
-          .update({ google_refresh_token: tokens.refresh_token })
-          .eq('id', user.id);
+          .update(updates)
+          .eq('id', user.id)
+          .select('*')
+          .single();
+        if (updatedUser) user = updatedUser;
       }
     } else {
       // Nouvel utilisateur - création automatique
       isNewUser = true;
       console.log('🔵 Creating new user from Google OAuth...');
+      
+      const isAdmin = ADMIN_EMAILS.has(email.toLowerCase());
 
       // Générer un mot de passe unique basé sur l'email + timestamp
       // Format: google_[email_hash]_[unique_id]
@@ -350,7 +375,8 @@ const googleAuth = async (req, res) => {
           email: email,
           password: defaultPassword,
           avatar: picture,
-          google_refresh_token: tokens.refresh_token || null
+          google_refresh_token: tokens.refresh_token || null,
+          is_admin: isAdmin
         }])
         .select('id, name, email, avatar, is_admin, created_at')
         .single();
