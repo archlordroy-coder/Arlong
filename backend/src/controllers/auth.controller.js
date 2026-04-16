@@ -443,10 +443,15 @@ const getGoogleAuthUrl = async (req, res) => {
       });
     }
 
+    // Construire l'URI de redirection dynamiquement
+    const frontendUrl = process.env.FRONTEND_URL || 'https://arlong-gamma.vercel.app';
+    const redirectUri = `${frontendUrl}/api/auth/google/callback`;
+    console.log('🔵 Using redirect URI:', redirectUri);
+
     const oauth2Client = new google.auth.OAuth2(
       process.env.GOOGLE_CLIENT_ID,
       process.env.GOOGLE_CLIENT_SECRET,
-      process.env.GOOGLE_REDIRECT_URI
+      redirectUri
     );
 
     const scopes = [
