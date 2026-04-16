@@ -97,8 +97,13 @@ const register = async (req, res) => {
       } 
     });
   } catch (error) {
-    console.error('Register error:', error);
-    res.status(500).json({ success: false, message: 'Erreur lors de l\'inscription' });
+    console.error('❌ Register error:', error);
+    console.error('❌ Error stack:', error.stack);
+    res.status(500).json({ 
+      success: false, 
+      message: 'Erreur lors de l\'inscription: ' + error.message,
+      error: error.message 
+    });
   }
 };
 
@@ -429,10 +434,12 @@ const getGoogleAuthUrl = async (req, res) => {
 
     // Vérifier si les credentials Google sont configurés
     if (!process.env.GOOGLE_CLIENT_ID || !process.env.GOOGLE_CLIENT_SECRET) {
-      return res.status(503).json({
+      console.log('⚠️ Google OAuth not configured - missing env vars');
+      return res.status(200).json({
         success: false,
-        message: 'La connexion Google n\'est pas configurée sur ce serveur. Utilisez l\'authentification par email/mot de passe.',
-        code: 'GOOGLE_AUTH_NOT_CONFIGURED'
+        message: 'La connexion Google n\'est pas configurée. Utilisez l\'authentification par email/mot de passe.',
+        code: 'GOOGLE_AUTH_NOT_CONFIGURED',
+        configured: false
       });
     }
 
