@@ -97,8 +97,52 @@ app.get('/api/env-check', (req, res) => {
     success: allConfigured,
     message: allConfigured ? 'All environment variables configured' : 'Some variables are missing',
     variables: status,
+    supabase_url: process.env.SUPABASE_URL || 'NOT SET',
     timestamp: new Date().toISOString()
   });
+});
+
+// Check actual database schema
+app.get('/api/db-schema', async (req, res) => {
+  try {
+    // Get User table columns
+    const { data: userCols, error: userError } = await supabase
+      .from('information_schema.columns')
+      .select('column_name, data_type, is_nullable')
+      .eq('table_name', 'User')
+      .order('ordinal_position');
+
+    if (userError) {
+      return res.status(500).json({
+        success: false,
+        message: 'Cannot query schema',
+        error: userError.message,
+        supabase_url: process.env.SUPABASE_URL
+      });
+    }
+
+    // Get all tables
+    const { data: tables, error: tablesError } = await supabase
+      .from('pg_tables')
+      .select('tablename')
+      .eq('schemaname', 'public')
+      .order('tablename');
+
+    res.json({
+      success: true,
+      supabase_url: process.env.SUPABASE_URL,
+      tables: tables?.map(t => t.tablename) || [],
+      user_columns: userCols || [],
+      timestamp: new Date().toISOString()
+    });
+  } catch (err) {
+    res.status(500).json({
+      success: false,
+      message: 'Schema check failed',
+      error: err.message,
+      supabase_url: process.env.SUPABASE_URL
+    });
+  }
 });
 
 // Root route - API info
