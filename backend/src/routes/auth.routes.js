@@ -3,17 +3,18 @@ const router = express.Router();
 const { register, login, googleAuth, getGoogleAuthUrl, getProfile, updateProfile, deleteAccount } = require('../controllers/auth.controller');
 const driveService = require('../services/googleDrive.service');
 const authMiddleware = require('../middlewares/auth.middleware');
+const { loginLimiter, registerLimiter } = require('../middlewares/rateLimit.middleware');
 const supabase = require('../config/supabase');
 
 const DRIVE_PLATFORMS = new Set(['web', 'desktop']);
 
 // Public - Authentification classique
-router.post('/register', register);
-router.post('/login', login);
+router.post('/register', registerLimiter, register);
+router.post('/login', loginLimiter, login);
 
 // Public - Authentification Google (Login/Register combiné)
 router.get('/google/login-url', getGoogleAuthUrl);  // URL pour "Se connecter avec Google"
-router.post('/google/callback', googleAuth);        // Callback après auth Google (login ou register auto)
+router.post('/google/callback', loginLimiter, googleAuth);        // Callback après auth Google (login ou register auto)
 
 // Lier le compte Google Drive (protégé)
 // Étape 1 : Obtenir l'URL de consentement Google OAuth2 pour l'utilisateur actuel

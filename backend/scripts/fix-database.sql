@@ -101,11 +101,15 @@ CREATE TABLE "Document" (
     name VARCHAR(255) NOT NULL,
     type VARCHAR(50) NOT NULL,
     size INTEGER,
-    url TEXT,
+    path TEXT,
+    "driveId" TEXT,
     "dossierId" UUID REFERENCES "Dossier"(id) ON DELETE SET NULL,
-    "espaceId" UUID NOT NULL REFERENCES "Espace"(id) ON DELETE CASCADE,
-    "createdById" UUID NOT NULL REFERENCES "User"(id),
+    "espaceId" UUID REFERENCES "Espace"(id) ON DELETE CASCADE,
+    "createdById" UUID REFERENCES "User"(id),
     "isDeleted" BOOLEAN DEFAULT FALSE,
+    "firebase_url" TEXT,
+    "use_firebase_cache" BOOLEAN DEFAULT FALSE,
+    "firebase_cached_at" TIMESTAMP WITH TIME ZONE,
     metadata JSONB DEFAULT '{}',
     created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
     updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
@@ -124,16 +128,37 @@ CREATE INDEX idx_document_deleted ON "Document"("isDeleted");
 -- ============================================================
 CREATE TABLE "Historique" (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-    action VARCHAR(255) NOT NULL,
+    "actionType" VARCHAR(255) NOT NULL,
     details JSONB DEFAULT '{}',
     "userId" UUID NOT NULL REFERENCES "User"(id) ON DELETE CASCADE,
+    "docId" UUID REFERENCES "Document"(id) ON DELETE CASCADE,
     "espaceId" UUID REFERENCES "Espace"(id) ON DELETE CASCADE,
+    "actionDate" TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
     created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
 
 CREATE INDEX idx_historique_user ON "Historique"("userId");
-CREATE INDEX idx_historique_espace ON "Historique"("espaceId");
-CREATE INDEX idx_historique_created ON "Historique"(created_at);
+CREATE INDEX idx_historique_doc ON "Historique"("docId");
+CREATE INDEX idx_historique_date ON "Historique"("actionDate");
+
+-- ============================================================
+-- TABLE RESOURCE_SHARE
+-- ============================================================
+CREATE TABLE "ResourceShare" (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    resource_id UUID NOT NULL,
+    resource_type VARCHAR(50) NOT NULL,
+    owner_id UUID NOT NULL REFERENCES "User"(id) ON DELETE CASCADE,
+    shared_with UUID NOT NULL REFERENCES "User"(id) ON DELETE CASCADE,
+    permission VARCHAR(50) DEFAULT 'viewer',
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+    UNIQUE(resource_id, shared_with)
+);
+
+CREATE INDEX idx_share_resource ON "ResourceShare"(resource_id);
+CREATE INDEX idx_share_user ON "ResourceShare"(shared_with);
+
+ALTER TABLE "ResourceShare" DISABLE ROW LEVEL SECURITY;
 
 -- ============================================================
 -- INSERTION DES 3 ADMINS

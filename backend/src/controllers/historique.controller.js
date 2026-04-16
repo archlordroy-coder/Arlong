@@ -33,7 +33,7 @@ const getHistorique = async (req, res) => {
     // Par défaut, on filtre par l'utilisateur connecté
     query = query.eq('userId', req.user.id);
     
-    if (docId) query = query.eq('docId', parseInt(docId));
+    if (docId) query = query.eq('docId', docId);
     if (action) query = query.eq('actionType', action);
 
     const { data: historiques, error, count } = await query
@@ -82,7 +82,7 @@ const deleteHistoriqueItem = async (req, res) => {
     const { error } = await supabase
       .from('Historique')
       .delete()
-      .eq('id', parseInt(id))
+      .eq('id', id)
       .eq('userId', req.user.id);
 
     if (error) throw error;

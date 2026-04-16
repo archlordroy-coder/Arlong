@@ -10,9 +10,9 @@ class GitHubService {
 
   async getCommits() {
     try {
-      const response = await axios.get(\`${this.baseUrl}/repos/${this.owner}/${this.repo}/commits\`, {
+      const response = await axios.get(`${this.baseUrl}/repos/${this.owner}/${this.repo}/commits`, {
         headers: {
-          Authorization: this.token ? \`token ${this.token}\` : undefined,
+          Authorization: this.token ? `token ${this.token}` : undefined,
           Accept: 'application/vnd.github.v3+json'
         }
       });
@@ -36,9 +36,9 @@ class GitHubService {
 
   async getCheckRuns(ref) {
     try {
-      const response = await axios.get(\`${this.baseUrl}/repos/${this.owner}/${this.repo}/commits/${ref}/check-runs\`, {
+      const response = await axios.get(`${this.baseUrl}/repos/${this.owner}/${this.repo}/commits/${ref}/check-runs`, {
         headers: {
-          Authorization: this.token ? \`token ${this.token}\` : undefined,
+          Authorization: this.token ? `token ${this.token}` : undefined,
           Accept: 'application/vnd.github.v3+json'
         }
       });

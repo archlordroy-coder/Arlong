@@ -59,7 +59,7 @@ const getEspaceById = async (req, res) => {
         ),
         dossiers:Dossier(*)
       `)
-      .eq('id', parseInt(id))
+      .eq('id', id)
       .eq('isDeleted', false)
       .single();
 
@@ -92,7 +92,7 @@ const updateEspace = async (req, res) => {
     const { data: check, error: checkError } = await supabase
       .from('Espace')
       .select('createdById')
-      .eq('id', parseInt(id))
+      .eq('id', id)
       .single();
 
     if (checkError || !check || check.createdById !== req.user.id) {
@@ -102,7 +102,7 @@ const updateEspace = async (req, res) => {
     const { data: updated, error } = await supabase
       .from('Espace')
       .update({ name })
-      .eq('id', parseInt(id))
+      .eq('id', id)
       .select()
       .single();
 
@@ -122,7 +122,7 @@ const deleteEspace = async (req, res) => {
     const { data: check, error: checkError } = await supabase
       .from('Espace')
       .select('createdById')
-      .eq('id', parseInt(id))
+      .eq('id', id)
       .single();
 
     if (checkError || !check || check.createdById !== req.user.id) {
@@ -132,7 +132,7 @@ const deleteEspace = async (req, res) => {
     const { error } = await supabase
       .from('Espace')
       .update({ isDeleted: true })
-      .eq('id', parseInt(id));
+      .eq('id', id);
 
     if (error) throw error;
 
@@ -151,7 +151,7 @@ const inviteUser = async (req, res) => {
     const { data: espace, error: checkError } = await supabase
       .from('Espace')
       .select('createdById')
-      .eq('id', parseInt(id))
+      .eq('id', id)
       .single();
 
     if (checkError || !espace || espace.createdById !== req.user.id) {
@@ -170,7 +170,7 @@ const inviteUser = async (req, res) => {
 
     const { error: inviteError } = await supabase
       .from('EspaceUser')
-      .upsert({ userId: userToInvite.id, espaceId: parseInt(id) });
+      .upsert({ userId: userToInvite.id, espaceId: id });
 
     if (inviteError) throw inviteError;
 

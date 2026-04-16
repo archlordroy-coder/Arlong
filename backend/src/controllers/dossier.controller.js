@@ -10,7 +10,7 @@ const createDossier = async (req, res) => {
       name,
       isPublic: isPublic || false,
       createdById: req.user.id,
-      ...(espaceId && { espaceId: parseInt(espaceId) }),
+      ...(espaceId && { espaceId: espaceId }),
     };
 
     const { data: dossier, error } = await supabase
@@ -42,7 +42,7 @@ const getDossiers = async (req, res) => {
       .order('created_at', { ascending: false });
 
     if (espaceId) {
-      query = query.eq('espaceId', parseInt(espaceId));
+      query = query.eq('espaceId', espaceId);
     }
 
     // Filtre: Possédé par l'user OU Public
@@ -72,7 +72,7 @@ const getDossierById = async (req, res) => {
         createdBy:User(id, name),
         documents:Document(*)
       `)
-      .eq('id', parseInt(id))
+      .eq('id', id)
       .eq('documents.isDeleted', false)
       .or(`createdById.eq.${req.user.id},isPublic.eq.true`)
       .single();
@@ -98,7 +98,7 @@ const updateDossier = async (req, res) => {
     const { data: check, error: checkError } = await supabase
       .from('Dossier')
       .select('createdById')
-      .eq('id', parseInt(id))
+      .eq('id', id)
       .single();
 
     if (checkError || !check || check.createdById !== req.user.id) {
@@ -111,7 +111,7 @@ const updateDossier = async (req, res) => {
         ...(name !== undefined && { name }), 
         ...(isPublic !== undefined && { isPublic }) 
       })
-      .eq('id', parseInt(id))
+      .eq('id', id)
       .select()
       .single();
 
@@ -131,7 +131,7 @@ const deleteDossier = async (req, res) => {
     const { data: check, error: checkError } = await supabase
       .from('Dossier')
       .select('createdById')
-      .eq('id', parseInt(id))
+      .eq('id', id)
       .single();
 
     if (checkError || !check || check.createdById !== req.user.id) {
@@ -142,7 +142,7 @@ const deleteDossier = async (req, res) => {
     await supabase
       .from('Document')
       .update({ isDeleted: true })
-      .eq('dossierId', parseInt(id));
+      .eq('dossierId', id);
 
     // Supprimer le dossier
     const { error } = await supabase
@@ -166,7 +166,7 @@ const toggleVisibility = async (req, res) => {
     const { data: dossier, error: checkError } = await supabase
       .from('Dossier')
       .select('createdById, isPublic')
-      .eq('id', parseInt(id))
+      .eq('id', id)
       .single();
 
     if (checkError || !dossier || dossier.createdById !== req.user.id) {
@@ -176,7 +176,7 @@ const toggleVisibility = async (req, res) => {
     const { data: updated, error } = await supabase
       .from('Dossier')
       .update({ isPublic: !dossier.isPublic })
-      .eq('id', parseInt(id))
+      .eq('id', id)
       .select()
       .single();
 

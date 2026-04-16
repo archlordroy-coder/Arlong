@@ -48,7 +48,7 @@ const importDocument = async (req, res) => {
     const { data: dossier, error: dossierError } = await supabase
       .from('Dossier')
       .select('id, name, createdById, isPublic, espace:Espace(id, name)')
-      .eq('id', parseInt(dossierId))
+      .eq('id', dossierId)
       .or(`createdById.eq.${req.user.id},isPublic.eq.true`)
       .single();
 
@@ -90,7 +90,7 @@ const importDocument = async (req, res) => {
         type: fileType,
         path: filePath,
         driveId,
-        dossierId: parseInt(dossierId),
+        dossierId: dossierId,
         firebase_url,
         use_firebase_cache,
         firebase_cached_at
@@ -128,7 +128,7 @@ const getDocuments = async (req, res) => {
       .eq('isDeleted', false);
 
     if (dossierId) {
-      query = query.eq('dossierId', parseInt(dossierId));
+      query = query.eq('dossierId', dossierId);
     }
     if (search) {
       query = query.ilike('name', `%${search}%`);
@@ -163,7 +163,7 @@ const getDocumentById = async (req, res) => {
         *,
         dossier:Dossier(id, name, createdById, isPublic, espace:Espace(id, name))
       `)
-      .eq('id', parseInt(id))
+      .eq('id', id)
       .eq('isDeleted', false)
       .single();
 
@@ -200,7 +200,7 @@ const downloadDocument = async (req, res) => {
         *,
         dossier:Dossier(id, name, createdById, isPublic, espace:Espace(id, name))
       `)
-      .eq('id', parseInt(id))
+      .eq('id', id)
       .eq('isDeleted', false)
       .single();
 
@@ -254,7 +254,7 @@ const moveDocument = async (req, res) => {
     const { data: document, error: docError } = await supabase
       .from('Document')
       .select('id, dossier:Dossier(createdById)')
-      .eq('id', parseInt(id))
+      .eq('id', id)
       .single();
 
     if (docError || !document) return res.status(404).json({ success: false, message: 'Document introuvable' });
@@ -266,7 +266,7 @@ const moveDocument = async (req, res) => {
     const { data: newDossier, error: newDossierError } = await supabase
       .from('Dossier')
       .select('id, createdById')
-      .eq('id', parseInt(newDossierId))
+      .eq('id', newDossierId)
       .single();
 
     if (newDossierError || !newDossier) return res.status(404).json({ success: false, message: 'Dossier de destination introuvable' });
@@ -276,8 +276,8 @@ const moveDocument = async (req, res) => {
 
     const { data: updated, error } = await supabase
       .from('Document')
-      .update({ dossierId: parseInt(newDossierId) })
-      .eq('id', parseInt(id))
+      .update({ dossierId: newDossierId })
+      .eq('id', id)
       .select()
       .single();
 
@@ -309,7 +309,7 @@ const updateDocument = async (req, res) => {
     const { data: document, error: docError } = await supabase
       .from('Document')
       .select('id, name, dossier:Dossier(createdById)')
-      .eq('id', parseInt(id))
+      .eq('id', id)
       .single();
 
     if (docError || !document) {
@@ -322,7 +322,7 @@ const updateDocument = async (req, res) => {
     const { data: updated, error } = await supabase
       .from('Document')
       .update({ name: name.trim() })
-      .eq('id', parseInt(id))
+      .eq('id', id)
       .select()
       .single();
 
@@ -344,7 +344,7 @@ const deleteDocument = async (req, res) => {
     const { data: document, error: docError } = await supabase
       .from('Document')
       .select('id, dossier:Dossier(createdById)')
-      .eq('id', parseInt(id))
+      .eq('id', id)
       .single();
 
     if (docError || !document) return res.status(404).json({ success: false, message: 'Document introuvable' });
