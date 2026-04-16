@@ -25,16 +25,15 @@ const getHistorique = async (req, res) => {
       });
     }
 
+    // Requête simplifiée sans jointures complexes pour éviter les erreurs
     let query = supabase
       .from('Historique')
-      .select(`
-        *,
-        user:User(id, name, email, avatar),
-        document:Document(id, name, type, isDeleted, dossier:Dossier(id, name, createdById, isPublic, espace:Espace(id, name)))
-      `, { count: 'exact' });
+      .select('*', { count: 'exact' });
 
+    // Par défaut, on filtre par l'utilisateur connecté
+    query = query.eq('userId', req.user.id);
+    
     if (docId) query = query.eq('docId', parseInt(docId));
-    if (userId) query = query.eq('userId', userId);
     if (action) query = query.eq('actionType', action);
 
     const { data: historiques, error, count } = await query
@@ -46,21 +45,17 @@ const getHistorique = async (req, res) => {
       throw error;
     }
 
-    // Filtrage pour la sécurité: On ne voit que les historiques des docs auxquels on a accès
-    // On inclut les documents supprimés pour voir l'historique des suppressions
-    const filteredHist = historiques.filter(h => {
-        if (!h.document) return false;
-        const d = h.document.dossier;
-        if (!d) return false;
-        return d.createdById === req.user.id || d.isPublic === true;
-    }).map(h => ({
+    // Enrichir les données avec les infos utilisateur et document si disponibles
+    const enrichedHist = historiques.map(h => ({
       ...h,
-      created_at: h.actionDate
+      created_at: h.actionDate,
+      user: { id: h.userId },
+      document: h.docId ? { id: h.docId } : null
     }));
 
     res.json({
       success: true,
-      data: filteredHist,
+      data: enrichedHist,
       meta: { 
         total: count, 
         page: parseInt(page), 

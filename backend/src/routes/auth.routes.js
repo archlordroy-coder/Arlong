@@ -101,4 +101,8 @@ router.get('/me', authMiddleware, getProfile);
 router.put('/me', authMiddleware, updateProfile);
 router.delete('/me', authMiddleware, deleteAccount);
 
+// Alias pour le frontend (qui appelle /api/auth/profile)
+router.get('/profile', authMiddleware, getProfile);
+router.put('/profile', authMiddleware, updateProfile);
+
 module.exports = router;
