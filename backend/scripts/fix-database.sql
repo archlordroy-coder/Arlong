@@ -31,8 +31,10 @@ CREATE TABLE "User" (
 );
 
 -- Index pour performance
-CREATE INDEX idx_user_email ON "User"(email);
-CREATE INDEX idx_user_admin ON "User"(is_admin);
+CREATE INDEX IF NOT EXISTS
+ idx_user_email ON "User"(email);
+CREATE INDEX IF NOT EXISTS
+ idx_user_admin ON "User"(is_admin);
 
 -- ============================================================
 -- TABLE ESPACE
@@ -49,8 +51,10 @@ CREATE TABLE "Espace" (
     updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
 
-CREATE INDEX idx_espace_createdby ON "Espace"("createdById");
-CREATE INDEX idx_espace_deleted ON "Espace"("isDeleted");
+CREATE INDEX IF NOT EXISTS
+ idx_espace_createdby ON "Espace"("createdById");
+CREATE INDEX IF NOT EXISTS
+ idx_espace_deleted ON "Espace"("isDeleted");
 
 -- ============================================================
 -- TABLE ESPACEUSER (liaison many-to-many)
@@ -65,8 +69,10 @@ CREATE TABLE "EspaceUser" (
     UNIQUE("userId", "espaceId")
 );
 
-CREATE INDEX idx_espaceuser_user ON "EspaceUser"("userId");
-CREATE INDEX idx_espaceuser_espace ON "EspaceUser"("espaceId");
+CREATE INDEX IF NOT EXISTS
+ idx_espaceuser_user ON "EspaceUser"("userId");
+CREATE INDEX IF NOT EXISTS
+ idx_espaceuser_espace ON "EspaceUser"("espaceId");
 
 -- ============================================================
 -- TABLE DOSSIER
@@ -85,9 +91,12 @@ CREATE TABLE "Dossier" (
     updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
 
-CREATE INDEX idx_dossier_espace ON "Dossier"("espaceId");
-CREATE INDEX idx_dossier_createdby ON "Dossier"("createdById");
-CREATE INDEX idx_dossier_deleted ON "Dossier"("isDeleted");
+CREATE INDEX IF NOT EXISTS
+ idx_dossier_espace ON "Dossier"("espaceId");
+CREATE INDEX IF NOT EXISTS
+ idx_dossier_createdby ON "Dossier"("createdById");
+CREATE INDEX IF NOT EXISTS
+ idx_dossier_deleted ON "Dossier"("isDeleted");
 
 -- ============================================================
 -- TABLE DOCUMENT
@@ -115,10 +124,14 @@ CREATE TABLE "Document" (
     updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
 
-CREATE INDEX idx_document_dossier ON "Document"("dossierId");
-CREATE INDEX idx_document_espace ON "Document"("espaceId");
-CREATE INDEX idx_document_createdby ON "Document"("createdById");
-CREATE INDEX idx_document_deleted ON "Document"("isDeleted");
+CREATE INDEX IF NOT EXISTS
+ idx_document_dossier ON "Document"("dossierId");
+CREATE INDEX IF NOT EXISTS
+ idx_document_espace ON "Document"("espaceId");
+CREATE INDEX IF NOT EXISTS
+ idx_document_createdby ON "Document"("createdById");
+CREATE INDEX IF NOT EXISTS
+ idx_document_deleted ON "Document"("isDeleted");
 
 -- ============================================================
 -- TABLE HISTORIQUE
@@ -137,9 +150,12 @@ CREATE TABLE "Historique" (
     created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
 
-CREATE INDEX idx_historique_user ON "Historique"("userId");
-CREATE INDEX idx_historique_doc ON "Historique"("docId");
-CREATE INDEX idx_historique_date ON "Historique"("actionDate");
+CREATE INDEX IF NOT EXISTS
+ idx_historique_user ON "Historique"("userId");
+CREATE INDEX IF NOT EXISTS
+ idx_historique_doc ON "Historique"("docId");
+CREATE INDEX IF NOT EXISTS
+ idx_historique_date ON "Historique"("actionDate");
 
 -- ============================================================
 -- TABLE RESOURCE_SHARE
@@ -155,8 +171,10 @@ CREATE TABLE "ResourceShare" (
     UNIQUE(resource_id, shared_with)
 );
 
-CREATE INDEX idx_share_resource ON "ResourceShare"(resource_id);
-CREATE INDEX idx_share_user ON "ResourceShare"(shared_with);
+CREATE INDEX IF NOT EXISTS
+ idx_share_resource ON "ResourceShare"(resource_id);
+CREATE INDEX IF NOT EXISTS
+ idx_share_user ON "ResourceShare"(shared_with);
 
 ALTER TABLE "ResourceShare" DISABLE ROW LEVEL SECURITY;
 
@@ -226,6 +244,8 @@ CREATE TABLE IF NOT EXISTS "AppVersion" (
     created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
 
-CREATE INDEX idx_version_platform ON "AppVersion"(platform);
-CREATE INDEX idx_version_code ON "AppVersion"(version_code);
+CREATE INDEX IF NOT EXISTS
+ idx_version_platform ON "AppVersion"(platform);
+CREATE INDEX IF NOT EXISTS
+ idx_version_code ON "AppVersion"(version_code);
 ALTER TABLE "AppVersion" DISABLE ROW LEVEL SECURITY;
