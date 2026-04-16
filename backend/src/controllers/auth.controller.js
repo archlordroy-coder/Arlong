@@ -1,3 +1,4 @@
+const crypto = require('crypto');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const supabase = require('../config/supabase');
@@ -53,6 +54,7 @@ const register = async (req, res) => {
     // --- INITIALISATION DES DONNÉES PAR DÉFAUT ---
     console.log('🔵 Creating default space for user:', user.id);
     try {
+    console.log("🔵 Initializing default data...");
       // 1. Créer un espace par défaut
       const { data: defaultEspace, error: espaceError } = await supabase
         .from('Espace')
@@ -72,6 +74,7 @@ const register = async (req, res) => {
             createdById: user.id 
           }]);
       }
+    console.log("🔵 Default data initialization finished");
     } catch (initError) {
       console.error('Erreur lors de l’initialisation par défaut:', initError);
       // On continue quand même car l'utilisateur est bien créé
@@ -82,6 +85,7 @@ const register = async (req, res) => {
       expiresIn: '7d',
     });
 
+    console.log("🔵 Register successful");
     res.status(201).json({ 
       success: true, 
       data: { 
@@ -117,6 +121,7 @@ const login = async (req, res) => {
     if (!email || !password) {
       return res.status(400).json({ success: false, message: 'Email et mot de passe requis' });
     }
+    console.log("🔵 Login attempt for email:", email);
 
     const { data: user, error: findError } = await supabase
       .from('User')
@@ -127,6 +132,7 @@ const login = async (req, res) => {
     if (!user || findError) {
       return res.status(401).json({ success: false, message: 'Identifiants incorrects' });
     }
+    console.log("🔵 User found, checking password...");
 
     // Compare password (supports both bcrypt hash and plain text)
     let isValid = false;
@@ -274,10 +280,16 @@ const googleAuth = async (req, res) => {
     console.log('🔵 GOOGLE_REDIRECT_URI:', process.env.GOOGLE_REDIRECT_URI);
 
     // Configuration OAuth2
+
+    const isProduction = process.env.VERCEL || process.env.NODE_ENV === 'production';
+    const redirectUri = isProduction
+      ? 'https://arlong-gamma.vercel.app/api/auth/google/callback'
+      : (process.env.GOOGLE_REDIRECT_URI || 'http://localhost:5000/api/auth/google/callback');
+
     const oauth2Client = new google.auth.OAuth2(
       process.env.GOOGLE_CLIENT_ID,
       process.env.GOOGLE_CLIENT_SECRET,
-      process.env.GOOGLE_REDIRECT_URI
+      redirectUri
     );
 
     // Échanger le code contre les tokens
@@ -444,8 +456,10 @@ const getGoogleAuthUrl = async (req, res) => {
     }
 
     // Construire l'URI de redirection dynamiquement
-    const frontendUrl = process.env.FRONTEND_URL || 'https://arlong-gamma.vercel.app';
-    const redirectUri = `${frontendUrl}/api/auth/google/callback`;
+    const isProduction = process.env.VERCEL || process.env.NODE_ENV === 'production';
+    const redirectUri = isProduction
+      ? 'https://arlong-gamma.vercel.app/api/auth/google/callback'
+      : (process.env.GOOGLE_REDIRECT_URI || 'http://localhost:5000/api/auth/google/callback');
     console.log('🔵 Using redirect URI:', redirectUri);
 
     const oauth2Client = new google.auth.OAuth2(

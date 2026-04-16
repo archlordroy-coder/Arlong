@@ -34,10 +34,10 @@ const getHistorique = async (req, res) => {
     query = query.eq('userId', req.user.id);
     
     if (docId) query = query.eq('docId', parseInt(docId));
-    if (action) query = query.eq('actionType', action);
+    if (action) query = query.eq('action', action);
 
     const { data: historiques, error, count } = await query
-      .order('actionDate', { ascending: false })
+      .order('created_at', { ascending: false })
       .range(from, to);
 
     if (error) {
@@ -48,7 +48,8 @@ const getHistorique = async (req, res) => {
     // Enrichir les données avec les infos utilisateur et document si disponibles
     const enrichedHist = historiques.map(h => ({
       ...h,
-      created_at: h.actionDate,
+      // created_at already exists in h
+
       user: { id: h.userId },
       document: h.docId ? { id: h.docId } : null
     }));

@@ -2,11 +2,12 @@ const express = require('express');
 const cors = require('cors');
 const dotenv = require('dotenv');
 const path = require('path');
+
+dotenv.config({ path: path.resolve(__dirname, '../.env') });
 const { initFirebase } = require('./services/firebase.service');
 const { initAI } = require('./services/ai.service');
 const supabase = require('./config/supabase');
 
-dotenv.config({ path: path.resolve(__dirname, '../.env') });
 // initFirebase(); // DÉSACTIVÉ: On utilise uniquement Google Drive pour le stockage
 initAI();
 

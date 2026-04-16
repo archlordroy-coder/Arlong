@@ -183,3 +183,24 @@ ORDER BY ordinal_position;
 
 SELECT 'Admins créés:' as verification;
 SELECT id, name, email, is_admin FROM "User" WHERE is_admin = TRUE;
+
+-- ============================================================
+-- TABLE APPVERSION
+-- ============================================================
+CREATE TABLE IF NOT EXISTS "AppVersion" (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    version_name VARCHAR(255) NOT NULL,
+    version_code INTEGER NOT NULL,
+    platform VARCHAR(50) NOT NULL,
+    download_url TEXT NOT NULL,
+    notes TEXT,
+    is_valid BOOLEAN DEFAULT TRUE,
+    is_beta BOOLEAN DEFAULT FALSE,
+    github_sha VARCHAR(255),
+    github_run_id VARCHAR(255),
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+);
+
+CREATE INDEX idx_version_platform ON "AppVersion"(platform);
+CREATE INDEX idx_version_code ON "AppVersion"(version_code);
+ALTER TABLE "AppVersion" DISABLE ROW LEVEL SECURITY;

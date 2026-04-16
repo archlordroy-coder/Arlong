@@ -5,7 +5,8 @@ const {
   listVersions,
   createVersion,
   updateVersion,
-  deleteVersion
+  deleteVersion,
+  listGitHubCommits
 } = require('../controllers/version.controller');
 const authMiddleware = require('../middlewares/auth.middleware');
 const adminMiddleware = require('../middlewares/admin.middleware');

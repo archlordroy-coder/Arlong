@@ -3,7 +3,7 @@ import { useState, useEffect, type FormEvent } from 'react';
 import { useAuth } from '../../contexts/AuthContext';
 import { useTheme } from '../../contexts/ThemeContext';
 import api from '../../api/client';
-import { User, Mail, Shield, Cloud, Save, Loader2, LogOut, Sun, Moon } from 'lucide-react';
+import { User, Mail, Shield, Cloud, Save, Loader2, LogOut, Sun, Moon, RefreshCw, CheckCircle } from 'lucide-react';
 import './Settings.css';
 
 const Settings = () => {
@@ -12,6 +12,10 @@ const Settings = () => {
   const [name, setName] = useState(user?.name || '');
   const [loading, setLoading] = useState(false);
   const [success, setSuccess] = useState(false);
+  const [latestVersion, setLatestVersion] = useState<any>(null);
+  const [checkingUpdate, setCheckingUpdate] = useState(false);
+  const [allowBeta, setAllowBeta] = useState(localStorage.getItem("mboadrive_beta") === "true");
+  const [currentVersion, setCurrentVersion] = useState("");
 
   useEffect(() => {
     const handleMessage = async (event: MessageEvent) => {
@@ -28,7 +32,38 @@ const Settings = () => {
     return () => window.removeEventListener('message', handleMessage);
   }, []);
 
-  const handleUpdate = async (e: FormEvent) => {
+
+  useEffect(() => {
+    const fetchCurrentVersion = async () => {
+      const v = await (window as any).arlong.getAppVersion();
+      setCurrentVersion(v);
+    };
+    fetchCurrentVersion();
+  }, []);
+
+  const checkUpdate = async () => {
+    setCheckingUpdate(true);
+    try {
+      const res = await api.get(\`/versions/latest?platform=desktop&allow_beta=${allowBeta}\`);
+      if (res.data.success && res.data.data) {
+        setLatestVersion(res.data.data);
+      }
+    } catch (error) {
+      console.error('Error checking for updates:', error);
+    } finally {
+      setCheckingUpdate(false);
+    }
+  };
+
+  const handleUpdate = async () => {
+    if ((window as any).arlong?.updater) {
+      await (window as any).arlong.updater.downloadUpdate();
+    } else {
+      window.open(latestVersion.download_url, '_blank');
+    }
+  };
+
+  const handleProfileUpdate = async (e: FormEvent) => {
     e.preventDefault();
     setLoading(true);
     setSuccess(false);
@@ -74,7 +109,7 @@ const Settings = () => {
             </div>
           </div>
 
-          <form onSubmit={handleUpdate}>
+          <form onSubmit={handleProfileUpdate}>
             <div className='input-group mb-6'>
               <label className='input-label flex items-center gap-2'>
                 <User size={16} /> Nom complet
@@ -110,7 +145,66 @@ const Settings = () => {
           </div>
         </div>
 
-        <div className='integrations-section flex flex-col gap-8'>
+
+          <div className='update-card glass-panel p-8'>
+            <div className='flex items-center gap-4 mb-6'>
+              <div className='p-3 bg-primary/10 rounded-xl text-primary'>
+                <RefreshCw size={24} />
+              </div>
+              <h3 className='text-lg font-bold'>Mise à jour</h3>
+            </div>
+            <p className='text-sm text-secondary mb-4'>Version actuelle : <strong>{currentVersion}</strong></p>
+
+            {latestVersion ? (
+              <div className='animate-fade-in'>
+                {latestVersion.version_name !== currentVersion ? (
+                  <div className='bg-primary/10 p-4 rounded-lg mb-6 border border-primary/20'>
+                    <h4 className='font-bold text-primary mb-1'>Nouvelle version disponible : {latestVersion.version_name}</h4>
+                    <p className='text-xs text-secondary mb-4'>{latestVersion.notes}</p>
+                    <button onClick={handleUpdate} className='btn btn-primary w-full flex items-center justify-center gap-2'>
+                      <Download size={18} />
+                      <span>Mettre à jour maintenant</span>
+                    </button>
+                  </div>
+                ) : (
+                  <div className='flex items-center gap-2 text-green-400 text-sm mb-6'>
+                    <CheckCircle size={16} />
+                    <span>Vous utilisez la dernière version</span>
+                  </div>
+                )}
+              </div>
+            ) : null}
+
+
+            <div className='checkbox-group mb-6 p-4 bg-primary/5 rounded-xl border border-primary/10'>
+              <div className='flex items-center justify-between w-full'>
+                <div>
+                  <label htmlFor='betaToggle' className='font-bold text-sm block mb-1'>Beta Updates</label>
+                  <span className='text-xs text-secondary'>Recevoir les versions expérimentales</span>
+                </div>
+                <input
+                  type='checkbox'
+                  id='betaToggle'
+                  className='toggle-switch'
+                  checked={allowBeta}
+                  onChange={e => {
+                    const val = e.target.checked;
+                    setAllowBeta(val);
+                    localStorage.setItem("mboadrive_beta", String(val));
+                  }}
+                />
+              </div>
+            </div>
+<button
+              onClick={checkUpdate}
+              className='btn btn-secondary w-full flex items-center justify-center gap-2'
+              disabled={checkingUpdate}
+            >
+              {checkingUpdate ? <Loader2 size={18} className='animate-spin' /> : <RefreshCw size={18} />}
+              <span>Vérifier les mises à jour</span>
+            </button>
+          </div>
+<div className='integrations-section flex flex-col gap-8'>
           <div className='theme-card glass-panel p-8'>
             <div className='flex items-center gap-4 mb-6'>
               <div className='p-3 bg-primary/10 rounded-xl text-primary'>
