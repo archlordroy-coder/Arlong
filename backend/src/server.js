@@ -70,6 +70,36 @@ app.get('/api/db-test', async (req, res) => {
   }
 });
 
+// Environment variables check (safe - no values exposed)
+app.get('/api/env-check', (req, res) => {
+  const requiredVars = [
+    'SUPABASE_URL',
+    'SUPABASE_ANON_KEY',
+    'SUPABASE_SERVICE_ROLE_KEY',
+    'JWT_SECRET',
+    'JWT_EXPIRES_IN',
+    'GOOGLE_CLIENT_ID',
+    'GOOGLE_CLIENT_SECRET',
+    'GOOGLE_REDIRECT_URI',
+    'FRONTEND_URL'
+  ];
+
+  const status = {};
+  requiredVars.forEach(varName => {
+    const value = process.env[varName];
+    status[varName] = value ? '✅ Set' : '❌ Missing';
+  });
+
+  const allConfigured = requiredVars.every(varName => process.env[varName]);
+
+  res.json({
+    success: allConfigured,
+    message: allConfigured ? 'All environment variables configured' : 'Some variables are missing',
+    variables: status,
+    timestamp: new Date().toISOString()
+  });
+});
+
 // Root route - API info
 app.get('/', (req, res) => {
   res.json({
