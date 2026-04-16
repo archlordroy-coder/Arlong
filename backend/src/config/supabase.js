@@ -2,7 +2,8 @@ const { createClient } = require('@supabase/supabase-js');
 
 // Variables standard pour Vercel
 const supabaseUrl = process.env.SUPABASE_URL || process.env.NEXT_PUBLIC_SUPABASE_URL;
-const supabaseKey = process.env.SUPABASE_ANON_KEY || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+// Use SERVICE_ROLE_KEY if available (for admin operations), fallback to ANON_KEY
+const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.SUPABASE_ANON_KEY || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
 
 // En développement, on affiche un warning au lieu de planter
 if (!supabaseUrl || !supabaseKey) {
