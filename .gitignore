@@ -22,6 +22,9 @@ package-lock.json
 */package-lock.json
 */*/package-lock.json
 
+# Root level node_modules (should not be at root)
+/node_modules/
+
 # ─── Build Outputs ────────────────────────────────────────────────────────────
 dist/
 build/
