@@ -76,6 +76,7 @@ app.get('/api/env-check', (req, res) => {
     'SUPABASE_URL',
     'SUPABASE_ANON_KEY',
     'SUPABASE_SERVICE_ROLE_KEY',
+    'NEXT_PUBLIC_SUPABASE_PUBLISHABLE_DEFAULT_KEY',
     'JWT_SECRET',
     'JWT_EXPIRES_IN',
     'GOOGLE_CLIENT_ID',
