@@ -7,6 +7,24 @@ const getHistorique = async (req, res) => {
     const from = (parseInt(page) - 1) * parseInt(limit);
     const to = from + parseInt(limit) - 1;
 
+    console.log('🔵 GetHistorique called by user:', req.user.id);
+
+    // Vérifier d'abord si la table Historique existe
+    const { error: tableCheckError } = await supabase
+      .from('Historique')
+      .select('id')
+      .limit(1);
+
+    if (tableCheckError) {
+      console.error('❌ Historique table error:', tableCheckError);
+      return res.json({ 
+        success: true, 
+        data: [], 
+        meta: { total: 0, page: 1, limit: parseInt(limit), pages: 0 },
+        message: 'Historique non disponible' 
+      });
+    }
+
     let query = supabase
       .from('Historique')
       .select(`
@@ -23,7 +41,10 @@ const getHistorique = async (req, res) => {
       .order('actionDate', { ascending: false })
       .range(from, to);
 
-    if (error) throw error;
+    if (error) {
+      console.error('❌ Supabase query error:', error);
+      throw error;
+    }
 
     // Filtrage pour la sécurité: On ne voit que les historiques des docs auxquels on a accès
     // On inclut les documents supprimés pour voir l'historique des suppressions
@@ -48,8 +69,13 @@ const getHistorique = async (req, res) => {
       },
     });
   } catch (error) {
-    console.error('Get Historique error:', error);
-    res.status(500).json({ success: false, message: 'Erreur serveur' });
+    console.error('❌ Get Historique error:', error);
+    console.error('❌ Error details:', error.message, error.stack);
+    res.status(500).json({ 
+      success: false, 
+      message: 'Erreur serveur: ' + (error.message || 'Unknown error'),
+      error: error.message 
+    });
   }
 };
 
