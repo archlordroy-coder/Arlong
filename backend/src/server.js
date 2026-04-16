@@ -7,7 +7,7 @@ const { initAI } = require('./services/ai.service');
 const supabase = require('./config/supabase');
 const authMiddleware = require('./middlewares/auth.middleware');
 
-dotenv.config({ path: path.resolve(__dirname, '../.env') });
+dotenv.config({ path: path.resolve(__dirname, '../../.env') });
 // initFirebase(); // DÉSACTIVÉ: On utilise uniquement Google Drive pour le stockage
 initAI();
 

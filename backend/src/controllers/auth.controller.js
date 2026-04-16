@@ -53,7 +53,7 @@ const register = async (req, res) => {
     // --- INITIALISATION DES DONNÉES PAR DÉFAUT ---
     console.log('🔵 Creating default space for user:', user.id);
     try {
-    console.log("🔵 Initializing default data...");
+      console.log("🔵 Initializing default data...");
       // 1. Créer un espace par défaut
       const { data: defaultEspace, error: espaceError } = await supabase
         .from('Espace')
@@ -73,7 +73,7 @@ const register = async (req, res) => {
             createdById: user.id 
           }]);
       }
-    console.log("🔵 Default data initialization finished");
+      console.log("🔵 Default data initialization finished");
     } catch (initError) {
       console.error('Erreur lors de l’initialisation par défaut:', initError);
       // On continue quand même car l'utilisateur est bien créé
