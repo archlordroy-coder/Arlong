@@ -73,6 +73,8 @@ app.get('/api/db-test', async (req, res) => {
 // Environment variables check (safe - no values exposed)
 app.get('/api/env-check', (req, res) => {
   const requiredVars = [
+    'VITE_SUPABASE_URL',
+    'VITE_SUPABASE_PUBLISHABLE_KEY',
     'SUPABASE_URL',
     'SUPABASE_ANON_KEY',
     'SUPABASE_SERVICE_ROLE_KEY',

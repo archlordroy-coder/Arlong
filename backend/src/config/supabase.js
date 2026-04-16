@@ -1,12 +1,14 @@
 const { createClient } = require('@supabase/supabase-js');
 
-// Variables standard pour Vercel
-const supabaseUrl = process.env.SUPABASE_URL || process.env.NEXT_PUBLIC_SUPABASE_URL;
-// Use SERVICE_ROLE_KEY if available (for admin operations), fallback to ANON_KEY
-const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.SUPABASE_ANON_KEY || process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_DEFAULT_KEY;
+// Variables VITE_* pour compatibilité avec le frontend
+const supabaseUrl = process.env.VITE_SUPABASE_URL || process.env.SUPABASE_URL || process.env.NEXT_PUBLIC_SUPABASE_URL;
+// Use VITE_SUPABASE_PUBLISHABLE_KEY ou SERVICE_ROLE_KEY
+const supabaseKey = process.env.VITE_SUPABASE_PUBLISHABLE_KEY || process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.SUPABASE_ANON_KEY || process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_DEFAULT_KEY;
 
-// En développement, on affiche un warning au lieu de planter
 if (!supabaseUrl || !supabaseKey) {
+  console.error('❌ Missing Supabase credentials:');
+  console.error('   VITE_SUPABASE_URL:', supabaseUrl ? 'Set' : 'NOT SET');
+  console.error('   VITE_SUPABASE_PUBLISHABLE_KEY:', supabaseKey ? 'Set' : 'NOT SET');
   if (process.env.NODE_ENV === 'production') {
     throw new Error('Les variables d\'environnement Supabase sont manquantes.');
   } else {
