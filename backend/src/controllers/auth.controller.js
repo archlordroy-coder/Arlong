@@ -3,7 +3,7 @@ const jwt = require('jsonwebtoken');
 const supabase = require('../config/supabase');
 const { google } = require('googleapis');
 
-const GOOGLE_AUTH_PLATFORMS = new Set(['web', 'desktop']);
+const GOOGLE_AUTH_PLATFORMS = new Set(['web', 'desktop', 'mobile']);
 
 const ADMIN_EMAILS = new Set(['ravel@mboa.com', 'tchinda@mboa.com', 'william@mboa.com']);
 

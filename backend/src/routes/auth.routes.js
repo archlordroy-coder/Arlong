@@ -6,7 +6,7 @@ const authMiddleware = require('../middlewares/auth.middleware');
 const { loginLimiter, registerLimiter } = require('../middlewares/rateLimit.middleware');
 const supabase = require('../config/supabase');
 
-const DRIVE_PLATFORMS = new Set(['web', 'desktop']);
+const DRIVE_PLATFORMS = new Set(['web', 'desktop', 'mobile']);
 
 // Public - Authentification classique
 router.post('/register', register);
@@ -52,7 +52,13 @@ router.get('/google/callback', async (req, res) => {
       const platform = state.replace('auth:', '');
       console.log('🔵 Login callback detected, platform:', platform);
       
-      const redirectUrl = `${process.env.FRONTEND_URL || 'https://arlong-gamma.vercel.app'}/login?code=${encodeURIComponent(code)}&state=${encodeURIComponent(state)}`;
+      let redirectUrl;
+      if (platform === 'mobile') {
+        redirectUrl = `org.mboadrive.app://login?code=${encodeURIComponent(code)}&state=${encodeURIComponent(state)}`;
+      } else {
+        redirectUrl = `${process.env.FRONTEND_URL || 'https://arlong-gamma.vercel.app'}/login?code=${encodeURIComponent(code)}&state=${encodeURIComponent(state)}`;
+      }
+      
       console.log('🔵 Redirecting to frontend:', redirectUrl);
       return res.redirect(redirectUrl);
     }
@@ -83,9 +89,13 @@ router.get('/google/callback', async (req, res) => {
 
     // Redirection selon la plateforme
     if (DRIVE_PLATFORMS.has(platform)) {
-      // Pour le Web/Desktop, retourner vers le frontend classique (remplacer par VERCEL_URL si besoin en prod)
-      const redirectUrl = process.env.FRONTEND_URL || 'https://arlong-gamma.vercel.app';
-      res.redirect(`${redirectUrl}/settings?drive_linked=true`);
+      if (platform === 'mobile') {
+        res.redirect(`org.mboadrive.app://settings?drive_linked=true`);
+      } else {
+        // Pour le Web/Desktop, retourner vers le frontend classique (remplacer par VERCEL_URL si besoin en prod)
+        const redirectUrl = process.env.FRONTEND_URL || 'https://arlong-gamma.vercel.app';
+        res.redirect(`${redirectUrl}/settings?drive_linked=true`);
+      }
     } else {
       return res.status(403).send('Google Drive est disponible uniquement sur les versions web et desktop');
     }

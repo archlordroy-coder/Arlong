@@ -18,6 +18,22 @@ const Settings = () => {
   const [currentVersion, setCurrentVersion] = useState("");
 
   useEffect(() => {
+    // Gérer le retour de Google Drive linking (URL param)
+    const urlParams = new URLSearchParams(window.location.search);
+    if (urlParams.get('drive_linked') === 'true') {
+      const refreshProfile = async () => {
+        try {
+          const res = await api.get('/auth/me');
+          if (res.data?.success) {
+            // Nettoyer l'URL
+            window.history.replaceState({}, document.title, "/settings");
+            window.location.reload();
+          }
+        } catch (error) {}
+      };
+      refreshProfile();
+    }
+
     const handleMessage = async (event: MessageEvent) => {
       if (event.data?.type === 'drive-linked' && event.data?.success) {
         try {
