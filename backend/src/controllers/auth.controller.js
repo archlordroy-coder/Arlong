@@ -11,34 +11,47 @@ const GOOGLE_AUTH_PLATFORMS = new Set(['web', 'desktop']);
 const register = async (req, res) => {
   try {
     const { name, email, password } = req.body;
+    console.log('🔵 Register called:', { name, email: email?.substring(0, 3) + '***' });
 
     if (!name || !email || !password) {
+      console.log('❌ Missing fields');
       return res.status(400).json({ success: false, message: 'Tous les champs sont requis (name, email, password)' });
     }
 
     // Vérifier si l'utilisateur existe déjà
+    console.log('🔵 Checking existing user...');
     const { data: existingUser, error: checkError } = await supabase
       .from('User')
       .select('email')
       .eq('email', email)
       .single();
 
+    console.log('🔵 Check result:', { existingUser: !!existingUser, error: checkError?.message });
+
     if (existingUser) {
       return res.status(409).json({ success: false, message: 'Cet email est déjà utilisé' });
     }
 
+    console.log('🔵 Hashing password...');
     const hashedPassword = await bcrypt.hash(password, 10);
 
     // Création de l'utilisateur
+    console.log('🔵 Creating user...');
     const { data: user, error: createError } = await supabase
       .from('User')
       .insert([{ name, email, password: hashedPassword }])
       .select('id, name, email, avatar, is_admin, created_at')
       .single();
 
-    if (createError) throw createError;
+    console.log('🔵 Create user result:', { user: !!user, error: createError?.message });
+
+    if (createError) {
+      console.error('❌ Create user error:', createError);
+      throw createError;
+    }
 
     // --- INITIALISATION DES DONNÉES PAR DÉFAUT ---
+    console.log('🔵 Creating default space for user:', user.id);
     try {
       // 1. Créer un espace par défaut
       const { data: defaultEspace, error: espaceError } = await supabase
@@ -46,6 +59,8 @@ const register = async (req, res) => {
         .insert([{ name: 'Mon Coffre', createdById: user.id }])
         .select('id')
         .single();
+      
+      console.log('🔵 Create space result:', { space: !!defaultEspace, error: espaceError?.message });
 
       if (!espaceError && defaultEspace) {
         // 2. Créer un dossier par défaut dans cet espace
