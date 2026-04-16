@@ -4,6 +4,7 @@ const dotenv = require('dotenv');
 const path = require('path');
 const { initFirebase } = require('./services/firebase.service');
 const { initAI } = require('./services/ai.service');
+const supabase = require('./config/supabase');
 
 dotenv.config({ path: path.resolve(__dirname, '../.env') });
 // initFirebase(); // DÉSACTIVÉ: On utilise uniquement Google Drive pour le stockage
