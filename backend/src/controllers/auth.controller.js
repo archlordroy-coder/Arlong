@@ -91,7 +91,7 @@ const register = async (req, res) => {
     // ----------------------------------------------
 
     const token = jwt.sign({ id: user.id, email: user.email }, process.env.JWT_SECRET, {
-      expiresIn: '7d',
+      expiresIn: '30d',
     });
 
     res.status(201).json({ 
@@ -154,7 +154,7 @@ const login = async (req, res) => {
     }
 
     const token = jwt.sign({ id: user.id, email: user.email }, process.env.JWT_SECRET, {
-      expiresIn: '7d',
+      expiresIn: '30d',
     });
 
     res.json({
@@ -431,7 +431,7 @@ const googleAuth = async (req, res) => {
     const token = jwt.sign(
       { id: user.id, email: user.email },
       process.env.JWT_SECRET,
-      { expiresIn: '7d' }
+      { expiresIn: '30d' }
     );
 
     // Rediriger vers le frontend avec le token

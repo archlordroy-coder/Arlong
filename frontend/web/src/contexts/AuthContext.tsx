@@ -28,6 +28,22 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
   // Vérifier la session au chargement
   useEffect(() => {
+    // Gérer le retour de Google Drive linking (URL param)
+    const urlParams = new URLSearchParams(window.location.search);
+    if (urlParams.get('drive_linked') === 'true') {
+      const refreshProfile = async () => {
+        try {
+          const res = await api.get('/auth/me');
+          if (res.data?.success) {
+            // Nettoyer l'URL
+            window.history.replaceState({}, document.title, window.location.pathname);
+            window.location.reload();
+          }
+        } catch (error) {}
+      };
+      refreshProfile();
+    }
+
     const checkAuth = async () => {
       // On commence le timer pour le splash screen
       const timer = new Promise(resolve => setTimeout(resolve, 1500));
