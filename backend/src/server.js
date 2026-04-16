@@ -33,6 +33,42 @@ app.get('/api/health', (req, res) => {
   res.json({ status: 'ok', message: 'MboaDrive API is running 🚀', timestamp: new Date().toISOString() });
 });
 
+// Database connection test
+app.get('/api/db-test', async (req, res) => {
+  try {
+    console.log('🔵 Testing database connection...');
+    console.log('🔵 SUPABASE_URL:', process.env.SUPABASE_URL ? 'Set' : 'NOT SET');
+    console.log('🔵 SUPABASE_SERVICE_ROLE_KEY:', process.env.SUPABASE_SERVICE_ROLE_KEY ? 'Set' : 'NOT SET');
+
+    const { data, error } = await supabase.from('User').select('count').limit(1);
+
+    if (error) {
+      console.error('❌ Database error:', error);
+      return res.status(500).json({
+        success: false,
+        message: 'Database connection failed',
+        error: error.message,
+        supabase_url: process.env.SUPABASE_URL ? 'Set' : 'Missing',
+        supabase_key: process.env.SUPABASE_SERVICE_ROLE_KEY ? 'Set' : 'Missing'
+      });
+    }
+
+    res.json({
+      success: true,
+      message: 'Database connection OK',
+      data: data,
+      supabase_configured: true
+    });
+  } catch (err) {
+    console.error('❌ Test error:', err);
+    res.status(500).json({
+      success: false,
+      message: 'Test failed',
+      error: err.message
+    });
+  }
+});
+
 // Root route - API info
 app.get('/', (req, res) => {
   res.json({
