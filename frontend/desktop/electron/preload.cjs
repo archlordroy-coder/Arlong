@@ -23,6 +23,12 @@ contextBridge.exposeInMainWorld('arlong', {
   },
 
   // Fichiers & Cache
+  cache: {
+    get: (table, id) => ipcRenderer.invoke("cache:get", { table, id }),
+    list: (table, filter) => ipcRenderer.invoke("cache:list", { table, filter }),
+    set: (table, data) => ipcRenderer.invoke("cache:set", { table, data }),
+    delete: (table, id) => ipcRenderer.invoke("cache:delete", { table, id }),
+  },
   files: {
     compress: (data) => ipcRenderer.invoke('files:compress', data),
     decompress: (data) => ipcRenderer.invoke('files:decompress', data),
