@@ -14,18 +14,18 @@ const adminMiddleware = async (req, res, next) => {
   try {
     const { data: user, error } = await supabase
       .from('User')
-      .select('id, is_admin')
+      .select('id, isAdmin')
       .eq('id', req.user.id)
       .single();
 
-    if (error || !user?.is_admin) {
+    if (error || !user?.isAdmin) {
       return res.status(403).json({
         success: false,
         message: "Accès refusé. Droits d'administrateur requis.",
       });
     }
 
-    req.user.is_admin = true;
+    req.user.isAdmin = true;
     next();
   } catch (error) {
     return res.status(500).json({

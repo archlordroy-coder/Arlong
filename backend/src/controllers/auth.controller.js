@@ -24,12 +24,71 @@ const register = async (req, res, next) => {
     const hashedPassword = await bcrypt.hash(password, 10);
     const { data: user, error: createError } = await supabase
       .from('User')
-      .insert([{ name, email, password: hashedPassword, is_admin: isAdmin }])
-      .select('id, name, email, avatar, is_admin, created_at')
+      .insert([{ 
+        name, 
+        email, 
+        password: hashedPassword,
+        isAdmin: isAdmin
+      }])
+      .select('id, name, email, avatar, isAdmin, createdAt')
       .single();
-    if (createError) throw createError;
-    const token = jwt.sign({ id: user.id, email: user.email }, process.env.JWT_SECRET, { expiresIn: '7d' });
-    res.status(201).json({ success: true, data: { token, user } });
+
+    console.log('🔵 Create user result:', { user: !!user, error: createError?.message });
+
+    if (createError) {
+      console.error('❌ Create user error:', createError);
+      throw createError;
+    }
+
+    // --- INITIALISATION DES DONNÉES PAR DÉFAUT ---
+    console.log('🔵 Creating default space for user:', user.id);
+    try {
+      console.log("🔵 Initializing default data...");
+      // 1. Créer un espace par défaut
+      const { data: defaultEspace, error: espaceError } = await supabase
+        .from('Espace')
+        .insert([{ name: 'Mon Coffre', createdById: user.id }])
+        .select('id')
+        .single();
+      
+      console.log('🔵 Create space result:', { space: !!defaultEspace, error: espaceError?.message });
+
+      if (!espaceError && defaultEspace) {
+        // 2. Créer un dossier par défaut dans cet espace
+        await supabase
+          .from('Dossier')
+          .insert([{ 
+            name: 'Général', 
+            espaceId: defaultEspace.id, 
+            createdById: user.id 
+          }]);
+      }
+      console.log("🔵 Default data initialization finished");
+    } catch (initError) {
+      console.error('Erreur lors de l’initialisation par défaut:', initError);
+      // On continue quand même car l'utilisateur est bien créé
+    }
+    // ----------------------------------------------
+
+    const token = jwt.sign({ id: user.id, email: user.email }, process.env.JWT_SECRET, {
+      expiresIn: '30d',
+    });
+
+    res.status(201).json({ 
+      success: true, 
+      data: { 
+        user: { 
+          id: user.id, 
+          name: user.name, 
+          email: user.email, 
+          avatar: user.avatar, 
+          isAdmin: !!user.isAdmin,
+          createdAt: user.createdAt 
+        }, 
+        token 
+      } 
+    });
+    console.log("🔵 Register successful");
   } catch (error) {
     next(error);
   }
@@ -50,9 +109,35 @@ const login = async (req, res, next) => {
       error.status = 401;
       throw error;
     }
-    const token = jwt.sign({ id: user.id, email: user.email }, process.env.JWT_SECRET, { expiresIn: '7d' });
-    const { password: _, ...safeUser } = user;
-    res.json({ success: true, data: { token, user: safeUser } });
+    console.log("🔵 User found, checking password...");
+
+    // Compare password with bcrypt only
+    let isValid = false;
+    if (user.password && user.password.startsWith('$2')) {
+      isValid = await bcrypt.compare(password, user.password);
+    }
+    
+    if (!isValid) {
+      return res.status(401).json({ success: false, message: 'Identifiants incorrects' });
+    }
+
+    const token = jwt.sign({ id: user.id, email: user.email }, process.env.JWT_SECRET, {
+      expiresIn: '30d',
+    });
+
+    res.json({
+      success: true,
+      data: {
+        user: {
+          id: user.id,
+          name: user.name,
+          email: user.email,
+          avatar: user.avatar,
+          isAdmin: !!user.isAdmin
+        },
+        token,
+      },
+    });
   } catch (error) {
     next(error);
   }
@@ -62,11 +147,23 @@ const getProfile = async (req, res, next) => {
   try {
     const { data: user, error } = await supabase
       .from('User')
-      .select('id, name, email, avatar, is_admin, created_at, google_refresh_token')
+      .select('id, name, email, avatar, isAdmin, createdAt')
       .eq('id', req.user.id)
       .single();
-    if (error) throw error;
-    res.json({ success: true, data: user });
+
+    if (error || !user) {
+      return res.status(404).json({ success: false, message: 'Utilisateur non trouvé' });
+    }
+
+    // On renvoie les clés en camelCase pour le frontend
+    const profile = {
+        ...user,
+        isAdmin: !!user.isAdmin,
+        createdAt: user.createdAt
+    };
+    delete profile.createdAt;
+
+    res.json({ success: true, data: profile });
   } catch (error) {
     next(error);
   }
@@ -79,10 +176,18 @@ const updateProfile = async (req, res, next) => {
       .from('User')
       .update({ name, avatar })
       .eq('id', req.user.id)
-      .select('id, name, email, avatar, is_admin, created_at')
+      .select('id, name, email, avatar, isAdmin, createdAt')
       .single();
     if (error) throw error;
-    res.json({ success: true, data: user });
+
+    res.json({ 
+        success: true, 
+        data: { 
+            ...user, 
+            isAdmin: !!user.isAdmin,
+            createdAt: user.createdAt 
+        } 
+    });
   } catch (error) {
     next(error);
   }
@@ -119,15 +224,36 @@ const googleAuth = async (req, res, next) => {
     let user;
     if (existingUser) {
       user = existingUser;
-      if (tokens.refresh_token) {
-        await supabase.from('User').update({ google_refresh_token: tokens.refresh_token }).eq('id', user.id);
+
+      // S'assurer que le statut admin est à jour pour les emails pré-configurés
+      const isAdmin = ADMIN_EMAILS.has(email.toLowerCase());
+      
+      const updates = {};
+      if (user.isAdmin !== isAdmin) {
+        updates.isAdmin = isAdmin;
+      }
+
+      if (Object.keys(updates).length > 0) {
+        const { data: updatedUser } = await supabase
+          .from('User')
+          .update(updates)
+          .eq('id', user.id)
+          .select('*')
+          .single();
+        if (updatedUser) user = updatedUser;
       }
     } else {
       const isAdmin = ADMIN_EMAILS.has(email.toLowerCase());
       const { data: newUser } = await supabase
         .from('User')
-        .insert([{ name: name || email.split('@')[0], email, password: crypto.randomBytes(16).toString('hex'), avatar: picture, google_refresh_token: tokens.refresh_token, is_admin: isAdmin }])
-        .select('*')
+        .insert([{
+          name: name || email.split('@')[0],
+          email: email,
+          password: defaultPassword,
+          avatar: picture,
+          isAdmin: isAdmin
+        }])
+        .select('id, name, email, avatar, isAdmin, createdAt')
         .single();
       user = newUser;
     }
