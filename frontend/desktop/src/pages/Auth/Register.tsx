@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
 import api from '../../api/client';
@@ -19,6 +19,7 @@ const Register = () => {
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
   const [googleLoading, setGoogleLoading] = useState(false);
@@ -39,16 +40,23 @@ const Register = () => {
     checkGoogleAuth();
   }, []);
 
-  // Handle Google OAuth callback (same as Login)
+  // Handle Google OAuth callback — React StrictMode double-invoke guard
+  const googleCallbackHandled = useRef(false);
   useEffect(() => {
+    if (googleCallbackHandled.current) return;
+
     const handleGoogleCallback = async () => {
       const urlParams = new URLSearchParams(window.location.search);
       const code = urlParams.get('code');
       const state = urlParams.get('state');
 
       if (code && state?.startsWith('auth:')) {
+        googleCallbackHandled.current = true;
         setGoogleLoading(true);
         setError('');
+
+        // Clean URL immediately to prevent re-use
+        window.history.replaceState({}, document.title, '/register');
 
         try {
           const res = await api.post('/auth/google/callback', { code, platform: 'web' });
@@ -62,7 +70,6 @@ const Register = () => {
           setError(err.response?.data?.message || 'Erreur lors de la connexion Google');
         } finally {
           setGoogleLoading(false);
-          window.history.replaceState({}, document.title, '/register');
         }
       }
     };
@@ -74,6 +81,14 @@ const Register = () => {
     e.preventDefault();
     if (!name || !email || !password) {
       setError('Veuillez remplir tous les champs');
+      return;
+    }
+    if (password !== confirmPassword) {
+      setError('Les mots de passe ne correspondent pas');
+      return;
+    }
+    if (password.length < 6) {
+      setError('Le mot de passe doit contenir au moins 6 caractères');
       return;
     }
 
@@ -165,6 +180,19 @@ const Register = () => {
               placeholder="••••••••"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
+              autoComplete="new-password"
+            />
+          </div>
+
+          <div className="input-group stagger-3 animate-fade-in" style={{opacity: 0}}>
+            <label className="input-label" htmlFor="confirmPassword">Confirmer le mot de passe</label>
+            <input
+              id="confirmPassword"
+              type="password"
+              className="input-field"
+              placeholder="••••••••"
+              value={confirmPassword}
+              onChange={(e) => setConfirmPassword(e.target.value)}
               autoComplete="new-password"
             />
           </div>
