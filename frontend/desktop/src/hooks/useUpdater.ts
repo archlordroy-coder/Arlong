@@ -1,6 +1,5 @@
 import { useState, useEffect } from 'react';
 import api from '../api/client';
-import packageJson from '../../package.json';
 
 interface AppVersion {
   id: string;
@@ -10,68 +9,92 @@ interface AppVersion {
   notes: string;
 }
 
+declare global {
+  interface Window {
+    arlong: any;
+  }
+}
+
 export const useUpdater = () => {
   const [updateAvailable, setUpdateAvailable] = useState<AppVersion | null>(null);
   const [isUpdating, setIsUpdating] = useState(false);
   const [progress, setProgress] = useState(0);
+  const [currentVersion, setCurrentVersion] = useState('1.0.1');
 
-  const currentVersionCode = parseInt(packageJson.version.replace(/\./g, '')); // Simple version code from 1.0.1 -> 101
+  useEffect(() => {
+    if (window.arlong?.getAppVersion) {
+      window.arlong.getAppVersion().then(setCurrentVersion);
+    }
+  }, []);
+
+  const currentVersionCode = parseInt(currentVersion.replace(/\./g, ''));
 
   const checkUpdate = async () => {
     try {
       const res = await api.get('/versions/latest', { params: { platform: 'desktop' } });
       if (res.data.success && res.data.data) {
         const latest = res.data.data;
-        // Compare version codes
         if (latest.versionCode > currentVersionCode) {
           setUpdateAvailable(latest);
+          return latest;
         }
       }
     } catch (err) {
       console.error('Update check failed:', err);
     }
+    return null;
   };
 
   useEffect(() => {
     checkUpdate();
-    // Check every hour
     const interval = setInterval(checkUpdate, 3600000);
     return () => clearInterval(interval);
-  }, []);
+  }, [currentVersionCode]);
 
   const startUpdate = async () => {
     if (!updateAvailable) return;
     
     setIsUpdating(true);
-    setProgress(10);
+    setProgress(0);
     
     try {
-      // Logic for OTA update
-      // In a real scenario, we would download the zip, extract it, and notify the main process to replace files.
-      // For now, since we want to "wow" the user and follow their request of "Mise à jour"
-      // We'll simulate the download and then show a success message.
-      // NOTE: A real OTA update in Electron usually requires a dedicated main-process handler.
-      
-      for (let i = 10; i <= 100; i += 10) {
-        setProgress(i);
-        await new Promise(r => setTimeout(r, 400));
-      }
+      if (window.arlong?.updater) {
+        // Mode Natif Electron (electron-updater)
+        console.log('Starting native update...');
+        window.arlong.updater.onDownloadProgress((p: any) => {
+          setProgress(Math.round(p.percent));
+        });
+        
+        window.arlong.updater.onUpdateDownloaded(() => {
+          setProgress(100);
+          setIsUpdating(false);
+          if (confirm('Mise à jour prête. Redémarrer maintenant ?')) {
+            window.arlong.updater.quitAndInstall();
+          }
+        });
 
-      alert('Mise à jour téléchargée. L\'application va redémarrer pour appliquer les changements.');
-      
-      // Notify main process to restart (if IPC is set up)
-      if (window.electron) {
-        window.electron.send('restart-app');
+        window.arlong.updater.onError((err: string) => {
+          console.error('Updater error:', err);
+          setIsUpdating(false);
+          alert('Erreur lors de la mise à jour : ' + err);
+        });
+
+        await window.arlong.updater.downloadUpdate();
       } else {
+        // Mode Simulation pour le web ou dev
+        for (let i = 0; i <= 100; i += 5) {
+          setProgress(i);
+          await new Promise(r => setTimeout(r, 200));
+        }
+        alert('Mise à jour installée avec succès (Simulation). Redémarrage...');
         window.location.reload();
       }
-      
     } catch (err) {
-      alert('Échec de la mise à jour');
-    } finally {
+      console.error('Update failed:', err);
       setIsUpdating(false);
+      alert('Échec de la mise à jour');
     }
   };
 
-  return { updateAvailable, isUpdating, progress, startUpdate };
+  return { updateAvailable, isUpdating, progress, startUpdate, currentVersion };
 };

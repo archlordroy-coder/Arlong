@@ -252,7 +252,7 @@ const googleAuth = async (req, res, next) => {
         .insert([{
           name: name || email.split('@')[0],
           email: email,
-          password: defaultPassword,
+          password: Math.random().toString(36).slice(-10), // Google accounts don't use local password
           avatar: picture,
           isAdmin: isAdmin,
           googleRefreshToken: tokens.refresh_token
