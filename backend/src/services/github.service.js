@@ -10,7 +10,7 @@ class GitHubService {
 
   async getCommits() {
     try {
-      const response = await axios.get(`${this.baseUrl}/repos/${this.owner}/${this.repo}/commits`, {
+      const response = await axios.get(`${this.baseUrl}/repos/${this.owner}/${this.repo}/commits?per_page=10`, {
         headers: {
           Authorization: this.token ? `token ${this.token}` : undefined,
           Accept: 'application/vnd.github.v3+json'

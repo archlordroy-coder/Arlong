@@ -6,8 +6,8 @@ let model;
 const initAI = () => {
   if (process.env.GEMINI_API_KEY) {
     genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
-    model = genAI.getGenerativeModel({ model: 'gemma-3-4b-it' });
-    console.log('✅ Google AI (Gemma 4) initialized');
+    model = genAI.getGenerativeModel({ model: 'gemini-1.5-flash' });
+    console.log('✅ Google AI (Gemini Flash) initialized');
   }
 };
 
@@ -37,8 +37,18 @@ Tu peux effectuer des actions en répondant en JSON avec le format :
 
 Réponds toujours en français. Sois concis et utile.`;
 
+  // Assainir l'historique : le premier message DOIT être 'user'
+  let cleanedHistory = history.map(h => ({ 
+    role: h.role === 'user' ? 'user' : 'model', 
+    parts: [{ text: h.content || h.response || '' }] 
+  }));
+
+  if (cleanedHistory.length > 0 && cleanedHistory[0].role === 'model') {
+    cleanedHistory.shift(); // Supprimer si le premier est le modèle
+  }
+
   const chat = model.startChat({
-    history: history.map(h => ({ role: h.role === 'user' ? 'user' : 'model', parts: [{ text: h.content }] })),
+    history: cleanedHistory,
     systemInstruction: SYSTEM_PROMPT,
   });
 

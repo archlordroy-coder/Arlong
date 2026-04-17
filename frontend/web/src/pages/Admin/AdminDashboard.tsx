@@ -200,7 +200,10 @@ const AdminDashboard = () => {
       <div className="admin-header mt-12">
         <h2 className="flex items-center gap-2"><GitBranch /> Commits GitHub Récents</h2>
         <button className="btn btn-sm btn-ghost" onClick={fetchCommits} disabled={loadingCommits}>
-          {loadingCommits ? <Loader2 className="animate-spin" size={16} /> : <RefreshCw size={16} />} Actualiser
+          <span className="flex items-center gap-2">
+            {loadingCommits ? <Loader2 className="animate-spin" size={16} /> : <RefreshCw size={16} />}
+            Actualiser
+          </span>
         </button>
       </div>
 

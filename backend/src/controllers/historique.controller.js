@@ -13,7 +13,7 @@ const getHistorique = async (req, res) => {
       .from('Historique')
       .select('*')
       .eq('userId', req.user.id)
-      .order('created_at', { ascending: false })
+      .order('actionDate', { ascending: false })
       .limit(parseInt(limit));
 
     if (error) throw error;
@@ -36,6 +36,7 @@ const getHistorique = async (req, res) => {
 
       return {
         ...record,
+        created_at: record.actionDate || record.created_at,
         user: { name: userName },
         document: { name: docName }
       };
@@ -59,7 +60,7 @@ const addHistorique = async (req, res) => {
         docId,
         espaceId,
         details: details || {},
-        createdAt: new Date().toISOString()
+        actionDate: new Date().toISOString()
       }])
       .select()
       .single();
