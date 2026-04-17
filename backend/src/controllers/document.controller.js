@@ -35,7 +35,15 @@ const getDocuments = async (req, res, next) => {
     const { search } = req.query;
     let query = supabase.from('Document').select('*, dossier:Dossier(name)').eq('createdById', req.user.id).eq('isDeleted', false);
     if (search) query = query.ilike('name', `%${search}%`);
-    const { data, error } = await query.order('created_at', { ascending: false });
+    let { data, error } = await query.order('created_at', { ascending: false });
+    
+    if (error && error.code === '42703') {
+      console.warn('⚠️ Colonne created_at non trouvée pour Document, chargement sans tri.');
+      const res = await query;
+      data = res.data;
+      error = res.error;
+    }
+    
     if (error) throw error;
     res.json({ success: true, data });
   } catch (error) {
