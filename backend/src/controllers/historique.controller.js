@@ -9,14 +9,25 @@ const getHistorique = async (req, res) => {
     const { limit = 20 } = req.query;
     
     // 1. Récupérer l'historique
-    const { data: records, error } = await supabase
+    let query = supabase
       .from('Historique')
       .select('*')
-      .eq('userId', req.user.id)
-      .order('created_at', { ascending: false })
-      .limit(parseInt(limit));
+      .eq('userId', req.user.id);
 
-    if (error) throw error;
+    // Tentative de tri avec fallback si la colonne manque au cache
+    const { data: testData, error: testError } = await query.order('created_at', { ascending: false }).limit(parseInt(limit));
+    
+    let records;
+    if (testError && testError.code === '42703') {
+      console.warn('⚠️ Colonne created_at non trouvée dans le cache pour Historique, chargement sans tri.');
+      const { data, error } = await query.limit(parseInt(limit));
+      if (error) throw error;
+      records = data;
+    } else if (testError) {
+      throw testError;
+    } else {
+      records = testData;
+    }
 
     // 2. Enrichir manuellement (Workaround pour relations manquantes)
     const enrichedData = await Promise.all(records.map(async (record) => {
