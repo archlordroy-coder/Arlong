@@ -43,7 +43,7 @@ const listVersions = async (req, res) => {
     const { data: versions, error } = await supabase
       .from('AppVersion')
       .select('*')
-      .order('created_at', { ascending: false });
+      .order('createdAt', { ascending: false });
 
     if (error) throw error;
     res.json({ success: true, data: versions });

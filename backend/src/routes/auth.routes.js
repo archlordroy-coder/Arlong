@@ -75,16 +75,27 @@ router.get('/google/callback', async (req, res) => {
     console.log('🔵 Tokens received:', tokens ? 'Success' : 'Failed');
     
     if (tokens.refresh_token) {
-      // Sauvegarder le refresh_token dans la base pour stocker SUR SON DRIVE
-      const { error } = await supabase
-        .from('User')
-        .update({ google_refresh_token: tokens.refresh_token })
-        .eq('id', userId); 
+      console.log('🔵 Tentative 1 : googleRefreshToken (camelCase)...');
+      let { error } = await supabase.from('User').update({ googleRefreshToken: tokens.refresh_token }).eq('id', userId); 
+      
+      if (error && error.code === 'PGRST204') {
+        console.warn('⚠️ Tentative 2 : google_refresh_token (snake_case)...');
+        const res2 = await supabase.from('User').update({ google_refresh_token: tokens.refresh_token }).eq('id', userId);
+        error = res2.error;
+      }
+
+      if (error && error.code === 'PGRST204') {
+        console.warn('⚠️ Tentative 3 : googlerefreshtoken (minuscules)...');
+        const res3 = await supabase.from('User').update({ googlerefreshtoken: tokens.refresh_token }).eq('id', userId);
+        error = res3.error;
+      }
       
       if (error) {
-        console.error('❌ Supabase error:', error);
-        throw error;
+        console.error('❌ ÉCHEC FINAL de liaison :', error.message, 'Code:', error.code);
+        return res.status(500).send(`Erreur de base de données : impossible de trouver la colonne pour le token. Veuillez vérifier que la colonne existe dans la table User. (Erreur: ${error.message})`);
       }
+
+      console.log('✅ Liaison Google Drive réussie !');
     }
 
     // Redirection selon la plateforme

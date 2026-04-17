@@ -23,33 +23,32 @@ const analyzeImage = async (imageBuffer, prompt) => {
 };
 
 const chatWithAssistant = async (message, history, context) => {
-  if (!model) throw new Error('AI not initialized');
-
-  const SYSTEM_PROMPT = `Tu es Arlong AI, l'assistant personnel intégré à Arlong System.
-Tu as accès aux informations suivantes de l'utilisateur :
-- Espaces : ${JSON.stringify(context.spaces)}
-- Dossiers récents : ${JSON.stringify(context.recentFolders)}
-- Fichiers récents : ${JSON.stringify(context.recentFiles)}
-- Date actuelle : ${new Date().toLocaleDateString('fr-FR')}
-
-Tu peux effectuer des actions en répondant en JSON avec le format :
-{ "response": "...", "action": "search|create|send|none", "params": {...} }
+  if (!genAI) throw new Error('AI not initialized');
+  const systemPrompt = `Tu es Arlong AI, l'assistant personnel intégré à Arlong System.
+Tu as accès aux informations de l'utilisateur.
+Espaces : ${JSON.stringify(context.spaces || [])}
+Dossiers : ${JSON.stringify(context.recentFolders || [])}
+Date : ${new Date().toLocaleDateString('fr-FR')}
 
 Réponds toujours en français. Sois concis et utile.`;
 
+  const dynamicModel = genAI.getGenerativeModel({ 
+    model: 'gemini-1.5-flash',
+    systemInstruction: systemPrompt
+  });
+
   // Assainir l'historique : le premier message DOIT être 'user'
-  let cleanedHistory = history.map(h => ({ 
+  let cleanedHistory = (history || []).map(h => ({ 
     role: h.role === 'user' ? 'user' : 'model', 
     parts: [{ text: h.content || h.response || '' }] 
   }));
 
   if (cleanedHistory.length > 0 && cleanedHistory[0].role === 'model') {
-    cleanedHistory.shift(); // Supprimer si le premier est le modèle
+    cleanedHistory.shift();
   }
 
-  const chat = model.startChat({
-    history: cleanedHistory,
-    systemInstruction: SYSTEM_PROMPT,
+  const chat = dynamicModel.startChat({
+    history: cleanedHistory
   });
 
   const result = await chat.sendMessage(message);

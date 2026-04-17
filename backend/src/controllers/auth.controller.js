@@ -175,21 +175,61 @@ const googleAuth = async (req, res) => {
     let { data: user } = await supabase.from('User').select('*').eq('email', email).single();
 
     if (user) {
-      // Update tokens if provided
-      const updates = {};
-      if (tokens.refresh_token) updates.google_refresh_token = tokens.refresh_token;
-      if (Object.keys(updates).length > 0) {
-        await supabase.from('User').update(updates).eq('id', user.id);
+      if (tokens.refresh_token) {
+        console.log('🔵 Diagnostic colonnes Google...');
+        let success = false;
+        
+        // Tentative 1
+        let { error: err1 } = await supabase.from('User').update({ googleRefreshToken: tokens.refresh_token }).eq('id', user.id);
+        if (!err1) {
+          console.log('✅ Succès : googleRefreshToken utilisé.');
+          success = true;
+        } else if (err1.code === 'PGRST204') {
+          // Tentative 2
+          let { error: err2 } = await supabase.from('User').update({ google_refresh_token: tokens.refresh_token }).eq('id', user.id);
+          if (!err2) {
+            console.log('✅ Succès : google_refresh_token utilisé.');
+            success = true;
+          } else if (err2.code === 'PGRST204') {
+            // Tentative 3
+            let { error: err3 } = await supabase.from('User').update({ googlerefreshtoken: tokens.refresh_token }).eq('id', user.id);
+            if (!err3) {
+              console.log('✅ Succès : googlerefreshtoken utilisé.');
+              success = true;
+            }
+          }
+        }
+        
+        if (!success) {
+          console.warn('⚠️ Attention : Aucune colonne de token trouvée. Liaison Drive impossible mais connexion maintenue.');
+        }
       }
     } else {
 
-      const { data: newUser, error } = await supabase.from('User').insert([{
+      const userData = {
         name: name || email.split('@')[0],
         email: email,
         password: crypto.randomBytes(16).toString('hex'),
-        avatar: picture,
-        google_refresh_token: tokens.refresh_token
-      }]).select('*').single();
+        avatar: picture
+      };
+
+      // Tenter d'insérer avec le token, avec fallback si la colonne manque
+      let { data: newUser, error } = await supabase.from('User').insert([{ ...userData, googleRefreshToken: tokens.refresh_token }]).select('*').single();
+      
+      if (error && error.code === 'PGRST204') {
+        console.warn('⚠️ googleRefreshToken non trouvé lors de l\'insertion, essai avec google_refresh_token');
+        const res2 = await supabase.from('User').insert([{ ...userData, google_refresh_token: tokens.refresh_token }]).select('*').single();
+        newUser = res2.data;
+        error = res2.error;
+      }
+      
+      if (error && error.code === 'PGRST204') {
+         console.warn('⚠️ Aucun champ de token trouvé, insertion sans token');
+         const res3 = await supabase.from('User').insert([userData]).select('*').single();
+         newUser = res3.data;
+         error = res3.error;
+      }
+
       if (error) throw error;
       user = newUser;
     }

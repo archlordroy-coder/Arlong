@@ -35,7 +35,7 @@ const getDocuments = async (req, res, next) => {
     const { search } = req.query;
     let query = supabase.from('Document').select('*, dossier:Dossier(name)').eq('createdById', req.user.id).eq('isDeleted', false);
     if (search) query = query.ilike('name', `%${search}%`);
-    const { data, error } = await query.order('created_at', { ascending: false });
+    const { data, error } = await query.order('createdAt', { ascending: false });
     if (error) throw error;
     res.json({ success: true, data });
   } catch (error) {

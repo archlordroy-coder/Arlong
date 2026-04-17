@@ -23,11 +23,13 @@ const supabase = require('../config/supabase');
 const getOAuth2Client = async (userId) => {
   const { data: user, error } = await supabase
     .from('User')
-    .select('google_refresh_token')
+    .select('googleRefreshToken, google_refresh_token')
     .eq('id', userId)
     .single();
 
-  if (error || !user || !user.google_refresh_token) {
+  const refreshToken = user?.googleRefreshToken || user?.google_refresh_token;
+
+  if (error || !user || !refreshToken) {
     throw new Error('Compte Google non lié');
   }
 
@@ -38,7 +40,7 @@ const getOAuth2Client = async (userId) => {
   );
 
   oauth2Client.setCredentials({
-    refresh_token: user.google_refresh_token
+    refresh_token: refreshToken
   });
 
   return oauth2Client;
