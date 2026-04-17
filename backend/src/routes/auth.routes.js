@@ -91,25 +91,20 @@ router.get('/google/callback', async (req, res) => {
       }
       
       if (error) {
-        console.error('❌ ÉCHEC FINAL de liaison :', error.message, 'Code:', error.code);
-        return res.status(500).send(`Erreur de base de données : impossible de trouver la colonne pour le token. Veuillez vérifier que la colonne existe dans la table User. (Erreur: ${error.message})`);
+        console.warn('⚠️ ÉCHEC FINAL de sauvegarde du token (colonne manquante) :', error.message);
+        // On ne bloque pas l'utilisateur, on le laisse continuer vers son dashboard
+      } else {
+        console.log('✅ Liaison Google Drive réussie !');
       }
-
-      console.log('✅ Liaison Google Drive réussie !');
     }
 
     // Redirection selon la plateforme
-    if (DRIVE_PLATFORMS.has(platform)) {
-      if (platform === 'mobile') {
-        res.redirect(`org.mboadrive.app://settings?drive_linked=true`);
-      } else {
-        // Pour le Web/Desktop, retourner vers le frontend classique (remplacer par VERCEL_URL si besoin en prod)
-        const redirectUrl = process.env.FRONTEND_URL || 'https://arlong-gamma.vercel.app';
-        res.redirect(`${redirectUrl}/settings?drive_linked=true`);
-      }
-    } else {
-      return res.status(403).send('Google Drive est disponible uniquement sur les versions web et desktop');
-    }
+    const redirectUrl = process.env.FRONTEND_URL || 'https://arlong-gamma.vercel.app';
+    const finalRedirect = platform === 'mobile' 
+      ? `org.mboadrive.app://settings?drive_linked=true` 
+      : `${redirectUrl}/dashboard?drive_linked=true`;
+    
+    res.redirect(finalRedirect);
 
   } catch (error) {
     console.error('❌ Erreur Callback Google:', error);

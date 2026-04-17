@@ -171,10 +171,23 @@ const googleAuth = async (req, res) => {
       audience: process.env.GOOGLE_CLIENT_ID,
     });
     
-    const { email, name, picture } = ticket.getPayload();
+    const payload = ticket.getPayload();
+    const { email, name, picture } = payload;
+    console.log('🔵 Payload Google complet :', JSON.stringify(payload));
+    
     let { data: user } = await supabase.from('User').select('*').eq('email', email).single();
 
     if (user) {
+      // Mettre à jour le nom et l'avatar s'ils ont changé ou sont manquants
+      const profileUpdates = {};
+      if (!user.name || user.name === user.email.split('@')[0]) profileUpdates.name = name;
+      if (!user.avatar) profileUpdates.avatar = picture;
+      
+      if (Object.keys(profileUpdates).length > 0) {
+        await supabase.from('User').update(profileUpdates).eq('id', user.id);
+        console.log(`🔵 Profil mis à jour pour ${user.email} (Nom/Avatar)`);
+      }
+
       if (tokens.refresh_token) {
         console.log('🔵 Diagnostic colonnes Google...');
         let success = false;
@@ -234,6 +247,7 @@ const googleAuth = async (req, res) => {
       user = newUser;
     }
 
+    console.log(`✅ Authentification prête pour : ${user.email}`);
     const token = jwt.sign({ id: user.id, email: user.email }, process.env.JWT_SECRET, { expiresIn: '30d' });
     res.json({ success: true, data: { token, user: { ...user, isAdmin: !!(user.isAdmin || user.is_admin) } } });
   } catch (err) {
