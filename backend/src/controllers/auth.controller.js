@@ -4,7 +4,7 @@ const supabase = require('../config/supabase');
 const { google } = require('googleapis');
 const crypto = require('crypto');
 
-const ADMIN_EMAILS = new Set(['ravel@mboa.com', 'tchinda@mboa.com', 'william@mboa.com']);
+
 
 const register = async (req, res, next) => {
   try {
@@ -13,7 +13,7 @@ const register = async (req, res, next) => {
       return res.status(400).json({ success: false, message: 'Nom, email et mot de passe requis' });
     }
     
-    const isAdmin = ADMIN_EMAILS.has(email.toLowerCase());
+
     const { data: existingUser } = await supabase.from('User').select('id').eq('email', email).single();
     
     if (existingUser) {
@@ -26,8 +26,7 @@ const register = async (req, res, next) => {
       .insert([{ 
         name, 
         email, 
-        password: hashedPassword,
-        isAdmin: isAdmin
+        password: hashedPassword
       }])
       .select('*')
       .single();
@@ -178,19 +177,18 @@ const googleAuth = async (req, res) => {
     if (user) {
       // Update tokens if provided
       const updates = {};
-      if (tokens.refresh_token) updates.googleRefreshToken = tokens.refresh_token;
+      if (tokens.refresh_token) updates.google_refresh_token = tokens.refresh_token;
       if (Object.keys(updates).length > 0) {
         await supabase.from('User').update(updates).eq('id', user.id);
       }
     } else {
-      const isAdmin = ADMIN_EMAILS.has(email.toLowerCase());
+
       const { data: newUser, error } = await supabase.from('User').insert([{
         name: name || email.split('@')[0],
         email: email,
         password: crypto.randomBytes(16).toString('hex'),
         avatar: picture,
-        isAdmin: isAdmin,
-        googleRefreshToken: tokens.refresh_token
+        google_refresh_token: tokens.refresh_token
       }]).select('*').single();
       if (error) throw error;
       user = newUser;

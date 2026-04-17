@@ -78,7 +78,7 @@ router.get('/google/callback', async (req, res) => {
       // Sauvegarder le refresh_token dans la base pour stocker SUR SON DRIVE
       const { error } = await supabase
         .from('User')
-        .update({ googleRefreshToken: tokens.refresh_token })
+        .update({ google_refresh_token: tokens.refresh_token })
         .eq('id', userId); 
       
       if (error) {

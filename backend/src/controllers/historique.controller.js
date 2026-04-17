@@ -71,4 +71,25 @@ const addHistorique = async (req, res) => {
   }
 };
 
-module.exports = { getHistorique, addHistorique };
+const deleteHistoriqueItem = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { error } = await supabase.from('Historique').delete().eq('id', id).eq('userId', req.user.id);
+    if (error) throw error;
+    res.json({ success: true, message: 'Entrée supprimée' });
+  } catch (error) {
+    res.status(500).json({ success: false, message: 'Erreur lors de la suppression' });
+  }
+};
+
+const clearAllHistorique = async (req, res) => {
+  try {
+    const { error } = await supabase.from('Historique').delete().eq('userId', req.user.id);
+    if (error) throw error;
+    res.json({ success: true, message: 'Historique vidé' });
+  } catch (error) {
+    res.status(500).json({ success: false, message: 'Erreur lors de la suppression' });
+  }
+};
+
+module.exports = { getHistorique, addHistorique, deleteHistoriqueItem, clearAllHistorique };
