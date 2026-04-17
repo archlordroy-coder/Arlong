@@ -154,13 +154,20 @@ const deleteAccount = async (req, res, next) => {
 };
 
 // Google Auth Logic (simplified but robust)
+const getRedirectUri = () => {
+  const isProduction = process.env.VERCEL || process.env.NODE_ENV === 'production';
+  return isProduction
+    ? 'https://arlong-gamma.vercel.app/api/auth/google/callback'
+    : (process.env.GOOGLE_REDIRECT_URI || 'http://localhost:5000/api/auth/google/callback');
+};
+
 const googleAuth = async (req, res) => {
   try {
     const { code, platform } = req.body;
     const oauth2Client = new google.auth.OAuth2(
       process.env.GOOGLE_CLIENT_ID,
       process.env.GOOGLE_CLIENT_SECRET,
-      process.env.GOOGLE_REDIRECT_URI
+      getRedirectUri()
     );
 
     const { tokens } = await oauth2Client.getToken(code);
@@ -257,7 +264,7 @@ const getGoogleAuthUrl = (req, res) => {
   const oauth2Client = new google.auth.OAuth2(
     process.env.GOOGLE_CLIENT_ID,
     process.env.GOOGLE_CLIENT_SECRET,
-    process.env.GOOGLE_REDIRECT_URI
+    getRedirectUri()
   );
 
   const url = oauth2Client.generateAuthUrl({

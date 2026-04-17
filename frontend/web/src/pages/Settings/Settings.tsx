@@ -24,7 +24,7 @@ const Settings = () => {
   const handleLinkGoogle = async () => {
     setGoogleLoading(true);
     try {
-      const res = await api.get('/auth/google/login-url?platform=web');
+      const res = await api.get('/auth/google/url?platform=web');
       if (res.data.success && res.data.url) {
         window.location.href = res.data.url;
       }
