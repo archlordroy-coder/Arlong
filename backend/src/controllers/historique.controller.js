@@ -13,7 +13,7 @@ const getHistorique = async (req, res) => {
       .from('Historique')
       .select('*')
       .eq('userId', req.user.id)
-      .order('actionDate', { ascending: false })
+      .order('created_at', { ascending: false })
       .limit(parseInt(limit));
 
     if (error) throw error;
@@ -29,16 +29,10 @@ const getHistorique = async (req, res) => {
         if (u) userName = u.name;
       }
       
-      if (record.docId) {
-        const { data: d } = await supabase.from('Document').select('name').eq('id', record.docId).single();
-        if (d) docName = d.name;
-      }
-
+      // Note: On ne cherche pas de document car la colonne docId n'existe pas dans Historique selon votre schéma
       return {
         ...record,
-        created_at: record.actionDate || record.created_at,
-        user: { name: userName },
-        document: { name: docName }
+        user: { name: userName }
       };
     }));
 
@@ -56,11 +50,9 @@ const addHistorique = async (req, res) => {
       .from('Historique')
       .insert([{
         userId: req.user.id,
-        actionType,
-        docId,
+        action: actionType, // On mappe actionType vers action
         espaceId,
-        details: details || {},
-        actionDate: new Date().toISOString()
+        details: details || {}
       }])
       .select()
       .single();

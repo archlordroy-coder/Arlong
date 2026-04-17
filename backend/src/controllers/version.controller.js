@@ -11,8 +11,8 @@ const getLatestVersion = async (req, res) => {
     let query = supabase
       .from('AppVersion')
       .select('*')
-      .eq('isValid', true)
-      .order('versionCode', { ascending: false });
+      .eq('is_valid', true)
+      .order('version_code', { ascending: false });
 
     if (platform) {
       query = query.eq('platform', platform);
@@ -43,7 +43,7 @@ const listVersions = async (req, res) => {
     const { data: versions, error } = await supabase
       .from('AppVersion')
       .select('*')
-      .order('createdAt', { ascending: false });
+      .order('created_at', { ascending: false });
 
     if (error) throw error;
     res.json({ success: true, data: versions });
@@ -64,14 +64,14 @@ const createVersion = async (req, res) => {
     const { data: version, error } = await supabase
       .from('AppVersion')
       .insert([{
-        versionName: version_name,
-        versionCode: parseInt(version_code),
+        version_name: version_name,
+        version_code: parseInt(version_code),
         platform,
-        downloadUrl: download_url,
+        download_url: download_url,
         notes,
-        isValid: is_valid !== undefined ? is_valid : true,
-        isBeta: !!is_beta,
-        githubSha: github_sha
+        is_valid: is_valid !== undefined ? is_valid : true,
+        is_beta: !!is_beta,
+        github_sha: github_sha
       }])
       .select()
       .single();
