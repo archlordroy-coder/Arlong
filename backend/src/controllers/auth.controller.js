@@ -189,32 +189,28 @@ const googleAuth = async (req, res) => {
       }
 
       if (tokens.refresh_token) {
-        console.log('🔵 Diagnostic colonnes Google...');
+        console.log('🔵 Tentative de sauvegarde du Refresh Token...');
+        const tokenCols = ['googleRefreshToken', 'google_refresh_token', 'googlerefreshtoken'];
         let success = false;
         
-        // Tentative 1
-        let { error: err1 } = await supabase.from('User').update({ googleRefreshToken: tokens.refresh_token }).eq('id', user.id);
-        if (!err1) {
-          console.log('✅ Succès : googleRefreshToken utilisé.');
-          success = true;
-        } else if (err1.code === 'PGRST204') {
-          // Tentative 2
-          let { error: err2 } = await supabase.from('User').update({ google_refresh_token: tokens.refresh_token }).eq('id', user.id);
-          if (!err2) {
-            console.log('✅ Succès : google_refresh_token utilisé.');
-            success = true;
-          } else if (err2.code === 'PGRST204') {
-            // Tentative 3
-            let { error: err3 } = await supabase.from('User').update({ googlerefreshtoken: tokens.refresh_token }).eq('id', user.id);
-            if (!err3) {
-              console.log('✅ Succès : googlerefreshtoken utilisé.');
+        for (const col of tokenCols) {
+          try {
+            const updateObj = {};
+            updateObj[col] = tokens.refresh_token;
+            const { error: updateError } = await supabase.from('User').update(updateObj).eq('id', user.id);
+            
+            if (!updateError) {
+              console.log(`✅ Succès : Token sauvegardé dans la colonne '${col}'`);
               success = true;
+              break;
             }
+          } catch (e) {
+            // Ignorer l'erreur et essayer la colonne suivante
           }
         }
         
         if (!success) {
-          console.warn('⚠️ Attention : Aucune colonne de token trouvée. Liaison Drive impossible mais connexion maintenue.');
+          console.warn('⚠️ Attention : Aucune colonne de token reconnue. Liaison Drive impossible.');
         }
       }
     } else {
