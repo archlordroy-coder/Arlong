@@ -85,7 +85,7 @@ const Login = () => {
           </div>
 
           <button type="submit" className="btn btn-primary w-full" disabled={loading}>
-            {loading ? <Loader2 className="animate-spin" /> : 'S'inscrire'}
+            {loading ? <Loader2 className="animate-spin" /> : "S'inscrire"}
           </button>
 
           <div className="auth-divider"><span>ou</span></div>

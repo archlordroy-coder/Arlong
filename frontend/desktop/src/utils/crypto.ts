@@ -24,7 +24,7 @@ async function deriveKey(password: string, salt: Uint8Array): Promise<CryptoKey>
   return crypto.subtle.deriveKey(
     {
       name: 'PBKDF2',
-      salt,
+      salt: salt.slice(0),
       iterations: KEY_ITERATIONS,
       hash: 'SHA-256',
     },
@@ -51,7 +51,7 @@ export async function encryptFile(file: File | Blob, password: string): Promise<
   );
 
   // Combine Salt + IV + Encrypted Data
-  const combined = new Blob([salt, iv, encryptedBuffer]);
+  const combined = new Blob([salt: salt.slice(0), iv, encryptedBuffer]);
   return combined;
 }
 

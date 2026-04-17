@@ -4,7 +4,7 @@ import { Shield, Key, Lock, Trash2, CheckCircle } from 'lucide-react';
 import './Settings.css';
 
 const Settings = () => {
-  const { encryptionKey, saveKey, clearKey, isConfigured } = useEncryption();
+  const { saveKey, clearKey, isConfigured } = useEncryption();
   const [newKey, setNewKey] = React.useState('');
 
   const handleSaveKey = (e: React.FormEvent) => {
