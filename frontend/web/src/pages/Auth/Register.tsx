@@ -1,39 +1,100 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { Shield, Lock, Mail, Loader2, ArrowLeft } from 'lucide-react';
+import { Shield, Lock, Mail, Loader2, ArrowLeft, User } from 'lucide-react';
 import { useAuth } from '../../contexts/AuthContext';
 import api from '../../api/client';
 import './Auth.css';
 
-const Login = () => {
+const Register = () => {
+  const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
   const [loading, setLoading] = useState(false);
+  const [googleLoading, setGoogleLoading] = useState(false);
   const [error, setError] = useState('');
   const navigate = useNavigate();
   const { login } = useAuth();
 
+  // Handle Google OAuth callback — React StrictMode double-invoke guard
+  const googleCallbackHandled = useRef(false);
+  useEffect(() => {
+    if (googleCallbackHandled.current) return;
+
+    const handleGoogleCallback = async () => {
+      const urlParams = new URLSearchParams(window.location.search);
+      const code = urlParams.get('code');
+      const state = urlParams.get('state');
+
+      if (code && state?.startsWith('auth:')) {
+        googleCallbackHandled.current = true;
+        setGoogleLoading(true);
+        setError('');
+
+        // Clean URL immediately to prevent re-use of the code
+        window.history.replaceState({}, document.title, '/register');
+
+        try {
+          const res = await api.post('/auth/google/callback', { code, platform: 'web' });
+          if (res.data.success) {
+            const { token, user } = res.data.data;
+            login(token, user);
+            navigate('/dashboard');
+          }
+        } catch (err: any) {
+          setError(err.response?.data?.message || 'Erreur lors de la connexion Google');
+        } finally {
+          setGoogleLoading(false);
+        }
+      }
+    };
+
+    handleGoogleCallback();
+  }, [login, navigate]);
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setLoading(true);
     setError('');
+
+    if (!name.trim()) {
+      setError('Le nom est requis');
+      return;
+    }
+    if (password !== confirmPassword) {
+      setError('Les mots de passe ne correspondent pas');
+      return;
+    }
+    if (password.length < 6) {
+      setError('Le mot de passe doit contenir au moins 6 caractères');
+      return;
+    }
+
+    setLoading(true);
     try {
-      const res = await api.post('/auth/register', { email, password });
+      const res = await api.post('/auth/register', { name: name.trim(), email, password });
       login(res.data.data.token, res.data.data.user);
       navigate('/dashboard');
     } catch (err: any) {
-      setError(err.message);
+      setError(err.response?.data?.message || err.message || 'Erreur lors de l\'inscription');
     } finally {
       setLoading(false);
     }
   };
 
-  const handleGoogleLogin = async () => {
+  const handleGoogleRegister = async () => {
+    setGoogleLoading(true);
+    setError('');
     try {
-        const res = await api.get('/auth/google/url?platform=web');
+      const res = await api.get('/auth/google/login-url?platform=web');
+      if (res.data.success && res.data.url) {
         window.location.href = res.data.url;
-    } catch (err) {
+      } else {
         setError('Impossible d\'initialiser la connexion Google');
+        setGoogleLoading(false);
+      }
+    } catch (err) {
+      setError('Impossible d\'initialiser la connexion Google');
+      setGoogleLoading(false);
     }
   };
 
@@ -48,12 +109,28 @@ const Login = () => {
             <Shield size={32} className="text-primary" />
           </div>
           <h2>Créer un compte</h2>
-          <p>Rejoignez-nous pour commencer à vos archives sécurisées.</p>
+          <p>Rejoignez MboaDrive pour sécuriser vos archives.</p>
         </div>
 
         {error && <div className="auth-error">{error}</div>}
 
         <form onSubmit={handleSubmit} className="auth-form">
+          <div className="input-group">
+            <label className="input-label">Nom complet</label>
+            <div className="input-with-icon">
+              <User size={18} />
+              <input
+                type="text"
+                className="input-field"
+                placeholder="Jean Dupont"
+                value={name}
+                onChange={(e) => setName(e.target.value)}
+                required
+                autoComplete="name"
+              />
+            </div>
+          </div>
+
           <div className="input-group">
             <label className="input-label">Email</label>
             <div className="input-with-icon">
@@ -65,6 +142,7 @@ const Login = () => {
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 required
+                autoComplete="email"
               />
             </div>
           </div>
@@ -80,18 +158,41 @@ const Login = () => {
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 required
+                autoComplete="new-password"
+                minLength={6}
               />
             </div>
           </div>
 
-          <button type="submit" className="btn btn-primary w-full" disabled={loading}>
-            {loading ? <Loader2 className="animate-spin" /> : "S'inscrire"}
+          <div className="input-group">
+            <label className="input-label">Confirmer le mot de passe</label>
+            <div className="input-with-icon">
+              <Lock size={18} />
+              <input
+                type="password"
+                className="input-field"
+                placeholder="••••••••"
+                value={confirmPassword}
+                onChange={(e) => setConfirmPassword(e.target.value)}
+                required
+                autoComplete="new-password"
+              />
+            </div>
+          </div>
+
+          <button type="submit" className="btn btn-primary w-full" disabled={loading || googleLoading}>
+            {loading ? <Loader2 className="animate-spin" size={20} /> : 'Créer mon compte'}
           </button>
 
           <div className="auth-divider"><span>ou</span></div>
 
-          <button type="button" onClick={handleGoogleLogin} className="btn btn-secondary w-full">
-            Continuer avec Google
+          <button
+            type="button"
+            onClick={handleGoogleRegister}
+            className="btn btn-secondary w-full"
+            disabled={loading || googleLoading}
+          >
+            {googleLoading ? <Loader2 className="animate-spin" size={20} /> : 'S\'inscrire avec Google'}
           </button>
         </form>
 
@@ -103,4 +204,4 @@ const Login = () => {
   );
 };
 
-export default Login;
+export default Register;

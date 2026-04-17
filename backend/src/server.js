@@ -13,6 +13,7 @@ const { initFirebase } = require('./services/firebase.service');
 const { initAI } = require('./services/ai.service');
 const supabase = require('./config/supabase');
 const authMiddleware = require('./middlewares/auth.middleware');
+const errorMiddleware = require('./middlewares/error.middleware');
 // initFirebase(); // DÉSACTIVÉ: On utilise uniquement Google Drive pour le stockage
 initAI();
 
@@ -167,7 +168,7 @@ app.use('/api/gmail', gmailRoutes);
 app.use('/api/ai', aiRoutes);
 
 // Global error handler
-app.use(errorHandler);
+app.use(errorMiddleware);
 
 app.listen(PORT, () => {
   console.log(`✅ MboaDrive Backend démarré sur http://localhost:${PORT}`);
