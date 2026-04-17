@@ -13,7 +13,7 @@ const getHistorique = async (req, res) => {
       .from('Historique')
       .select('*')
       .eq('userId', req.user.id)
-      .order('createdAt', { ascending: false })
+      .order('created_at', { ascending: false })
       .limit(parseInt(limit));
 
     if (error) throw error;
