@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { Shield, Lock, Mail, Loader2, ArrowLeft } from 'lucide-react';
 import { useAuth } from '../../contexts/AuthContext';
@@ -9,9 +9,47 @@ const Login = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
+  const [googleLoading, setGoogleLoading] = useState(false);
   const [error, setError] = useState('');
   const navigate = useNavigate();
   const { login } = useAuth();
+
+  // Handle Google OAuth callback — React StrictMode double-invoke guard
+  const googleCallbackHandled = useRef(false);
+  useEffect(() => {
+    if (googleCallbackHandled.current) return;
+
+    const handleGoogleCallback = async () => {
+      const urlParams = new URLSearchParams(window.location.search);
+      const code = urlParams.get('code');
+      const state = urlParams.get('state');
+
+      if (code && state?.startsWith('auth:')) {
+        googleCallbackHandled.current = true;
+        setGoogleLoading(true);
+        setError('');
+
+        // Clean URL immediately to prevent re-use of the code
+        window.history.replaceState({}, document.title, '/login');
+
+        try {
+          const res = await api.post('/auth/google/callback', { code, platform: 'web' });
+          if (res.data.success) {
+            const { token, user } = res.data.data;
+            login(token, user);
+            navigate('/dashboard');
+          }
+        } catch (err: any) {
+          setError(err.response?.data?.message || 'Erreur lors de la connexion Google');
+        } finally {
+          setGoogleLoading(false);
+        }
+      }
+    };
+
+    handleGoogleCallback();
+  }, [login, navigate]);
+
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -29,11 +67,19 @@ const Login = () => {
   };
 
   const handleGoogleLogin = async () => {
+    setGoogleLoading(true);
+    setError('');
     try {
-        const res = await api.get('/auth/google/url?platform=web');
+      const res = await api.get('/auth/google/login-url?platform=web');
+      if (res.data.success && res.data.url) {
         window.location.href = res.data.url;
-    } catch (err) {
+      } else {
         setError('Impossible d\'initialiser la connexion Google');
+        setGoogleLoading(false);
+      }
+    } catch (err) {
+      setError('Impossible d\'initialiser la connexion Google');
+      setGoogleLoading(false);
     }
   };
 

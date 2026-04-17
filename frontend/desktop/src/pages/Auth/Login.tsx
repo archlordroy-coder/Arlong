@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
 import api from '../../api/client';
@@ -39,16 +39,23 @@ const Login = () => {
     checkGoogleAuth();
   }, []);
 
-  // Handle Google OAuth callback
+  // Handle Google OAuth callback — React StrictMode double-invoke guard
+  const googleCallbackHandled = useRef(false);
   useEffect(() => {
+    if (googleCallbackHandled.current) return;
+
     const handleGoogleCallback = async () => {
       const urlParams = new URLSearchParams(window.location.search);
       const code = urlParams.get('code');
       const state = urlParams.get('state');
 
       if (code && state?.startsWith('auth:')) {
+        googleCallbackHandled.current = true;
         setGoogleLoading(true);
         setError('');
+
+        // Clean URL immediately to prevent re-use
+        window.history.replaceState({}, document.title, '/login');
 
         try {
           const res = await api.post('/auth/google/callback', { code, platform: 'web' });
@@ -62,14 +69,13 @@ const Login = () => {
           setError(err.response?.data?.message || 'Erreur lors de la connexion Google');
         } finally {
           setGoogleLoading(false);
-          // Clean up URL
-          window.history.replaceState({}, document.title, '/login');
         }
       }
     };
 
     handleGoogleCallback();
   }, [login, navigate]);
+
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
