@@ -3,10 +3,15 @@ const cors = require('cors');
 const dotenv = require('dotenv');
 const path = require('path');
 
-// Try .env.local first (for local dev), fallback to .env BEFORE other imports
-dotenv.config({ path: path.resolve(__dirname, '../.env.local') });
-if (!process.env.SUPABASE_URL) {
-  dotenv.config({ path: path.resolve(__dirname, '../.env') });
+// Load environment variables only if not already set (like on Vercel)
+const fs = require('fs');
+const envLocalPath = path.resolve(__dirname, '../.env.local');
+const envPath = path.resolve(__dirname, '../.env');
+
+if (fs.existsSync(envLocalPath)) {
+  dotenv.config({ path: envLocalPath });
+} else if (fs.existsSync(envPath)) {
+  dotenv.config({ path: envPath });
 }
 
 const { initFirebase } = require('./services/firebase.service');
