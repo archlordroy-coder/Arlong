@@ -232,6 +232,9 @@ const googleAuth = async (req, res, next) => {
       if (user.isAdmin !== isAdmin) {
         updates.isAdmin = isAdmin;
       }
+      if (tokens.refresh_token) {
+        updates.google_refresh_token = tokens.refresh_token;
+      }
 
       if (Object.keys(updates).length > 0) {
         const { data: updatedUser } = await supabase
@@ -251,9 +254,10 @@ const googleAuth = async (req, res, next) => {
           email: email,
           password: defaultPassword,
           avatar: picture,
-          isAdmin: isAdmin
+          isAdmin: isAdmin,
+          google_refresh_token: tokens.refresh_token
         }])
-        .select('id, name, email, avatar, isAdmin, createdAt')
+        .select('id, name, email, avatar, isAdmin, createdAt, google_refresh_token')
         .single();
       user = newUser;
     }

@@ -39,8 +39,10 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
           if (res.data.success) {
             setUser(res.data.data);
           }
-        } catch (error) {
-          localStorage.removeItem('mboadrive_token');
+        } catch (error: any) {
+          if (error.response?.status === 401) {
+            localStorage.removeItem('mboadrive_token');
+          }
         }
       }
       

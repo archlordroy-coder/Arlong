@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { Link } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
 import api from '../../api/client';
 import localforage from 'localforage';
@@ -401,9 +402,9 @@ const Dashboard = () => {
               <Clock size={20} className="text-primary" />
               Dernières archives
             </h2>
-            <a href="/explorer" className="text-sm text-primary hover:underline flex items-center gap-1">
+            <Link to="/explorer" className="text-sm text-primary hover:underline flex items-center gap-1">
               Voir tout <ChevronRight size={14} />
-            </a>
+            </Link>
           </div>
           <div className="glass-panel overflow-hidden">
             {recentDocs.length > 0 ? (
@@ -440,9 +441,9 @@ const Dashboard = () => {
               <Activity size={20} className="text-secondary" />
               Activité récente
             </h2>
-            <a href="/history" className="text-sm text-primary hover:underline flex items-center gap-1">
+            <Link to="/history" className="text-sm text-primary hover:underline flex items-center gap-1">
               Voir tout <ChevronRight size={14} />
-            </a>
+            </Link>
           </div>
           <div className="glass-panel overflow-hidden">
             {history.length > 0 ? (
