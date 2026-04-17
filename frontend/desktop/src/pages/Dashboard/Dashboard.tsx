@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
+import { useUpdater } from '../../hooks/useUpdater';
 import api from '../../api/client';
 import localforage from 'localforage';
 import {
@@ -29,6 +30,7 @@ interface HistoryItem {
 
 const Dashboard = () => {
   const { user } = useAuth();
+  const { updateAvailable } = useUpdater();
   const [isOnline, setIsOnline] = useState(navigator.onLine);
   const [offlineQueue, setOfflineQueue] = useState<OfflineFile[]>([]);
   const [isSyncing, setIsSyncing] = useState(false);

@@ -5,9 +5,9 @@ const getHistorique = async (req, res, next) => {
     const { limit = 20 } = req.query;
     const { data, error } = await supabase
       .from('Historique')
-      .select('*, user:User(name), document:Document(name)')
+      .select('*, User!userId(name), Document!docId(name)')
       .eq('userId', req.user.id)
-      .order('created_at', { ascending: false })
+      .order('createdAt', { ascending: false })
       .limit(parseInt(limit));
 
     if (error) throw error;

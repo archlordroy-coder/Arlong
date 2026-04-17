@@ -1,12 +1,14 @@
 import React, { useState } from 'react';
 import { useEncryption } from '../../hooks/useEncryption';
 import { useAuth } from '../../contexts/AuthContext';
-import { Shield, Key, Lock, Trash2, CheckCircle, Cloud, RefreshCw } from 'lucide-react';
+import { useUpdater } from '../../hooks/useUpdater';
+import { Shield, Key, Lock, Trash2, CheckCircle, Cloud, RefreshCw, Download } from 'lucide-react';
 import api from '../../api/client';
 import './Settings.css';
 
 const Settings = () => {
   const { user } = useAuth();
+  const { updateAvailable, isUpdating, progress, startUpdate } = useUpdater();
   const { saveKey, clearKey, isConfigured } = useEncryption();
   const [newKey, setNewKey] = useState('');
   const [googleLoading, setGoogleLoading] = useState(false);
@@ -112,6 +114,47 @@ const Settings = () => {
                 {googleLoading ? <RefreshCw className="animate-spin" size={16} /> : <Cloud size={16} />}
                 Lier mon compte Google Drive
               </button>
+            )}
+        </section>
+
+        <section className="settings-section glass-panel">
+            <div className="section-title">
+                <RefreshCw size={20} />
+                <h2>Mise à jour Logicielle</h2>
+            </div>
+            <p className="section-desc">Vérifiez si une nouvelle version d'Arlong est disponible.</p>
+            
+            {updateAvailable ? (
+              <div className="update-available-info">
+                <div className="p-3 bg-primary/10 rounded-lg mb-4">
+                  <p className="text-sm font-bold">Version {updateAvailable.versionName} prête</p>
+                  <p className="text-xs text-secondary mt-1 line-clamp-2">{updateAvailable.notes}</p>
+                </div>
+                
+                {isUpdating ? (
+                  <div className="update-progress">
+                    <div className="flex justify-between text-xs mb-1">
+                      <span>Téléchargement...</span>
+                      <span>{progress}%</span>
+                    </div>
+                    <div className="w-full bg-white/10 rounded-full h-1.5 overflow-hidden">
+                      <div className="bg-primary h-full transition-all duration-300" style={{ width: `${progress}%` }}></div>
+                    </div>
+                  </div>
+                ) : (
+                  <button onClick={startUpdate} className="btn btn-primary w-full flex items-center justify-center gap-2">
+                    <Download size={16} /> Mettre à jour maintenant
+                  </button>
+                )}
+              </div>
+            ) : (
+              <div className="text-center py-2">
+                <div className="flex items-center justify-center gap-2 text-success mb-2">
+                  <CheckCircle size={14} />
+                  <span className="text-sm">Vous êtes à jour</span>
+                </div>
+                <p className="text-xs text-secondary">Dernière vérification à l'instant</p>
+              </div>
             )}
         </section>
 

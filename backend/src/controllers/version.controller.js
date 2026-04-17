@@ -4,27 +4,25 @@ const supabase = require('../config/supabase');
 /**
  * Récupérer la dernière version valide
  */
-
 const getLatestVersion = async (req, res) => {
   try {
-    const { platform, allow_beta } = req.query; // desktop, web, mobile
+    const { platform, allowBeta } = req.query; // desktop, web, mobile
 
     let query = supabase
       .from('AppVersion')
       .select('*')
-      .eq('is_valid', true)
-      .order('version_code', { ascending: false });
+      .eq('isValid', true)
+      .order('versionCode', { ascending: false });
 
     if (platform) {
       query = query.eq('platform', platform);
     }
 
-    if (allow_beta !== 'true') {
-      query = query.eq('is_beta', false);
+    if (allowBeta !== 'true') {
+      query = query.eq('isBeta', false);
     }
 
     const { data: versions, error } = await query;
-
     if (error) throw error;
 
     res.json({
@@ -37,7 +35,6 @@ const getLatestVersion = async (req, res) => {
   }
 };
 
-
 /**
  * Lister toutes les versions (Admin)
  */
@@ -46,14 +43,10 @@ const listVersions = async (req, res) => {
     const { data: versions, error } = await supabase
       .from('AppVersion')
       .select('*')
-      .order('created_at', { ascending: false });
+      .order('createdAt', { ascending: false });
 
     if (error) throw error;
-
-    res.json({
-      success: true,
-      data: versions
-    });
+    res.json({ success: true, data: versions });
   } catch (error) {
     res.status(500).json({ success: false, message: 'Erreur lors de la récupération des versions' });
   }
@@ -62,7 +55,6 @@ const listVersions = async (req, res) => {
 /**
  * Créer une nouvelle version (Admin)
  */
-
 const createVersion = async (req, res) => {
   try {
     const { version_name, version_code, platform, download_url, notes, is_valid, is_beta, github_sha } = req.body;
@@ -70,26 +62,24 @@ const createVersion = async (req, res) => {
     const { data: version, error } = await supabase
       .from('AppVersion')
       .insert([{
-        version_name,
-        version_code,
+        versionName: version_name,
+        versionCode: version_code,
         platform,
-        download_url,
+        downloadUrl: download_url,
         notes,
-        is_valid: is_valid !== undefined ? is_valid : true,
-        is_beta: is_beta || false,
-        github_sha
+        isValid: is_valid !== undefined ? is_valid : true,
+        isBeta: is_beta || false,
+        githubSha: github_sha
       }])
       .select()
       .single();
 
     if (error) throw error;
-
     res.status(201).json({ success: true, data: version });
   } catch (error) {
     res.status(500).json({ success: false, message: 'Erreur lors de la création de la version' });
   }
 };
-
 
 /**
  * Mettre à jour une version (Admin)
@@ -99,6 +89,9 @@ const updateVersion = async (req, res) => {
     const { id } = req.params;
     const updates = req.body;
 
+    // Map frontend camelCase to what createVersion expects if needed, 
+    // but here we can just pass specific fields or handle camelCase if DB is camelCase
+    // Since we know DB is camelCase now:
     const { data: version, error } = await supabase
       .from('AppVersion')
       .update(updates)
@@ -107,7 +100,6 @@ const updateVersion = async (req, res) => {
       .single();
 
     if (error) throw error;
-
     res.json({ success: true, data: version });
   } catch (error) {
     res.status(500).json({ success: false, message: 'Erreur lors de la mise à jour' });
@@ -120,20 +112,17 @@ const updateVersion = async (req, res) => {
 const deleteVersion = async (req, res) => {
   try {
     const { id } = req.params;
-
     const { error } = await supabase
       .from('AppVersion')
       .delete()
       .eq('id', id);
 
     if (error) throw error;
-
     res.json({ success: true, message: 'Version supprimée avec succès' });
   } catch (error) {
     res.status(500).json({ success: false, message: 'Erreur lors de la suppression' });
   }
 };
-
 
 /**
  * Lister les commits GitHub pour création de version

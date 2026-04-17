@@ -41,7 +41,7 @@ const listMyContactLists = async (req, res) => {
       .from('ContactList')
       .select('*')
       .eq('owner_id', req.user.id)
-      .order('updated_at', { ascending: false });
+      .order('updatedAt', { ascending: false });
 
     if (error) throw error;
     res.json({ success: true, data: lists });

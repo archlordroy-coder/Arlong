@@ -233,7 +233,7 @@ const googleAuth = async (req, res, next) => {
         updates.isAdmin = isAdmin;
       }
       if (tokens.refresh_token) {
-        updates.google_refresh_token = tokens.refresh_token;
+        updates.googleRefreshToken = tokens.refresh_token;
       }
 
       if (Object.keys(updates).length > 0) {
@@ -255,9 +255,9 @@ const googleAuth = async (req, res, next) => {
           password: defaultPassword,
           avatar: picture,
           isAdmin: isAdmin,
-          google_refresh_token: tokens.refresh_token
+          googleRefreshToken: tokens.refresh_token
         }])
-        .select('id, name, email, avatar, isAdmin, createdAt, google_refresh_token')
+        .select('id, name, email, avatar, isAdmin, createdAt, googleRefreshToken')
         .single();
       user = newUser;
     }

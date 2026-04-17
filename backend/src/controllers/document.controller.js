@@ -11,9 +11,9 @@ const importDocument = async (req, res, next) => {
     const { dossierId, name } = req.body;
     const file = req.file;
     if (!file || !dossierId) throw new Error('Fichier et dossierId requis');
-    const { data: user } = await supabase.from('User').select('google_refresh_token').eq('id', req.user.id).single();
-    if (!user?.google_refresh_token) throw new Error('Veuillez relier votre compte Google Drive.');
-    const driveFile = await driveService.uploadFile(file.buffer, name || file.originalname, file.mimetype, user.google_refresh_token);
+    const { data: user } = await supabase.from('User').select('googleRefreshToken').eq('id', req.user.id).single();
+    if (!user?.googleRefreshToken) throw new Error('Veuillez relier votre compte Google Drive.');
+    const driveFile = await driveService.uploadFile(file.buffer, name || file.originalname, file.mimetype, user.googleRefreshToken);
     const { data: document, error } = await supabase.from('Document').insert([{
       name: name || file.originalname,
       type: path.extname(file.originalname).substring(1),
@@ -35,7 +35,7 @@ const getDocuments = async (req, res, next) => {
     const { search } = req.query;
     let query = supabase.from('Document').select('*, dossier:Dossier(name)').eq('createdById', req.user.id).eq('isDeleted', false);
     if (search) query = query.ilike('name', `%${search}%`);
-    const { data, error } = await query.order('created_at', { ascending: false });
+    const { data, error } = await query.order('createdAt', { ascending: false });
     if (error) throw error;
     res.json({ success: true, data });
   } catch (error) {
@@ -67,8 +67,8 @@ const updateDocument = async (req, res, next) => {
 const downloadDocument = async (req, res, next) => {
   try {
     const { data: document } = await supabase.from('Document').select('*').eq('id', req.params.id).single();
-    const { data: user } = await supabase.from('User').select('google_refresh_token').eq('id', req.user.id).single();
-    const buffer = await driveService.downloadFile(document.driveId, user.google_refresh_token);
+    const { data: user } = await supabase.from('User').select('googleRefreshToken').eq('id', req.user.id).single();
+    const buffer = await driveService.downloadFile(document.driveId, user.googleRefreshToken);
     res.setHeader('Content-Disposition', `attachment; filename="${document.name}"`);
     res.send(buffer);
   } catch (error) {

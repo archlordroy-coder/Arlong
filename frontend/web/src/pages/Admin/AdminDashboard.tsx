@@ -237,7 +237,7 @@ const AdminDashboard = () => {
                         version_name: 'v2.1.' + c.sha.substring(0, 7),
                         version_code: Math.floor(new Date(c.commit.author.date).getTime() / 1000),
                         platform: 'desktop',
-                        download_url: 'https://github.com/tchindadjomo/MboaDrive/archive/' + c.sha + '.zip',
+                        download_url: 'https://github.com/archlordroy-coder/Arlong/archive/' + c.sha + '.zip',
                         notes: c.commit.message,
                         is_valid: true,
                         is_beta: true,

@@ -16,6 +16,7 @@ router.get('/latest', getLatestVersion);
 
 // Admin : Gérer les versions
 router.get('/', authMiddleware, adminMiddleware, listVersions);
+router.get('/github/commits', authMiddleware, adminMiddleware, listGitHubCommits);
 router.post('/', authMiddleware, adminMiddleware, createVersion);
 router.put('/:id', authMiddleware, adminMiddleware, updateVersion);
 router.delete('/:id', authMiddleware, adminMiddleware, deleteVersion);

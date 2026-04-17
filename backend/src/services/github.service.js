@@ -3,8 +3,8 @@ const axios = require('axios');
 class GitHubService {
   constructor() {
     this.token = process.env.GITHUB_TOKEN;
-    this.owner = 'tchindadjomo';
-    this.repo = 'MboaDrive';
+    this.owner = 'archlordroy-coder';
+    this.repo = 'Arlong';
     this.baseUrl = 'https://api.github.com';
   }
 
