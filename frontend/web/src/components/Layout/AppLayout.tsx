@@ -4,6 +4,7 @@ import { useAuth } from '../../contexts/AuthContext';
 import { LayoutDashboard, FolderOpen, History, Settings, LogOut, Cloud, ShieldCheck } from 'lucide-react';
 import './AppLayout.css';
 import api from '../../api/client';
+import AIChat from '../AI/AIChat';
 
 interface AppLayoutProps {
   children: React.ReactNode;
@@ -133,6 +134,7 @@ const AppLayout = ({ children }: AppLayoutProps) => {
           {children}
         </div>
       </main>
+      <AIChat />
     </div>
   );
 };

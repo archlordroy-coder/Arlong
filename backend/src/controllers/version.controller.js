@@ -6,7 +6,7 @@ const supabase = require('../config/supabase');
  */
 const getLatestVersion = async (req, res) => {
   try {
-    const { platform, allowBeta } = req.query; // desktop, web, mobile
+    const { platform, allowBeta } = req.query;
 
     let query = supabase
       .from('AppVersion')
@@ -48,6 +48,7 @@ const listVersions = async (req, res) => {
     if (error) throw error;
     res.json({ success: true, data: versions });
   } catch (error) {
+    console.error('ListVersions error:', error);
     res.status(500).json({ success: false, message: 'Erreur lors de la récupération des versions' });
   }
 };
@@ -59,16 +60,17 @@ const createVersion = async (req, res) => {
   try {
     const { version_name, version_code, platform, download_url, notes, is_valid, is_beta, github_sha } = req.body;
 
+    // On utilise camelCase pour les colonnes en base (conforme au reste du projet)
     const { data: version, error } = await supabase
       .from('AppVersion')
       .insert([{
         versionName: version_name,
-        versionCode: version_code,
+        versionCode: parseInt(version_code),
         platform,
         downloadUrl: download_url,
         notes,
         isValid: is_valid !== undefined ? is_valid : true,
-        isBeta: is_beta || false,
+        isBeta: !!is_beta,
         githubSha: github_sha
       }])
       .select()
@@ -77,7 +79,8 @@ const createVersion = async (req, res) => {
     if (error) throw error;
     res.status(201).json({ success: true, data: version });
   } catch (error) {
-    res.status(500).json({ success: false, message: 'Erreur lors de la création de la version' });
+    console.error('CreateVersion error:', error);
+    res.status(500).json({ success: false, message: 'Erreur lors de la création de la version', details: error.message });
   }
 };
 
@@ -89,9 +92,6 @@ const updateVersion = async (req, res) => {
     const { id } = req.params;
     const updates = req.body;
 
-    // Map frontend camelCase to what createVersion expects if needed, 
-    // but here we can just pass specific fields or handle camelCase if DB is camelCase
-    // Since we know DB is camelCase now:
     const { data: version, error } = await supabase
       .from('AppVersion')
       .update(updates)
@@ -124,9 +124,6 @@ const deleteVersion = async (req, res) => {
   }
 };
 
-/**
- * Lister les commits GitHub pour création de version
- */
 const listGitHubCommits = async (req, res) => {
   try {
     const commits = await githubService.getCommits();
