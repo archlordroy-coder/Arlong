@@ -1,374 +1,99 @@
 const supabase = require('../config/supabase');
 const driveService = require('../services/googleDrive.service');
-const multer = require('multer');
 const path = require('path');
+const multer = require('multer');
 
-// Multer en mémoire (buffer) pour transfert direct vers Google Drive
-const upload = multer({
-  storage: multer.memoryStorage(),
-  limits: { fileSize: 50 * 1024 * 1024 }, // 50MB max
-  fileFilter: (req, file, cb) => {
-    const allowed = [
-      '.pdf', '.jpg', '.jpeg', '.png', '.gif', '.webp',
-      '.doc', '.docx', '.txt', '.md',
-      '.zip', '.rar', '.7z', '.tar', '.gz',
-      '.ppt', '.pptx', '.xls', '.xlsx', '.csv'
-    ];
-    const ext = path.extname(file.originalname).toLowerCase();
-    if (allowed.includes(ext)) cb(null, true);
-    else {
-      const error = new Error(`Le type de fichier "${ext}" n'est pas autorisé. Extensions admises : ${allowed.join(', ')}`);
-      error.status = 400;
-      cb(error);
-    }
-  },
-});
+const storage = multer.memoryStorage();
+const upload = multer({ storage: storage });
 
-/** Upload et importer un document */
-const importDocument = async (req, res) => {
+const importDocument = async (req, res, next) => {
   try {
     const { dossierId, name } = req.body;
     const file = req.file;
-
-    if (!file) return res.status(400).json({ success: false, message: 'Aucun fichier fourni' });
-    if (!dossierId) return res.status(400).json({ success: false, message: 'dossierId requis' });
-
-    // Récupérer l'utilisateur pour son token Drive
-    const { data: user, error: userError } = await supabase
-      .from('User')
-      .select('google_refresh_token')
-      .eq('id', req.user.id)
-      .single();
-
-    if (userError || !user?.google_refresh_token) {
-      return res.status(403).json({ success: false, message: "Vous devez lier votre compte Google Drive pour importer des documents." });
-    }
-
-    // Vérifier que le dossier existe et est accessible
-    const { data: dossier, error: dossierError } = await supabase
-      .from('Dossier')
-      .select('id, name, createdById, isPublic, espace:Espace(id, name)')
-      .eq('id', dossierId)
-      .or(`createdById.eq.${req.user.id},isPublic.eq.true`)
-      .single();
-
-    if (dossierError || !dossier) {
-      return res.status(404).json({ success: false, message: 'Dossier non trouvé ou inaccessible' });
-    }
-
-    // Chemin hiérarchique : Mboa Drive / [Espace] / [Dossier]
-    const pathSegments = ['Mboa Drive'];
-    if (dossier.espace?.name) pathSegments.push(dossier.espace.name);
-    pathSegments.push(dossier.name);
-
-    const fileName = name || file.originalname;
-    const fileType = path.extname(file.originalname).substring(1).toLowerCase();
-
-    // Upload vers Google Drive de l'utilisateur avec le chemin hierarchique
-    const driveFile = await driveService.uploadFile(
-      file.buffer, 
-      fileName, 
-      file.mimetype, 
-      user.google_refresh_token,
-      pathSegments
-    );
-
-    const filePath = driveFile.webViewLink; // Lien consultable sur Drive
-    const driveId = driveFile.id; // ID unique du fichier sur Drive
-    
-    // --- FIREBASE DÉSACTIVÉ: Stockage uniquement sur Google Drive ---
-    // Les fichiers sont stockés exclusivement sur Google Drive
-    const firebase_url = null;
-    const use_firebase_cache = false;
-    const firebase_cached_at = null;
-
-    // Créer le document en base
-    const { data: document, error: docError } = await supabase
-      .from('Document')
-      .insert([{
-        name: fileName,
-        type: fileType,
-        path: filePath,
-        driveId,
-        dossierId: dossierId,
-        firebase_url,
-        use_firebase_cache,
-        firebase_cached_at
-      }])
-      .select()
-      .single();
-
-    if (docError) throw docError;
-
-    // Enregistrer dans l'historique
-    await supabase.from('Historique').insert([{
-      actionType: 'Importation',
-      docId: document.id,
-      userId: req.user.id,
-    }]);
-
+    if (!file || !dossierId) throw new Error('Fichier et dossierId requis');
+    const { data: user } = await supabase.from('User').select('google_refresh_token').eq('id', req.user.id).single();
+    if (!user?.google_refresh_token) throw new Error('Veuillez relier votre compte Google Drive.');
+    const driveFile = await driveService.uploadFile(file.buffer, name || file.originalname, file.mimetype, user.google_refresh_token);
+    const { data: document, error } = await supabase.from('Document').insert([{
+      name: name || file.originalname,
+      type: path.extname(file.originalname).substring(1),
+      path: driveFile.webViewLink,
+      driveId: driveFile.id,
+      dossierId: dossierId === 'root' ? null : dossierId,
+      size: file.size,
+      createdById: req.user.id
+    }]).select().single();
+    if (error) throw error;
     res.status(201).json({ success: true, data: document });
   } catch (error) {
-    console.error('Import error:', error);
-    res.status(500).json({ success: false, message: error.message || 'Erreur lors de l\'import' });
+    next(error);
   }
 };
 
-/** Lister les documents d'un dossier */
-const getDocuments = async (req, res) => {
+const getDocuments = async (req, res, next) => {
   try {
-    const { dossierId, search, type } = req.query;
-
-    let query = supabase
-      .from('Document')
-      .select(`
-        *,
-        dossier:Dossier(id, name, createdById, isPublic, espace:Espace(id, name))
-      `)
-      .eq('isDeleted', false);
-
-    if (dossierId) {
-      query = query.eq('dossierId', dossierId);
-    }
-    if (search) {
-      query = query.ilike('name', `%${search}%`);
-    }
-    if (type) {
-      query = query.eq('type', type);
-    }
-
-    const { data: documents, error } = await query.order('created_at', { ascending: false });
-
+    const { search } = req.query;
+    let query = supabase.from('Document').select('*, dossier:Dossier(name)').eq('createdById', req.user.id).eq('isDeleted', false);
+    if (search) query = query.ilike('name', `%${search}%`);
+    const { data, error } = await query.order('created_at', { ascending: false });
     if (error) throw error;
-
-    // Filtrage post-requête pour la sécurité (Dossiers privés)
-    const filteredDocs = documents.filter(doc => 
-        doc.dossier.createdById === req.user.id || doc.dossier.isPublic === true
-    );
-
-    res.json({ success: true, data: filteredDocs });
+    res.json({ success: true, data });
   } catch (error) {
-    res.status(500).json({ success: false, message: 'Erreur serveur' });
+    next(error);
   }
 };
 
-/** Obtenir un document par ID */
-const getDocumentById = async (req, res) => {
-  try {
-    const { id } = req.params;
-
-    const { data: document, error } = await supabase
-      .from('Document')
-      .select(`
-        *,
-        dossier:Dossier(id, name, createdById, isPublic, espace:Espace(id, name))
-      `)
-      .eq('id', id)
-      .eq('isDeleted', false)
-      .single();
-
-    if (error || !document) {
-      return res.status(404).json({ success: false, message: 'Document non trouvé' });
+const getDocumentById = async (req, res, next) => {
+    try {
+        const { data, error } = await supabase.from('Document').select('*').eq('id', req.params.id).single();
+        if (error) throw error;
+        res.json({ success: true, data });
+    } catch (error) {
+        next(error);
     }
-
-    // Vérification accès
-    if (document.dossier.createdById !== req.user.id && !document.dossier.isPublic) {
-        return res.status(403).json({ success: false, message: 'Accès non autorisé' });
-    }
-
-    // Log de consultation
-    await supabase.from('Historique').insert([{
-        actionType: 'Consultation',
-        docId: document.id,
-        userId: req.user.id,
-    }]);
-
-    res.json({ success: true, data: document });
-  } catch (error) {
-    res.status(500).json({ success: false, message: 'Erreur serveur' });
-  }
 };
 
-/** Télécharger un document */
-const downloadDocument = async (req, res) => {
+const updateDocument = async (req, res, next) => {
+    try {
+        const { name } = req.body;
+        const { data, error } = await supabase.from('Document').update({ name }).eq('id', req.params.id).select().single();
+        if (error) throw error;
+        res.json({ success: true, data });
+    } catch (error) {
+        next(error);
+    }
+};
+
+const downloadDocument = async (req, res, next) => {
   try {
-    const { id } = req.params;
-
-    const { data: document, error: docError } = await supabase
-      .from('Document')
-      .select(`
-        *,
-        dossier:Dossier(id, name, createdById, isPublic, espace:Espace(id, name))
-      `)
-      .eq('id', id)
-      .eq('isDeleted', false)
-      .single();
-
-    if (docError || !document) return res.status(404).json({ success: false, message: 'Document non trouvé' });
-
-    // Accès ?
-    if (document.dossier.createdById !== req.user.id && !document.dossier.isPublic) {
-        return res.status(403).json({ success: false, message: 'Accès non autorisé' });
-    }
-
-    if (!document.driveId) {
-      return res.status(400).json({ success: false, message: 'Fichier non disponible sur Google Drive' });
-    }
-
-    // Récupérer le token de l'utilisateur actuel
-    const { data: user, error: userError } = await supabase
-        .from('User')
-        .select('google_refresh_token')
-        .eq('id', req.user.id)
-        .single();
-
-    if (userError || !user?.google_refresh_token) {
-      return res.status(403).json({ success: false, message: "Vous devez relier votre compte Google Drive." });
-    }
-
+    const { data: document } = await supabase.from('Document').select('*').eq('id', req.params.id).single();
+    const { data: user } = await supabase.from('User').select('google_refresh_token').eq('id', req.user.id).single();
     const buffer = await driveService.downloadFile(document.driveId, user.google_refresh_token);
-
-    // Historique
-    await supabase.from('Historique').insert([{
-        actionType: 'Téléchargement',
-        docId: document.id,
-        userId: req.user.id,
-    }]);
-
     res.setHeader('Content-Disposition', `attachment; filename="${document.name}"`);
-    res.setHeader('Content-Type', 'application/octet-stream');
     res.send(buffer);
   } catch (error) {
-    console.error('Download error:', error);
-    res.status(500).json({ success: false, message: 'Erreur lors du téléchargement.' });
+    next(error);
   }
 };
 
-/** Déplacer un document vers un autre dossier */
-const moveDocument = async (req, res) => {
-  try {
-    const { id } = req.params;
-    const { newDossierId } = req.body;
-
-    // 1. Vérifier si le document existe et si l'utilisateur y a accès
-    const { data: document, error: docError } = await supabase
-      .from('Document')
-      .select('id, dossier:Dossier(createdById)')
-      .eq('id', id)
-      .single();
-
-    if (docError || !document) return res.status(404).json({ success: false, message: 'Document introuvable' });
-    if (document.dossier.createdById !== req.user.id) {
-      return res.status(403).json({ success: false, message: 'Accès non autorisé pour déplacer ce document' });
+const moveDocument = async (req, res, next) => {
+    try {
+        const { dossierId } = req.body;
+        const { data, error } = await supabase.from('Document').update({ dossierId }).eq('id', req.params.id).select().single();
+        if (error) throw error;
+        res.json({ success: true, data });
+    } catch (error) {
+        next(error);
     }
-
-    // 2. Vérifier si le nouveau dossier existe et si l'utilisateur y a accès
-    const { data: newDossier, error: newDossierError } = await supabase
-      .from('Dossier')
-      .select('id, createdById')
-      .eq('id', newDossierId)
-      .single();
-
-    if (newDossierError || !newDossier) return res.status(404).json({ success: false, message: 'Dossier de destination introuvable' });
-    if (newDossier.createdById !== req.user.id) {
-      return res.status(403).json({ success: false, message: 'Accès non autorisé au dossier de destination' });
-    }
-
-    const { data: updated, error } = await supabase
-      .from('Document')
-      .update({ dossierId: newDossierId })
-      .eq('id', id)
-      .select()
-      .single();
-
-    if (error) throw error;
-
-    await supabase.from('Historique').insert([{
-        actionType: 'Déplacement',
-        docId: id,
-        userId: req.user.id,
-    }]);
-
-    res.json({ success: true, data: updated });
-  } catch (error) {
-    res.status(500).json({ success: false, message: 'Erreur lors du déplacement' });
-  }
 };
 
-/** Renommer un document */
-const updateDocument = async (req, res) => {
+const deleteDocument = async (req, res, next) => {
   try {
-    const { id } = req.params;
-    const { name } = req.body;
-
-    if (!name || !name.trim()) {
-      return res.status(400).json({ success: false, message: 'Le nouveau nom est requis' });
-    }
-
-    // Vérifier l'accès
-    const { data: document, error: docError } = await supabase
-      .from('Document')
-      .select('id, name, dossier:Dossier(createdById)')
-      .eq('id', id)
-      .single();
-
-    if (docError || !document) {
-      return res.status(404).json({ success: false, message: 'Document introuvable' });
-    }
-    if (document.dossier.createdById !== req.user.id) {
-      return res.status(403).json({ success: false, message: 'Accès non autorisé' });
-    }
-
-    const { data: updated, error } = await supabase
-      .from('Document')
-      .update({ name: name.trim() })
-      .eq('id', id)
-      .select()
-      .single();
-
-    if (error) throw error;
-
-    res.json({ success: true, data: updated });
-  } catch (error) {
-    console.error('Update document error:', error);
-    res.status(500).json({ success: false, message: 'Erreur lors du renommage' });
-  }
-};
-
-/** Suppression logique */
-const deleteDocument = async (req, res) => {
-  try {
-    const { id } = req.params;
-
-    // Vérifier l'accès
-    const { data: document, error: docError } = await supabase
-      .from('Document')
-      .select('id, dossier:Dossier(createdById)')
-      .eq('id', id)
-      .single();
-
-    if (docError || !document) return res.status(404).json({ success: false, message: 'Document introuvable' });
-    if (document.dossier.createdById !== req.user.id) {
-      return res.status(403).json({ success: false, message: 'Accès non autorisé pour supprimer ce document' });
-    }
-
-    const { error } = await supabase
-      .from('Document')
-      .update({ isDeleted: true })
-      .eq('id', id);
-
-    if (error) throw error;
-
-    await supabase.from('Historique').insert([{
-        actionType: 'Suppression',
-        docId: id,
-        userId: req.user.id,
-    }]);
-
+    await supabase.from('Document').update({ isDeleted: true }).eq('id', req.params.id);
     res.json({ success: true, message: 'Document supprimé' });
   } catch (error) {
-    res.status(500).json({ success: false, message: 'Erreur lors de la suppression' });
+    next(error);
   }
 };
 
-module.exports = { upload, importDocument, getDocuments, getDocumentById, downloadDocument, moveDocument, deleteDocument, updateDocument };
+module.exports = { upload, importDocument, getDocuments, getDocumentById, downloadDocument, updateDocument, moveDocument, deleteDocument };

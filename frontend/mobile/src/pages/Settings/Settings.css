@@ -1,261 +1,89 @@
-/* =========================================================
-    SETTINGS MOBILE CSS - Theme Support
-    ========================================================= */
+.settings-container {
+  max-width: 900px;
+  margin: 0 auto;
+}
 
-.mobile-settings {
-  padding: env(safe-area-inset-top, 16px) 1.25rem 1.25rem;
+.settings-header {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  margin-bottom: 2.5rem;
+}
+
+.settings-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+  gap: 2rem;
+}
+
+.settings-section {
+  padding: 2rem;
+}
+
+.section-title {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  margin-bottom: 1rem;
+}
+
+.section-title h2 {
+  font-size: 1.25rem;
+}
+
+.section-desc {
+  font-size: 0.95rem;
+  color: var(--text-secondary);
+  line-height: 1.6;
+  margin-bottom: 2rem;
+}
+
+.key-status-configured {
   display: flex;
   flex-direction: column;
   gap: 1.5rem;
 }
 
-.mobile-settings-header {
-  margin-top: 10px;
-}
-
-.mobile-settings-title {
-  font-size: 1.5rem;
-  font-weight: 700;
-  color: var(--text-primary);
-  margin-bottom: 0.25rem;
-}
-
-.mobile-settings-subtitle {
-  font-size: 0.8rem;
-  color: var(--text-secondary);
-}
-
-.mobile-settings-section {
-  display: flex;
-  flex-direction: column;
-}
-
-.mobile-settings-card {
-  background: var(--bg-card);
-  border: 1px solid var(--border-default);
-  border-radius: 1.5rem;
-  padding: 1.25rem;
-  display: flex;
-  flex-direction: column;
-  gap: 1rem;
-  transition: all 0.3s ease, background 0.3s ease;
-}
-
-.drive-card {
-  border-left: 4px solid var(--accent-warning);
-}
-
-.mobile-profile-overview {
+.status-badge {
   display: flex;
   align-items: center;
-  gap: 1rem;
-  margin-bottom: 0.5rem;
-}
-
-.mobile-avatar {
-  width: 60px;
-  height: 60px;
-  background: linear-gradient(135deg, var(--accent-primary), #9333ea);
-  border-radius: 16px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  color: white;
-  font-size: 1.5rem;
-  font-weight: 700;
-  box-shadow: 0 4px 10px rgba(99, 102, 241, 0.3);
-}
-
-.mobile-profile-info h2 {
-  font-size: 1.1rem;
-  font-weight: 600;
-  color: var(--text-primary);
-  margin-bottom: 0.1rem;
-}
-
-.mobile-profile-info p {
-  font-size: 0.75rem;
-  color: var(--text-secondary);
-}
-
-.mobile-settings-form {
-  display: flex;
-  flex-direction: column;
-  gap: 1rem;
-}
-
-.mobile-form-group {
-  display: flex;
-  flex-direction: column;
-  gap: 0.4rem;
-}
-
-.mobile-form-group.disabled {
-  opacity: 0.5;
-}
-
-.mobile-form-group label {
-  display: flex;
-  align-items: center;
-  gap: 0.4rem;
-  font-size: 0.75rem;
-  font-weight: 500;
-  color: var(--text-secondary);
-}
-
-.mobile-form-group input {
-  padding: 0.75rem;
-  background: var(--bg-input);
-  border: 1px solid var(--border-default);
-  border-radius: 0.75rem;
-  color: var(--text-primary);
-  font-size: 0.9rem;
-}
-
-.mobile-btn-save {
-  display: flex;
-  align-items: center;
-  justify-content: center;
   gap: 0.5rem;
-  background: var(--accent-primary);
-  color: white;
-  border: none;
-  border-radius: 0.75rem;
-  padding: 0.8rem;
-  font-size: 0.9rem;
-  font-weight: 600;
-  margin-top: 0.5rem;
-}
-
-.spin {
-  animation: spin 1s linear infinite;
-}
-
-@keyframes spin {
-  from { transform: rotate(0deg); }
-  to { transform: rotate(360deg); }
-}
-
-.mobile-card-header {
-  display: flex;
-  align-items: center;
-  gap: 0.75rem;
-}
-
-.mobile-card-icon {
-  width: 36px;
-  height: 36px;
-  border-radius: 10px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.mobile-card-icon.warning { background: rgba(245, 158, 11, 0.15); color: var(--accent-warning); }
-.mobile-card-icon.primary { background: rgba(99, 102, 241, 0.15); color: var(--accent-primary); }
-
-.mobile-card-header h3 {
-  font-size: 1rem;
-  font-weight: 600;
-  color: var(--text-primary);
-}
-
-.mobile-card-desc {
-  font-size: 0.8rem;
-  color: var(--text-secondary);
-  line-height: 1.4;
-}
-
-.mobile-btn-connect {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 0.5rem;
-  background: var(--accent-primary);
-  color: white;
-  border: none;
-  border-radius: 0.75rem;
-  padding: 0.8rem;
-  font-size: 0.9rem;
-  font-weight: 600;
-  margin-top: 0.5rem;
-}
-
-.mobile-btn-logout {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 0.5rem;
-  background: transparent;
-  color: var(--text-secondary);
-  border: 1px solid var(--border-default);
-  border-radius: 0.75rem;
-  padding: 0.8rem;
-  font-size: 0.9rem;
-  font-weight: 500;
-}
-
-.mobile-drive-status {
-  display: flex;
-  flex-direction: column;
-  gap: 0.5rem;
-}
-
-.mobile-badge-success {
-  background: rgba(16, 185, 129, 0.1);
-  border: 1px solid rgba(16, 185, 129, 0.3);
   color: var(--accent-success);
-  text-transform: uppercase;
-  font-size: 0.7rem;
-  font-weight: 700;
-  padding: 0.6rem;
-  text-align: center;
-  border-radius: 0.5rem;
-  letter-spacing: 0.05em;
+  font-weight: 600;
+  font-size: 0.9rem;
 }
 
-.mobile-btn-text {
-  background: transparent;
-  border: none;
-  color: var(--text-secondary);
-  font-size: 0.8rem;
-}
-
-/* Theme Toggle */
-.theme-card {
-  border-left: 4px solid var(--accent-primary);
-}
-
-.theme-toggle-container {
+.key-setup-form {
   display: flex;
-  gap: 0.75rem;
-  margin-top: 0.5rem;
+  flex-direction: column;
+  gap: 1.5rem;
 }
 
-.theme-option {
-  flex: 1;
+.input-with-icon {
+  position: relative;
   display: flex;
   align-items: center;
-  justify-content: center;
-  gap: 0.5rem;
-  padding: 0.75rem;
-  background: var(--bg-card);
-  border: 1px solid var(--border-default);
-  border-radius: 0.75rem;
-  color: var(--text-secondary);
-  font-size: 0.85rem;
-  font-weight: 500;
-  cursor: pointer;
-  transition: all 0.2s;
 }
 
-.theme-option:hover {
-  background: var(--bg-card-hover);
-  border-color: var(--border-hover);
+.input-with-icon svg {
+  position: absolute;
+  left: 1rem;
 }
 
-.theme-option.active {
-  background: rgba(99, 102, 241, 0.15);
-  border-color: var(--accent-primary);
-  color: #818CF8;
+.input-with-icon .input-field {
+  padding-left: 3rem;
+}
+
+.feature-list {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.feature-item {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  font-size: 0.9rem;
+  color: var(--text-primary);
 }

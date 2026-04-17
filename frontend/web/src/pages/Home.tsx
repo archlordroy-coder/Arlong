@@ -1,6 +1,6 @@
 import React, { useEffect, useRef } from 'react';
 import { Link } from 'react-router-dom';
-import { Shield, Cloud, Zap, Lock, FolderOpen, Smartphone } from 'lucide-react';
+import { Shield, Cloud, Zap, Lock, FolderOpen, Smartphone, ChevronRight, Activity } from 'lucide-react';
 import './Home.css';
 
 const FEATURES = [
@@ -8,189 +8,145 @@ const FEATURES = [
     icon: Shield,
     title: 'Chiffrement AES-256',
     desc: 'Vos fichiers sont chiffrés localement avant tout téléversement. Seul vous détenez la clé.',
-    color: 'var(--primary)',
-    bg: 'rgba(99,102,241,0.10)',
+    color: '#6366F1',
+    bg: 'rgba(99,102,241,0.1)',
   },
   {
     icon: Cloud,
     title: 'Synchro Google Drive',
     desc: 'Liez votre Drive en un clic et accédez à vos archives depuis n\'importe où.',
-    color: 'var(--secondary)',
-    bg: 'rgba(20,184,166,0.10)',
+    color: '#06B6D4',
+    bg: 'rgba(6,182,212,0.1)',
   },
   {
     icon: Zap,
     title: 'Instantané & Léger',
     desc: 'Interface ultra-rapide construite sur Vite. Aucun délai, aucune friction.',
     color: '#F59E0B',
-    bg: 'rgba(245,158,11,0.10)',
+    bg: 'rgba(245,158,11,0.1)',
   },
   {
     icon: FolderOpen,
     title: 'Gestion avancée',
     desc: 'Organisez vos archives par espaces, tags et dossiers. Retrouvez tout en 2 secondes.',
     color: '#10B981',
-    bg: 'rgba(16,185,129,0.10)',
+    bg: 'rgba(16,185,129,0.1)',
   },
   {
     icon: Lock,
     title: 'Confidentialité totale',
     desc: 'Aucune donnée stockée sans votre consentement. RGPD conforme par conception.',
     color: '#E879F9',
-    bg: 'rgba(232,121,249,0.10)',
+    bg: 'rgba(232,121,249,0.1)',
   },
   {
     icon: Smartphone,
     title: 'Multiplateforme',
-    desc: 'Web, Desktop (Windows/Linux) et Android. Votre coffre-fort, partout.',
+    desc: 'Web, Desktop et Mobile. Votre coffre-fort numérique, partout.',
     color: '#60A5FA',
-    bg: 'rgba(96,165,250,0.10)',
+    bg: 'rgba(96,165,250,0.1)',
   },
-];
-
-const STATS = [
-  { value: 'AES-256', label: 'Chiffrement' },
-  { value: '3', label: 'Plateformes' },
-  { value: '100%', label: 'Open Source' },
-  { value: 'RGPD', label: 'Conforme' },
 ];
 
 const Home: React.FC = () => {
   const heroRef = useRef<HTMLDivElement>(null);
 
-  // Animation d'entrée par scroll pour les cartes de features
   useEffect(() => {
-    const cards = document.querySelectorAll('.home-feature-card');
     const observer = new IntersectionObserver(
       (entries) => {
-        entries.forEach((entry, i) => {
+        entries.forEach((entry) => {
           if (entry.isIntersecting) {
-            setTimeout(() => {
-              (entry.target as HTMLElement).style.opacity = '1';
-              (entry.target as HTMLElement).style.transform = 'translateY(0)';
-            }, i * 80);
+            entry.target.classList.add('visible');
           }
         });
       },
       { threshold: 0.1 }
     );
-    cards.forEach((card) => observer.observe(card));
+
+    document.querySelectorAll('.animate-on-scroll').forEach((el) => observer.observe(el));
     return () => observer.disconnect();
   }, []);
 
-  // Effet de parallaxe subtil sur la boule lumineuse
-  useEffect(() => {
-    const handleMove = (e: MouseEvent) => {
-      const orb = document.querySelector('.home-orb') as HTMLElement;
-      if (!orb) return;
-      const x = (e.clientX / window.innerWidth - 0.5) * 30;
-      const y = (e.clientY / window.innerHeight - 0.5) * 30;
-      orb.style.transform = `translate(${x}px, ${y}px)`;
-    };
-    window.addEventListener('mousemove', handleMove);
-    return () => window.removeEventListener('mousemove', handleMove);
-  }, []);
-
   return (
-    <div className="home-page">
-      {/* Arrière-plan dynamique */}
-      <div className="home-bg-layer">
-        <div className="home-orb home-orb-1"></div>
-        <div className="home-orb home-orb-2"></div>
-        <div className="home-grid"></div>
-      </div>
-
-      {/* ===== NAVBAR ===== */}
-      <nav className="home-nav">
-        <div className="home-nav-inner">
-          <div className="home-nav-brand">
-            <img src="/logo.png" alt="Mboa Drive" className="home-nav-logo" />
-            <span className="home-nav-name">Mboa Drive</span>
+    <div className="home-container">
+      <nav className="home-nav animate-fade-in">
+        <div className="nav-content">
+          <div className="nav-brand">
+            <div className="logo-wrap">
+              <Shield size={24} className="text-primary" />
+            </div>
+            <span className="brand-name">Mboa Drive</span>
           </div>
-          <div className="home-nav-links">
-            <Link to="/privacy" className="home-nav-link">Confidentialité</Link>
-            <Link to="/terms" className="home-nav-link">Conditions</Link>
-            <Link to="/login" className="btn btn-primary home-nav-cta">Se connecter</Link>
+          <div className="nav-links">
+            <Link to="/login" className="nav-link">Connexion</Link>
+            <Link to="/register" className="btn btn-primary">Démarrer</Link>
           </div>
         </div>
       </nav>
 
-      {/* ===== HERO ===== */}
-      <section className="home-hero" ref={heroRef}>
-        <img src="/logo.png" alt="Mboa Drive Logo Central" className="home-hero-logo" />
-        <div className="home-hero-badge">
-          <span className="home-hero-badge-dot"></span>
-          Sécurisé · Chiffré · Open Source
+      <header className="home-hero">
+        <div className="hero-content animate-slide-up">
+          <div className="hero-badge">Nouveauté : Chiffrement GCM activé</div>
+          <h1 className="hero-title">
+            Vos documents méritent <br />
+            <span className="text-gradient">une sécurité absolue.</span>
+          </h1>
+          <p className="hero-subtitle">
+            Mboa Drive est l'écosystème d'archivage ultime qui chiffre vos données sur votre appareil et les stocke sur votre propre Google Drive.
+          </p>
+          <div className="hero-actions">
+            <Link to="/register" className="btn btn-primary btn-large">
+              Créer mon compte gratuit <ChevronRight size={20} />
+            </Link>
+            <Link to="/login" className="btn btn-secondary btn-large">
+              Accéder à mon espace
+            </Link>
+          </div>
         </div>
-        <h1 className="home-hero-title">
-          Vos archives.<br />
-          <span className="home-hero-gradient">Protégées. Partout.</span>
-        </h1>
-        <p className="home-hero-subtitle">
-          Mboa Drive est la plateforme de gestion documentaire qui chiffre vos fichiers côté client
-          et les synchronise sur votre espace Google Drive personnel — sans jamais y accéder.
-        </p>
-        <div className="home-hero-actions">
-          <Link to="/register" className="btn btn-primary home-cta-main">
-            Commencer gratuitement
-          </Link>
-          <Link to="/login" className="btn btn-secondary home-cta-secondary">
-            Se connecter
-          </Link>
+        <div className="hero-visual animate-fade-in stagger-2">
+            <div className="visual-card glass-panel">
+                <div className="card-header">
+                    <Activity size={18} />
+                    <span>Sécurité en temps réel</span>
+                </div>
+                <div className="card-body">
+                    <div className="status-line">
+                        <div className="status-dot"></div>
+                        <span>AES-256-GCM actif</span>
+                    </div>
+                    <div className="progress-mini">
+                        <div className="progress-fill" style={{width: '85%'}}></div>
+                    </div>
+                </div>
+            </div>
         </div>
+      </header>
 
-        {/* Stats */}
-        <div className="home-stats">
-          {STATS.map((s) => (
-            <div key={s.label} className="home-stat">
-              <span className="home-stat-value">{s.value}</span>
-              <span className="home-stat-label">{s.label}</span>
+      <section className="home-features">
+        <div className="section-header animate-on-scroll">
+            <h2 className="section-title">Pourquoi choisir Mboa Drive ?</h2>
+            <p className="section-desc">Une plateforme pensée pour la confidentialité et la performance.</p>
+        </div>
+        <div className="features-grid">
+          {FEATURES.map((f, i) => (
+            <div key={i} className="feature-card glass-panel animate-on-scroll" style={{transitionDelay: `${i * 0.1}s`}}>
+              <div className="feature-icon" style={{ background: f.bg }}>
+                <f.icon size={24} style={{ color: f.color }} />
+              </div>
+              <h3 className="feature-title">{f.title}</h3>
+              <p className="feature-desc">{f.desc}</p>
             </div>
           ))}
         </div>
       </section>
 
-      {/* ===== FEATURES ===== */}
-      <section className="home-features-section">
-        <div className="home-section-header">
-          <h2 className="home-section-title">Tout ce dont vous avez besoin</h2>
-          <p className="home-section-desc">
-            Un coffre-fort numérique complet, conçu pour la performance et la confidentialité.
-          </p>
-        </div>
-        <div className="home-features-grid">
-          {FEATURES.map((f) => {
-            const Icon = f.icon;
-            return (
-              <div key={f.title} className="home-feature-card">
-                <div className="home-feature-icon-wrap" style={{ background: f.bg }}>
-                  <Icon size={22} color={f.color} />
-                </div>
-                <h3 className="home-feature-title">{f.title}</h3>
-                <p className="home-feature-desc">{f.desc}</p>
-              </div>
-            );
-          })}
-        </div>
-      </section>
-
-      {/* ===== CTA BANNER ===== */}
-      <section className="home-cta-banner">
-        <div className="home-cta-banner-inner">
-          <h2 className="home-cta-banner-title">Prêt à sécuriser vos documents ?</h2>
-          <p className="home-cta-banner-desc">Créez votre compte en 30 secondes, aucune carte requise.</p>
-          <Link to="/register" className="btn btn-primary home-cta-main">
-            Créer mon espace
-          </Link>
-        </div>
-      </section>
-
-      {/* ===== FOOTER ===== */}
       <footer className="home-footer">
-        <span>© 2026 Mboa Drive — Tous droits réservés</span>
-        <div className="home-footer-links">
-          <Link to="/privacy">Politique de confidentialité</Link>
-          <Link to="/terms">Conditions d'utilisation</Link>
+        <div className="footer-content">
+            <p>© 2026 Mboa Drive System. Conçu pour la souveraineté numérique.</p>
+            <div className="footer-links">
+                <Link to="/privacy">Confidentialité</Link>
+                <Link to="/terms">Conditions</Link>
+            </div>
         </div>
       </footer>
     </div>

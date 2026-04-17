@@ -1,5 +1,6 @@
 {
   "version": 2,
+  "name": "mboadrive",
   "builds": [
     {
       "src": "backend/src/server.js",
@@ -8,7 +9,9 @@
     {
       "src": "frontend/web/package.json",
       "use": "@vercel/static-build",
-      "config": { "distDir": "dist" }
+      "config": {
+        "distDir": "dist"
+      }
     }
   ],
   "routes": [
@@ -17,12 +20,19 @@
       "dest": "backend/src/server.js"
     },
     {
-      "src": "/assets/(.*)",
-      "dest": "frontend/web/assets/$1"
+      "src": "/(.*)",
+      "dest": "frontend/web/$1",
+      "continue": true
+    },
+    {
+      "handle": "filesystem"
     },
     {
       "src": "/(.*)",
       "dest": "frontend/web/index.html"
     }
-  ]
+  ],
+  "env": {
+    "NODE_ENV": "production"
+  }
 }

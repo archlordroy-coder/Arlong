@@ -1,196 +1,89 @@
-import { useState, useEffect, type FormEvent } from 'react';
-import { useAuth } from '../../contexts/AuthContext';
-import { useTheme } from '../../contexts/ThemeContext';
-import api from '../../api/client';
-import { User, Mail, Shield, Cloud, Save, Loader2, LogOut, Sun, Moon } from 'lucide-react';
+import React from 'react';
+import { useEncryption } from '../../hooks/useEncryption';
+import { Shield, Key, Lock, Trash2, CheckCircle } from 'lucide-react';
 import './Settings.css';
 
 const Settings = () => {
-  const { user, logout } = useAuth();
-  const { theme, toggleTheme } = useTheme();
-  const [name, setName] = useState(user?.name || '');
-  const [loading, setLoading] = useState(false);
-  const [success, setSuccess] = useState(false);
+  const { encryptionKey, saveKey, clearKey, isConfigured } = useEncryption();
+  const [newKey, setNewKey] = React.useState('');
 
-  useEffect(() => {
-    // Gérer le retour de Google Drive linking (URL param)
-    const urlParams = new URLSearchParams(window.location.search);
-    if (urlParams.get('drive_linked') === 'true') {
-      const refreshProfile = async () => {
-        try {
-          const res = await api.get('/auth/me');
-          if (res.data?.success) {
-            // Nettoyer l'URL sans recharger complètement si possible, ou recharger une fois
-            window.history.replaceState({}, document.title, "/settings");
-            window.location.reload();
-          }
-        } catch (error) {}
-      };
-      refreshProfile();
-    }
-
-    const handleMessage = async (event: MessageEvent) => {
-      if (event.data?.type === 'drive-linked' && event.data?.success) {
-        try {
-          const res = await api.get('/auth/me');
-          if (res.data?.success) {
-            window.location.reload(); 
-          }
-        } catch (error) {}
-      }
-    };
-    window.addEventListener('message', handleMessage);
-    return () => window.removeEventListener('message', handleMessage);
-  }, []);
-
-  const handleUpdate = async (e: FormEvent) => {
+  const handleSaveKey = (e: React.FormEvent) => {
     e.preventDefault();
-    setLoading(true);
-    setSuccess(false);
-    try {
-      const res = await api.put('/auth/profile', { name });
-      if (res.data.success) {
-        setSuccess(true);
-      }
-    } catch (error) {
-      alert('Erreur lors de la mise à jour');
-    } finally {
-      setLoading(false);
+    if (newKey.length < 8) {
+      alert('La clé doit faire au moins 8 caractères.');
+      return;
     }
-  };
-
-  const linkDrive = async () => {
-    try {
-      const res = await api.get('/auth/google/url?platform=mobile');
-      if (res.data.success && res.data.url) {
-        window.location.href = res.data.url;
-      }
-    } catch (error) {
-      alert("Erreur lors de la liaison au Drive");
-    }
+    saveKey(newKey);
+    setNewKey('');
   };
 
   return (
-    <div className="mobile-settings">
-      <header className="mobile-settings-header">
-        <h1 className="mobile-settings-title">Paramètres</h1>
-        <p className="mobile-settings-subtitle">Identité et intégrations</p>
-      </header>
+    <div className="settings-container animate-fade-in">
+      <div className="settings-header">
+        <Shield size={32} className="text-primary" />
+        <h1>Sécurité & Chiffrement</h1>
+      </div>
 
-      <section className="mobile-settings-section">
-        <div className="mobile-settings-card">
-          <div className="mobile-profile-overview">
-            <div className="mobile-avatar">
-              {user?.name?.charAt(0).toUpperCase()}
-            </div>
-            <div className="mobile-profile-info">
-              <h2>{user?.name}</h2>
-              <p>{user?.email}</p>
-            </div>
+      <div className="settings-grid">
+        <section className="settings-section glass-panel">
+          <div className="section-title">
+            <Key size={20} />
+            <h2>Clé Maîtresse d'Archivage</h2>
           </div>
-
-          <form onSubmit={handleUpdate} className="mobile-settings-form">
-            <div className="mobile-form-group">
-              <label><User size={14} /> Nom complet</label>
-              <input 
-                type="text" 
-                value={name}
-                onChange={e => setName(e.target.value)}
-              />
-            </div>
-
-            <div className="mobile-form-group disabled">
-              <label><Mail size={14} /> Email (Fixe)</label>
-              <input 
-                type="email" 
-                value={user?.email}
-                disabled
-              />
-            </div>
-
-            <button type="submit" className="mobile-btn-save" disabled={loading}>
-              {loading ? <Loader2 size={16} className="spin" /> : <Save size={16} />}
-              <span>{success ? 'Profil mis à jour !' : 'Enregistrer'}</span>
-            </button>
-          </form>
-        </div>
-      </section>
-
-      <section className="mobile-settings-section">
-        <div className="mobile-settings-card drive-card">
-          <div className="mobile-card-header">
-            <div className="mobile-card-icon warning">
-              <Cloud size={20} />
-            </div>
-            <h3>Google Drive</h3>
-          </div>
-          
-          <p className="mobile-card-desc">
-            Indispensable pour archiver vos documents et activer la synchronisation.
+          <p className="section-desc">
+            Cette clé est utilisée pour chiffrer vos fichiers sur votre appareil.
+            <strong> Elle n'est jamais envoyée au serveur.</strong> Si vous la perdez,
+            vos archives cryptées seront illisibles.
           </p>
 
-          {user?.googleRefreshToken ? (
-            <div className="mobile-drive-status">
-              <div className="mobile-badge-success">
-                Compte Lié
+          {isConfigured ? (
+            <div className="key-status-configured">
+              <div className="status-badge">
+                <CheckCircle size={16} />
+                <span>Clé configurée et active</span>
               </div>
-              <button className="mobile-btn-text" onClick={linkDrive}>
-                Modifier le compte
+              <button onClick={clearKey} className="btn btn-secondary">
+                <Trash2 size={16} /> Réinitialiser la clé
               </button>
             </div>
           ) : (
-            <button onClick={linkDrive} className="mobile-btn-connect">
-              <Cloud size={18} />
-              <span>Connecter Drive</span>
-            </button>
+            <form onSubmit={handleSaveKey} className="key-setup-form">
+              <div className="input-group">
+                <label className="input-label">Définir une nouvelle clé</label>
+                <div className="input-with-icon">
+                  <Lock size={18} className="text-muted" />
+                  <input
+                    type="password"
+                    className="input-field"
+                    placeholder="Votre clé secrète (min. 8 chars)"
+                    value={newKey}
+                    onChange={(e) => setNewKey(e.target.value)}
+                  />
+                </div>
+              </div>
+              <button type="submit" className="btn btn-primary">Activer le chiffrement</button>
+            </form>
           )}
-        </div>
-      </section>
+        </section>
 
-      <section className="mobile-settings-section">
-        <div className="mobile-settings-card theme-card">
-          <div className="mobile-card-header">
-            <div className="mobile-card-icon primary">
-              {theme === 'dark' ? <Moon size={20} /> : <Sun size={20} />}
+        <section className="settings-section glass-panel">
+            <div className="section-title">
+                <Shield size={20} />
+                <h2>Protection Native</h2>
             </div>
-            <h3>Apparence</h3>
-          </div>
-          <p className="mobile-card-desc">Personnalisez le thème de l'application.</p>
-          
-          <div className="theme-toggle-container">
-            <button 
-              className={`theme-option ${theme === 'dark' ? 'active' : ''}`}
-              onClick={() => theme !== 'dark' && toggleTheme()}
-            >
-              <Moon size={18} />
-              <span>Sombre</span>
-            </button>
-            <button 
-              className={`theme-option ${theme === 'light' ? 'active' : ''}`}
-              onClick={() => theme !== 'light' && toggleTheme()}
-            >
-              <Sun size={18} />
-              <span>Clair</span>
-            </button>
-          </div>
-        </div>
-      </section>
-
-      <section className="mobile-settings-section">
-        <div className="mobile-settings-card">
-          <div className="mobile-card-header">
-            <div className="mobile-card-icon primary">
-              <Shield size={20} />
+            <p className="section-desc">Version Desktop {import.meta.env.VITE_APP_VERSION || '2.0.0'}</p>
+            <div className="feature-list">
+                <div className="feature-item">
+                    <CheckCircle size={16} className="text-success" />
+                    <span>Isolation du contexte active</span>
+                </div>
+                <div className="feature-item">
+                    <CheckCircle size={16} className="text-success" />
+                    <span>Pont IPC sécurisé</span>
+                </div>
             </div>
-            <h3>Sécurité</h3>
-          </div>
-          <p className="mobile-card-desc">Chiffrement de bout en bout activé (AES-256).</p>
-          <button onClick={logout} className="mobile-btn-logout">
-            <LogOut size={16} />
-            <span>Déconnexion</span>
-          </button>
-        </div>
-      </section>
+        </section>
+      </div>
     </div>
   );
 };

@@ -1,7 +1,6 @@
 import axios from 'axios';
 
 const api = axios.create({
-  // Utilisation de l'URL absolue Vercel en production
   baseURL: import.meta.env.DEV 
     ? (import.meta.env.VITE_API_URL || 'http://localhost:5000/api')
     : 'https://arlong-gamma.vercel.app/api',
@@ -10,7 +9,6 @@ const api = axios.create({
   },
 });
 
-// Intercepteur pour injecter le token JWT
 api.interceptors.request.use(
   (config) => {
     const token = localStorage.getItem('mboadrive_token');
@@ -22,18 +20,24 @@ api.interceptors.request.use(
   (error) => Promise.reject(error)
 );
 
-// Intercepteur pour gérer les erreurs (ex: token expiré)
 api.interceptors.response.use(
   (response) => response,
   (error) => {
+    const message = error.response?.data?.message || 'Une erreur est survenue';
+
     if (error.response?.status === 401) {
       localStorage.removeItem('mboadrive_token');
-      // Rediriger vers le login si on n'y est pas
       if (window.location.pathname !== '/login' && window.location.pathname !== '/register') {
         window.location.href = '/login';
       }
     }
-    return Promise.reject(error);
+
+    // Customize error object for better UI reporting
+    const customError = new Error(message);
+    (customError as any).status = error.response?.status;
+    (customError as any).data = error.response?.data;
+
+    return Promise.reject(customError);
   }
 );
 
