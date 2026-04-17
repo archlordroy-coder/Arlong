@@ -17,7 +17,12 @@ const createDossier = async (req, res, next) => {
 
 const getDossiers = async (req, res, next) => {
   try {
-    const { data, error } = await supabase.from('Dossier').select('*').eq('createdById', req.user.id).eq('isDeleted', false);
+    const { data, error } = await supabase
+      .from('Dossier')
+      .select('*')
+      .eq('createdById', req.user.id)
+      .eq('isDeleted', false)
+      .order('created_at', { ascending: false });
     if (error) throw error;
     res.json({ success: true, data });
   } catch (error) {

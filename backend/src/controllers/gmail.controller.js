@@ -30,11 +30,11 @@ const getRedirectUri = () => {
 const getOAuth2Client = async (userId) => {
   const { data: user, error } = await supabase
     .from('User')
-    .select('googleRefreshToken, google_refresh_token')
+    .select('google_refresh_token, google_refresh_token')
     .eq('id', userId)
     .single();
 
-  const refreshToken = user?.googleRefreshToken || user?.google_refresh_token;
+  const refreshToken = user?.google_refresh_token || user?.google_refresh_token;
 
   if (error || !user || !refreshToken) {
     throw new Error('Compte Google non lié');

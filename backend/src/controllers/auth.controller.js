@@ -4,8 +4,6 @@ const supabase = require('../config/supabase');
 const { google } = require('googleapis');
 const crypto = require('crypto');
 
-
-
 const register = async (req, res, next) => {
   try {
     const { name, email, password } = req.body;
@@ -13,7 +11,6 @@ const register = async (req, res, next) => {
       return res.status(400).json({ success: false, message: 'Nom, email et mot de passe requis' });
     }
     
-
     const { data: existingUser } = await supabase.from('User').select('id').eq('email', email).single();
     
     if (existingUser) {
@@ -51,8 +48,8 @@ const register = async (req, res, next) => {
           name: user.name, 
           email: user.email, 
           avatar: user.avatar, 
-          isAdmin: !!(user.isAdmin || user.is_admin),
-          createdAt: user.createdAt || user.created_at 
+          isAdmin: !!user.is_admin,
+          createdAt: user.created_at
         }, 
         token 
       } 
@@ -86,8 +83,8 @@ const login = async (req, res, next) => {
           name: user.name,
           email: user.email,
           avatar: user.avatar,
-          isAdmin: !!(user.isAdmin || user.is_admin),
-          createdAt: user.createdAt || user.created_at
+          isAdmin: !!user.is_admin,
+          createdAt: user.created_at
         },
         token,
       },
@@ -116,9 +113,9 @@ const getProfile = async (req, res, next) => {
         name: user.name,
         email: user.email,
         avatar: user.avatar,
-        isAdmin: !!(user.isAdmin || user.is_admin),
-        createdAt: user.createdAt || user.created_at,
-        googleRefreshToken: user.googleRefreshToken || user.google_refresh_token
+        isAdmin: !!user.is_admin,
+        createdAt: user.created_at,
+        google_refresh_token: user.google_refresh_token
       }
     });
   } catch (error) {
@@ -153,12 +150,13 @@ const deleteAccount = async (req, res, next) => {
   }
 };
 
-// Google Auth Logic (simplified but robust)
+// Google Auth Logic
 const getRedirectUri = () => {
   const isProduction = process.env.VERCEL || process.env.NODE_ENV === 'production';
-  return isProduction
+  const rawUri = isProduction
     ? 'https://arlong-gamma.vercel.app/api/auth/google/callback'
     : (process.env.GOOGLE_REDIRECT_URI || 'http://localhost:5000/api/auth/google/callback');
+  return rawUri.replace(/([^:])\/\//g, '$1/');
 };
 
 const googleAuth = async (req, res) => {
@@ -180,79 +178,35 @@ const googleAuth = async (req, res) => {
     
     const payload = ticket.getPayload();
     const { email, name, picture } = payload;
-    console.log('🔵 Payload Google complet :', JSON.stringify(payload));
     
     let { data: user } = await supabase.from('User').select('*').eq('email', email).single();
 
     if (user) {
-      // Mettre à jour le nom et l'avatar s'ils ont changé ou sont manquants
-      const profileUpdates = {};
-      if (!user.name || user.name === user.email.split('@')[0]) profileUpdates.name = name;
-      if (!user.avatar) profileUpdates.avatar = picture;
+      const updates = {
+        name: user.name || name,
+        avatar: user.avatar || picture
+      };
+      if (tokens.refresh_token) updates.google_refresh_token = tokens.refresh_token;
       
-      if (Object.keys(profileUpdates).length > 0) {
-        await supabase.from('User').update(profileUpdates).eq('id', user.id);
-        console.log(`🔵 Profil mis à jour pour ${user.email} (Nom/Avatar)`);
-      }
-
-      if (tokens.refresh_token) {
-        console.log('🔵 Tentative de sauvegarde du Refresh Token...');
-        const tokenCols = ['googleRefreshToken', 'google_refresh_token', 'googlerefreshtoken'];
-        let success = false;
-        
-        for (const col of tokenCols) {
-          try {
-            const updateObj = {};
-            updateObj[col] = tokens.refresh_token;
-            const { error: updateError } = await supabase.from('User').update(updateObj).eq('id', user.id);
-            
-            if (!updateError) {
-              console.log(`✅ Succès : Token sauvegardé dans la colonne '${col}'`);
-              success = true;
-              break;
-            }
-          } catch (e) {
-            // Ignorer l'erreur et essayer la colonne suivante
-          }
-        }
-        
-        if (!success) {
-          console.warn('⚠️ Attention : Aucune colonne de token reconnue. Liaison Drive impossible.');
-        }
-      }
+      await supabase.from('User').update(updates).eq('id', user.id);
+      const { data: updatedUser } = await supabase.from('User').select('*').eq('id', user.id).single();
+      user = updatedUser;
     } else {
-
       const userData = {
         name: name || email.split('@')[0],
         email: email,
         password: crypto.randomBytes(16).toString('hex'),
-        avatar: picture
+        avatar: picture,
+        google_refresh_token: tokens.refresh_token
       };
 
-      // Tenter d'insérer avec le token, avec fallback si la colonne manque
-      let { data: newUser, error } = await supabase.from('User').insert([{ ...userData, googleRefreshToken: tokens.refresh_token }]).select('*').single();
-      
-      if (error && error.code === 'PGRST204') {
-        console.warn('⚠️ googleRefreshToken non trouvé lors de l\'insertion, essai avec google_refresh_token');
-        const res2 = await supabase.from('User').insert([{ ...userData, google_refresh_token: tokens.refresh_token }]).select('*').single();
-        newUser = res2.data;
-        error = res2.error;
-      }
-      
-      if (error && error.code === 'PGRST204') {
-         console.warn('⚠️ Aucun champ de token trouvé, insertion sans token');
-         const res3 = await supabase.from('User').insert([userData]).select('*').single();
-         newUser = res3.data;
-         error = res3.error;
-      }
-
+      const { data: newUser, error } = await supabase.from('User').insert([userData]).select('*').single();
       if (error) throw error;
       user = newUser;
     }
 
-    console.log(`✅ Authentification prête pour : ${user.email}`);
     const token = jwt.sign({ id: user.id, email: user.email }, process.env.JWT_SECRET, { expiresIn: '30d' });
-    res.json({ success: true, data: { token, user: { ...user, isAdmin: !!(user.isAdmin || user.is_admin) } } });
+    res.json({ success: true, data: { token, user: { ...user, isAdmin: !!user.is_admin } } });
   } catch (err) {
     console.error('Google Auth Error:', err);
     res.status(500).json({ success: false, message: err.message });
