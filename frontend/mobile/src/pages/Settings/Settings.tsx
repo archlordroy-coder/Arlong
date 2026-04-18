@@ -1,11 +1,15 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { useEncryption } from '../../hooks/useEncryption';
-import { Shield, Key, Lock, Trash2, CheckCircle } from 'lucide-react';
+import { useAuth } from '../../contexts/AuthContext';
+import { Shield, Key, Lock, Trash2, CheckCircle, Cloud, RefreshCw } from 'lucide-react';
+import api from '../../api/client';
 import './Settings.css';
 
 const Settings = () => {
+  const { user } = useAuth();
   const { encryptionKey, saveKey, clearKey, isConfigured } = useEncryption();
-  const [newKey, setNewKey] = React.useState('');
+  const [newKey, setNewKey] = useState('');
+  const [googleLoading, setGoogleLoading] = useState(false);
 
   const handleSaveKey = (e: React.FormEvent) => {
     e.preventDefault();
@@ -15,6 +19,21 @@ const Settings = () => {
     }
     saveKey(newKey);
     setNewKey('');
+  };
+
+  const handleLinkGoogle = async () => {
+    setGoogleLoading(true);
+    try {
+      // Pour le mobile, on demande l'URL de liaison (callback via deep link ou browser)
+      const res = await api.get('/auth/google/url?platform=mobile');
+      if (res.data.success && res.data.url) {
+        window.location.href = res.data.url;
+      }
+    } catch (err) {
+      alert('Erreur lors de la liaison Google Drive');
+    } finally {
+      setGoogleLoading(false);
+    }
   };
 
   return (
@@ -68,10 +87,39 @@ const Settings = () => {
 
         <section className="settings-section glass-panel">
             <div className="section-title">
+                <Cloud size={20} />
+                <h2>Connexion Cloud</h2>
+            </div>
+            <p className="section-desc">
+              Liez votre compte Google Drive pour activer l'archivage automatique.
+            </p>
+            
+            {user?.googleRefreshToken ? (
+              <div className="drive-connected">
+                <div className="status-badge success">
+                  <CheckCircle size={16} />
+                  <span>DRIVE LIÉ</span>
+                </div>
+                <p className="text-xs text-secondary mt-2">Dossier : My Drive / Mboa Drive</p>
+              </div>
+            ) : (
+              <button 
+                onClick={handleLinkGoogle} 
+                className="btn btn-secondary w-full flex items-center justify-center gap-2"
+                disabled={googleLoading}
+              >
+                {googleLoading ? <RefreshCw className="animate-spin" size={16} /> : <Cloud size={16} />}
+                Lier mon compte Google Drive
+              </button>
+            )}
+        </section>
+
+        <section className="settings-section glass-panel">
+            <div className="section-title">
                 <Shield size={20} />
                 <h2>Protection Native</h2>
             </div>
-            <p className="section-desc">Version Desktop {import.meta.env.VITE_APP_VERSION || '2.0.0'}</p>
+            <p className="section-desc">Version Mobile {import.meta.env.VITE_APP_VERSION || '2.0.0'}</p>
             <div className="feature-list">
                 <div className="feature-item">
                     <CheckCircle size={16} className="text-success" />
@@ -79,7 +127,7 @@ const Settings = () => {
                 </div>
                 <div className="feature-item">
                     <CheckCircle size={16} className="text-success" />
-                    <span>Pont IPC sécurisé</span>
+                    <span>Chiffrement AES-256 local</span>
                 </div>
             </div>
         </section>

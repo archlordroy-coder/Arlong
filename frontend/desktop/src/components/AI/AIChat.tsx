@@ -11,7 +11,7 @@ interface Message {
 const AIChat = () => {
   const [isOpen, setIsOpen] = useState(false);
   const [messages, setMessages] = useState<Message[]>([
-    { role: 'ai', content: 'Bonjour ! Je suis Arlong AI. Comment puis-je vous aider aujourd\'hui ?' }
+    { role: 'ai', content: 'Bonjour ! Je suis Mboa Drive AI. Comment puis-je vous aider aujourd\'hui ?' }
   ]);
   const [input, setInput] = useState('');
   const [isTyping, setIsTyping] = useState(false);
@@ -70,7 +70,7 @@ const AIChat = () => {
               <div className="p-1.5 bg-primary/20 rounded-lg text-primary">
                 <Bot size={18} />
               </div>
-              Arlong Assistant AI
+              Mboa Drive Assistant AI
               <Sparkles size={14} className="text-yellow-400" />
             </h3>
             <div className="flex items-center gap-3">

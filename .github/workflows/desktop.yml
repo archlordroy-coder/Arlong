@@ -38,7 +38,7 @@ jobs:
           if [ "${{ matrix.os }}" = "windows-latest" ]; then
             npx electron-builder build --windows --x64
           else
-            npx electron-builder build --linux --AppImage
+            npx electron-builder build --linux
           fi
         shell: bash
         env:
@@ -51,3 +51,5 @@ jobs:
           path: |
             frontend/desktop/dist_electron/*.exe
             frontend/desktop/dist_electron/*.AppImage
+            frontend/desktop/dist_electron/*.deb
+            frontend/desktop/dist_electron/*.rpm

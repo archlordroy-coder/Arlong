@@ -6,8 +6,8 @@ let model;
 const initAI = () => {
   if (process.env.GEMINI_API_KEY) {
     genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
-    model = genAI.getGenerativeModel({ model: 'gemini-1.5-pro' });
-    console.log('✅ Google AI (Gemini Pro) initialized');
+    model = genAI.getGenerativeModel({ model: 'gemini-1.5-flash' });
+    console.log('✅ Google AI (Gemini Flash) initialized');
   }
 };
 
@@ -24,7 +24,7 @@ const analyzeImage = async (imageBuffer, prompt) => {
 
 const chatWithAssistant = async (message, history, context) => {
   if (!genAI) throw new Error('AI not initialized');
-  const systemPrompt = `Tu es Arlong AI, l'assistant personnel intégré à Arlong System.
+  const systemPrompt = `Tu es Mboa Drive AI, l'assistant personnel intégré à Mboa Drive.
 Tu as accès aux informations de l'utilisateur.
 Espaces : ${JSON.stringify(context.spaces || [])}
 Dossiers : ${JSON.stringify(context.recentFolders || [])}
@@ -33,7 +33,7 @@ Date : ${new Date().toLocaleDateString('fr-FR')}
 Réponds toujours en français. Sois concis et utile.`;
 
   const dynamicModel = genAI.getGenerativeModel({ 
-    model: 'gemini-1.5-pro',
+    model: 'gemini-1.5-flash',
     systemInstruction: systemPrompt
   });
 
