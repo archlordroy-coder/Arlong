@@ -24,7 +24,7 @@ const Settings = () => {
   const handleLinkGoogle = async () => {
     setGoogleLoading(true);
     try {
-      const res = await api.get('/auth/google/login-url?platform=web');
+      const res = await api.get('/auth/google/url?platform=web');
       if (res.data.success && res.data.url) {
         window.location.href = res.data.url;
       }
@@ -97,7 +97,7 @@ const Settings = () => {
               <div className="drive-connected">
                 <div className="status-badge success">
                   <CheckCircle size={16} />
-                  <span>Google Drive connecté</span>
+                  <span>DRIVE LIÉ</span>
                 </div>
                 <p className="text-xs text-secondary mt-2">Dossier : My Drive / Mboa Drive</p>
               </div>

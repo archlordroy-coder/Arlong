@@ -4,8 +4,6 @@ const supabase = require('../config/supabase');
 const { google } = require('googleapis');
 const crypto = require('crypto');
 
-
-
 const register = async (req, res, next) => {
   try {
     const { name, email, password } = req.body;
@@ -13,13 +11,25 @@ const register = async (req, res, next) => {
       return res.status(400).json({ success: false, message: 'Nom, email et mot de passe requis' });
     }
     
-
-    const { data: existingUser } = await supabase.from('User').select('id').eq('email', email).single();
+    console.log('🔵 Register attempt:', { name, email: email?.substring(0, 3) + '***' });
+    
+    // Use maybeSingle() to avoid 406 error when no user found
+    const { data: existingUser, error: findError } = await supabase.from('User').select('id').eq('email', email).maybeSingle();
+    
+    if (findError) {
+      console.error('❌ Database error checking existing user:', findError);
+      return res.status(500).json({ 
+        success: false, 
+        message: 'Erreur base de données: ' + findError.message,
+        details: 'Vérifiez que la table User existe'
+      });
+    }
     
     if (existingUser) {
       return res.status(409).json({ success: false, message: 'Cet email est déjà utilisé' });
     }
     
+    console.log('🔵 Creating new user...');
     const hashedPassword = await bcrypt.hash(password, 10);
     const { data: user, error: createError } = await supabase
       .from('User')
@@ -31,7 +41,16 @@ const register = async (req, res, next) => {
       .select('*')
       .single();
 
-    if (createError) throw createError;
+    if (createError) {
+      console.error('❌ Error creating user:', createError);
+      return res.status(500).json({
+        success: false,
+        message: 'Erreur création utilisateur: ' + createError.message,
+        details: 'Vérifiez que toutes les colonnes existent dans la table User'
+      });
+    }
+    
+    console.log('✅ User created:', user.id);
 
     // Initialisation données par défaut
     try {
@@ -51,8 +70,8 @@ const register = async (req, res, next) => {
           name: user.name, 
           email: user.email, 
           avatar: user.avatar, 
-          isAdmin: !!(user.isAdmin || user.is_admin),
-          createdAt: user.createdAt || user.created_at 
+          isAdmin: !!user.is_admin,
+          createdAt: user.created_at
         }, 
         token 
       } 
@@ -86,8 +105,8 @@ const login = async (req, res, next) => {
           name: user.name,
           email: user.email,
           avatar: user.avatar,
-          isAdmin: !!(user.isAdmin || user.is_admin),
-          createdAt: user.createdAt || user.created_at
+          isAdmin: !!user.is_admin,
+          createdAt: user.created_at
         },
         token,
       },
@@ -116,9 +135,9 @@ const getProfile = async (req, res, next) => {
         name: user.name,
         email: user.email,
         avatar: user.avatar,
-        isAdmin: !!(user.isAdmin || user.is_admin),
-        createdAt: user.createdAt || user.created_at,
-        googleRefreshToken: user.googleRefreshToken || user.google_refresh_token
+        isAdmin: !!user.is_admin,
+        createdAt: user.created_at,
+        googleRefreshToken: user.google_refresh_token
       }
     });
   } catch (error) {
@@ -153,106 +172,149 @@ const deleteAccount = async (req, res, next) => {
   }
 };
 
-// Google Auth Logic (simplified but robust)
+// Google Auth Logic
+const getRedirectUri = () => {
+  const isProduction = process.env.VERCEL || process.env.NODE_ENV === 'production';
+  const rawUri = isProduction
+    ? 'https://arlong-gamma.vercel.app/api/auth/google/callback'
+    : (process.env.GOOGLE_REDIRECT_URI || 'http://localhost:5000/api/auth/google/callback');
+  return rawUri.replace(/([^:])\/\//g, '$1/');
+};
+
 const googleAuth = async (req, res) => {
   try {
+    console.log('🔵 Google Auth started');
     const { code, platform } = req.body;
+    
+    // Validation des credentials Google
+    if (!process.env.GOOGLE_CLIENT_ID || !process.env.GOOGLE_CLIENT_SECRET) {
+      console.error('❌ Missing Google OAuth credentials');
+      return res.status(500).json({ 
+        success: false, 
+        message: 'Configuration OAuth incomplète' 
+      });
+    }
+    
     const oauth2Client = new google.auth.OAuth2(
       process.env.GOOGLE_CLIENT_ID,
       process.env.GOOGLE_CLIENT_SECRET,
-      process.env.GOOGLE_REDIRECT_URI
+      getRedirectUri()
     );
 
+    console.log('🔵 Exchanging code for tokens...');
     const { tokens } = await oauth2Client.getToken(code);
     oauth2Client.setCredentials(tokens);
 
+    console.log('🔵 Verifying ID token...');
     const ticket = await oauth2Client.verifyIdToken({
       idToken: tokens.id_token,
       audience: process.env.GOOGLE_CLIENT_ID,
     });
     
     const payload = ticket.getPayload();
-    const { email, name, picture } = payload;
-    console.log('🔵 Payload Google complet :', JSON.stringify(payload));
+    const { email, name, picture, sub: googleId } = payload;
     
-    let { data: user } = await supabase.from('User').select('*').eq('email', email).single();
+    console.log('🔵 Google user:', { email, name, googleId });
+    
+    // Vérifier si l'utilisateur existe déjà avec gestion d'erreur améliorée
+    console.log('🔵 Checking existing user...');
+    let { data: user, error: findError } = await supabase
+      .from('User')
+      .select('*')
+      .eq('email', email)
+      .maybeSingle();
+
+    if (findError) {
+      console.error('❌ Database error when finding user:', findError);
+      return res.status(500).json({
+        success: false,
+        message: 'Erreur base de données: ' + findError.message,
+        details: 'Vérifiez que le schéma SQL est appliqué sur Supabase'
+      });
+    }
 
     if (user) {
-      // Mettre à jour le nom et l'avatar s'ils ont changé ou sont manquants
-      const profileUpdates = {};
-      if (!user.name || user.name === user.email.split('@')[0]) profileUpdates.name = name;
-      if (!user.avatar) profileUpdates.avatar = picture;
+      console.log('🔵 Existing user found, updating...');
+      const updates = {
+        name: user.name || name,
+        avatar: user.avatar || picture
+      };
+      if (tokens.refresh_token) updates.google_refresh_token = tokens.refresh_token;
       
-      if (Object.keys(profileUpdates).length > 0) {
-        await supabase.from('User').update(profileUpdates).eq('id', user.id);
-        console.log(`🔵 Profil mis à jour pour ${user.email} (Nom/Avatar)`);
-      }
-
-      if (tokens.refresh_token) {
-        console.log('🔵 Diagnostic colonnes Google...');
-        let success = false;
+      const { error: updateError } = await supabase
+        .from('User')
+        .update(updates)
+        .eq('id', user.id);
         
-        // Tentative 1
-        let { error: err1 } = await supabase.from('User').update({ googleRefreshToken: tokens.refresh_token }).eq('id', user.id);
-        if (!err1) {
-          console.log('✅ Succès : googleRefreshToken utilisé.');
-          success = true;
-        } else if (err1.code === 'PGRST204') {
-          // Tentative 2
-          let { error: err2 } = await supabase.from('User').update({ google_refresh_token: tokens.refresh_token }).eq('id', user.id);
-          if (!err2) {
-            console.log('✅ Succès : google_refresh_token utilisé.');
-            success = true;
-          } else if (err2.code === 'PGRST204') {
-            // Tentative 3
-            let { error: err3 } = await supabase.from('User').update({ googlerefreshtoken: tokens.refresh_token }).eq('id', user.id);
-            if (!err3) {
-              console.log('✅ Succès : googlerefreshtoken utilisé.');
-              success = true;
-            }
-          }
-        }
-        
-        if (!success) {
-          console.warn('⚠️ Attention : Aucune colonne de token trouvée. Liaison Drive impossible mais connexion maintenue.');
-        }
+      if (updateError) {
+        console.error('❌ Error updating user:', updateError);
       }
+      
+      // Re-fetch user
+      const { data: updatedUser } = await supabase
+        .from('User')
+        .select('*')
+        .eq('id', user.id)
+        .single();
+      user = updatedUser;
     } else {
-
+      console.log('🔵 Creating new user...');
       const userData = {
         name: name || email.split('@')[0],
         email: email,
         password: crypto.randomBytes(16).toString('hex'),
-        avatar: picture
+        avatar: picture,
+        google_refresh_token: tokens.refresh_token
       };
 
-      // Tenter d'insérer avec le token, avec fallback si la colonne manque
-      let { data: newUser, error } = await supabase.from('User').insert([{ ...userData, googleRefreshToken: tokens.refresh_token }]).select('*').single();
-      
-      if (error && error.code === 'PGRST204') {
-        console.warn('⚠️ googleRefreshToken non trouvé lors de l\'insertion, essai avec google_refresh_token');
-        const res2 = await supabase.from('User').insert([{ ...userData, google_refresh_token: tokens.refresh_token }]).select('*').single();
-        newUser = res2.data;
-        error = res2.error;
+      console.log('🔵 Inserting user data...');
+      const { data: newUser, error: insertError } = await supabase
+        .from('User')
+        .insert([userData])
+        .select('*')
+        .single();
+        
+      if (insertError) {
+        console.error('❌ Error inserting user:', insertError);
+        return res.status(500).json({
+          success: false,
+          message: 'Erreur création utilisateur: ' + insertError.message,
+          details: 'Vérifiez que la table User existe avec toutes les colonnes requises'
+        });
       }
-      
-      if (error && error.code === 'PGRST204') {
-         console.warn('⚠️ Aucun champ de token trouvé, insertion sans token');
-         const res3 = await supabase.from('User').insert([userData]).select('*').single();
-         newUser = res3.data;
-         error = res3.error;
-      }
-
-      if (error) throw error;
       user = newUser;
+      console.log('✅ User created successfully:', user.id);
     }
 
-    console.log(`✅ Authentification prête pour : ${user.email}`);
-    const token = jwt.sign({ id: user.id, email: user.email }, process.env.JWT_SECRET, { expiresIn: '30d' });
-    res.json({ success: true, data: { token, user: { ...user, isAdmin: !!(user.isAdmin || user.is_admin) } } });
+    const token = jwt.sign(
+      { id: user.id, email: user.email }, 
+      process.env.JWT_SECRET, 
+      { expiresIn: '30d' }
+    );
+    
+    console.log('✅ Google Auth completed');
+    res.json({ 
+      success: true, 
+      data: { 
+        token, 
+        user: { 
+          id: user.id,
+          name: user.name,
+          email: user.email,
+          avatar: user.avatar,
+          isAdmin: !!user.is_admin,
+          googleRefreshToken: user.google_refresh_token,
+          createdAt: user.created_at
+        } 
+      } 
+    });
   } catch (err) {
-    console.error('Google Auth Error:', err);
-    res.status(500).json({ success: false, message: err.message });
+    console.error('❌ Google Auth Error:', err);
+    res.status(500).json({ 
+      success: false, 
+      message: 'Erreur Google Auth: ' + err.message,
+      details: err.stack
+    });
   }
 };
 
@@ -261,7 +323,7 @@ const getGoogleAuthUrl = (req, res) => {
   const oauth2Client = new google.auth.OAuth2(
     process.env.GOOGLE_CLIENT_ID,
     process.env.GOOGLE_CLIENT_SECRET,
-    process.env.GOOGLE_REDIRECT_URI
+    getRedirectUri()
   );
 
   const url = oauth2Client.generateAuthUrl({

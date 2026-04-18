@@ -11,14 +11,14 @@ const importDocument = async (req, res, next) => {
     const { dossierId, name } = req.body;
     const file = req.file;
     if (!file || !dossierId) throw new Error('Fichier et dossierId requis');
-    const { data: user } = await supabase.from('User').select('googleRefreshToken, google_refresh_token').eq('id', req.user.id).single();
-    const refreshToken = user?.googleRefreshToken || user?.google_refresh_token;
+    const { data: user } = await supabase.from('User').select('google_refresh_token').eq('id', req.user.id).single();
+    const refreshToken = user?.google_refresh_token;
     if (!refreshToken) throw new Error('Veuillez relier votre compte Google Drive.');
     const driveFile = await driveService.uploadFile(file.buffer, name || file.originalname, file.mimetype, refreshToken);
     const { data: document, error } = await supabase.from('Document').insert([{
       name: name || file.originalname,
       type: path.extname(file.originalname).substring(1),
-      url: driveFile.id, // On stocke l'ID Drive ici (Option A)
+      "driveId": driveFile.id,
       size: file.size,
       dossierId: dossierId === 'root' ? null : dossierId,
       createdById: req.user.id
@@ -33,19 +33,38 @@ const importDocument = async (req, res, next) => {
 const getDocuments = async (req, res, next) => {
   try {
     const { search } = req.query;
+    
+    // Essayer created_at d'abord
     let query = supabase.from('Document').select('*, dossier:Dossier(name)').eq('createdById', req.user.id).eq('isDeleted', false);
     if (search) query = query.ilike('name', `%${search}%`);
-    let { data, error } = await query.order('created_at', { ascending: false });
-    
-    if (error && error.code === '42703') {
-      console.warn('⚠️ Colonne created_at non trouvée pour Document, chargement sans tri.');
-      const res = await query;
-      data = res.data;
-      error = res.error;
+    let result = await query.order('created_at', { ascending: false });
+
+    // Si erreur created_at, essayer updated_at
+    if (result.error && result.error.message?.includes('created_at')) {
+      console.log('⚠️ Fallback: using updated_at instead of created_at');
+      let query2 = supabase.from('Document').select('*, dossier:Dossier(name)').eq('createdById', req.user.id).eq('isDeleted', false);
+      if (search) query2 = query2.ilike('name', `%${search}%`);
+      result = await query2.order('updated_at', { ascending: false });
     }
-    
-    if (error) throw error;
-    res.json({ success: true, data });
+
+    // Si toujours erreur, essayer par id
+    if (result.error && result.error.message?.includes('updated_at')) {
+      console.log('⚠️ Fallback: using id instead of updated_at');
+      let query3 = supabase.from('Document').select('*, dossier:Dossier(name)').eq('createdById', req.user.id).eq('isDeleted', false);
+      if (search) query3 = query3.ilike('name', `%${search}%`);
+      result = await query3.order('id', { ascending: false });
+    }
+
+    // Dernier recours: sans ordre du tout
+    if (result.error) {
+      console.log('⚠️ Final fallback: no ordering');
+      let query4 = supabase.from('Document').select('*, dossier:Dossier(name)').eq('createdById', req.user.id).eq('isDeleted', false);
+      if (search) query4 = query4.ilike('name', `%${search}%`);
+      result = await query4;
+    }
+
+    if (result.error) throw result.error;
+    res.json({ success: true, data: result.data });
   } catch (error) {
     next(error);
   }
@@ -75,8 +94,8 @@ const updateDocument = async (req, res, next) => {
 const downloadDocument = async (req, res, next) => {
   try {
     const { data: document } = await supabase.from('Document').select('*').eq('id', req.params.id).single();
-    const { data: user } = await supabase.from('User').select('googleRefreshToken, google_refresh_token').eq('id', req.user.id).single();
-    const buffer = await driveService.downloadFile(document.url, user.googleRefreshToken || user.google_refresh_token);
+    const { data: user } = await supabase.from('User').select('google_refresh_token').eq('id', req.user.id).single();
+    const buffer = await driveService.downloadFile(document.driveId || document.url, user.google_refresh_token);
     res.setHeader('Content-Disposition', `attachment; filename="${document.name}"`);
     res.send(buffer);
   } catch (error) {

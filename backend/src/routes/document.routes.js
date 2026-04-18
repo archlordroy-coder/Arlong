@@ -10,6 +10,7 @@ router.use(authMiddleware);
 
 router.get('/', getDocuments);
 router.post('/', upload.single('file'), importDocument);
+router.post('/import', upload.single('file'), importDocument);
 router.get('/:id', getDocumentById);
 router.put('/:id', updateDocument);
 router.get('/:id/download', downloadDocument);

@@ -15,10 +15,10 @@
     "start:electron": "npm run start --prefix frontend/desktop"
   },
   "devDependencies": {
+    "@supabase/supabase-js": "^2.103.3",
     "concurrently": "^8.2.2"
   },
   "dependencies": {
-    "@supabase/supabase-js": "^2.103.2",
     "bcryptjs": "^3.0.3",
     "cors": "^2.8.6",
     "dotenv": "^17.4.1",

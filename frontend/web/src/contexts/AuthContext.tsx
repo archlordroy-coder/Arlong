@@ -35,9 +35,10 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         try {
           const res = await api.get('/auth/me');
           if (res.data?.success) {
+            // Mettre à jour le user avec le nouveau googleRefreshToken
+            setUser(res.data.data);
             // Nettoyer l'URL
             window.history.replaceState({}, document.title, window.location.pathname);
-            window.location.reload();
           }
         } catch (error) {}
       };

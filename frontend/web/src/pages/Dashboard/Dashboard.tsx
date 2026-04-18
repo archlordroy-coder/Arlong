@@ -45,20 +45,18 @@ const Dashboard = () => {
     const files = e.target.files;
     if (!files || files.length === 0) return;
 
-    if (!isConfigured) {
-      alert("Veuillez configurer votre clé de chiffrement dans les paramètres avant d'uploader.");
-      return;
-    }
-
     setIsSyncing(true);
     try {
       for (const file of Array.from(files)) {
         const encryptedBlob = await encrypt(file);
         const formData = new FormData();
-        formData.append('file', encryptedBlob, file.name + '.enc');
+        // Si chiffré, ajouter .enc au nom, sinon garder le nom original
+        const fileName = isConfigured ? file.name + '.enc' : file.name;
+        formData.append('file', encryptedBlob, fileName);
         formData.append('dossierId', 'root'); // Default for now
+        formData.append('isEncrypted', isConfigured ? 'true' : 'false');
 
-        await api.post('/documents/import', formData, {
+        await api.post('/documents', formData, {
           headers: { 'Content-Type': 'multipart/form-data' }
         });
       }

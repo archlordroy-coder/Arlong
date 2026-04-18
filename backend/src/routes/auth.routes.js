@@ -75,24 +75,10 @@ router.get('/google/callback', async (req, res) => {
     console.log('🔵 Tokens received:', tokens ? 'Success' : 'Failed');
     
     if (tokens.refresh_token) {
-      console.log('🔵 Tentative 1 : googleRefreshToken (camelCase)...');
-      let { error } = await supabase.from('User').update({ googleRefreshToken: tokens.refresh_token }).eq('id', userId); 
-      
-      if (error && error.code === 'PGRST204') {
-        console.warn('⚠️ Tentative 2 : google_refresh_token (snake_case)...');
-        const res2 = await supabase.from('User').update({ google_refresh_token: tokens.refresh_token }).eq('id', userId);
-        error = res2.error;
-      }
-
-      if (error && error.code === 'PGRST204') {
-        console.warn('⚠️ Tentative 3 : googlerefreshtoken (minuscules)...');
-        const res3 = await supabase.from('User').update({ googlerefreshtoken: tokens.refresh_token }).eq('id', userId);
-        error = res3.error;
-      }
+      const { error } = await supabase.from('User').update({ google_refresh_token: tokens.refresh_token }).eq('id', userId);
       
       if (error) {
-        console.warn('⚠️ ÉCHEC FINAL de sauvegarde du token (colonne manquante) :', error.message);
-        // On ne bloque pas l'utilisateur, on le laisse continuer vers son dashboard
+        console.warn('⚠️ Erreur sauvegarde token Google:', error.message);
       } else {
         console.log('✅ Liaison Google Drive réussie !');
       }

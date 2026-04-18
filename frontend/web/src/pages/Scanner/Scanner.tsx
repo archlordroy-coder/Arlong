@@ -70,7 +70,7 @@ const Scanner = () => {
         formData.append('file', encryptedBlob, fileName + '.enc');
         formData.append('dossierId', 'root');
 
-        await api.post('/documents/import', formData, {
+        await api.post('/documents', formData, {
           headers: { 'Content-Type': 'multipart/form-data' }
         });
       }

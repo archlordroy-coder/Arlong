@@ -26,8 +26,8 @@ const Settings = () => {
   const handleLinkGoogle = async () => {
     setGoogleLoading(true);
     try {
-      // Pour le desktop, on demande explicitement l'URL de login Google
-      const res = await api.get('/auth/google/login-url?platform=desktop');
+      // Pour le desktop, on demande explicitement l'URL de liaison Google Drive (pas le login)
+      const res = await api.get('/auth/google/url?platform=desktop');
       if (res.data.success && res.data.url) {
         // Dans une app Electron, on pourrait utiliser shell.openExternal
         // Mais ici on redirige la fenêtre principale
@@ -102,7 +102,7 @@ const Settings = () => {
               <div className="drive-connected">
                 <div className="status-badge success">
                   <CheckCircle size={16} />
-                  <span>Google Drive connecté</span>
+                  <span>DRIVE LIÉ</span>
                 </div>
               </div>
             ) : (

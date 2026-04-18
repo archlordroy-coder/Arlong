@@ -65,3 +65,11 @@ tmp/
 !README.md
 !CHANGELOG.md
 !LICENSE.md
+
+# ─── Configuration scripts (may contain secrets when being developed) ─────────
+# These scripts read from .env.local but may accidentally contain hardcoded secrets
+# during development. They should be reviewed before committing.
+scripts/configure-vercel-complete.sh
+scripts/vercel-clean-redeploy.sh
+scripts/setup-vercel-new-project.sh
+scripts/fix-git-push.sh

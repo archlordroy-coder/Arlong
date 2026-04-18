@@ -6,8 +6,8 @@ let model;
 const initAI = () => {
   if (process.env.GEMINI_API_KEY) {
     genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
-    model = genAI.getGenerativeModel({ model: 'gemini-1.5-flash' });
-    console.log('✅ Google AI (Gemini Flash) initialized');
+    model = genAI.getGenerativeModel({ model: 'gemini-1.5-pro' });
+    console.log('✅ Google AI (Gemini Pro) initialized');
   }
 };
 
@@ -33,7 +33,7 @@ Date : ${new Date().toLocaleDateString('fr-FR')}
 Réponds toujours en français. Sois concis et utile.`;
 
   const dynamicModel = genAI.getGenerativeModel({ 
-    model: 'gemini-1.5-flash',
+    model: 'gemini-1.5-pro',
     systemInstruction: systemPrompt
   });
 

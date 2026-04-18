@@ -16,13 +16,21 @@ export const useEncryption = () => {
     setEncryptionKey(null);
   }, []);
 
+  // Encrypt only if key is configured, otherwise return file as-is
   const encrypt = useCallback(async (file: File | Blob) => {
-    if (!encryptionKey) throw new Error('Aucune clé de chiffrement définie');
+    if (!encryptionKey) {
+      console.log('⚠️ Pas de clé de chiffrement - upload sans chiffrement');
+      return file; // Return file unchanged if no encryption key
+    }
     return encryptFile(file, encryptionKey);
   }, [encryptionKey]);
 
+  // Decrypt only if key is configured, otherwise return blob as-is
   const decrypt = useCallback(async (blob: Blob) => {
-    if (!encryptionKey) throw new Error('Aucune clé de chiffrement définie');
+    if (!encryptionKey) {
+      console.log('⚠️ Pas de clé de chiffrement - fichier non chiffré');
+      return blob; // Return blob unchanged if no encryption key
+    }
     return decryptFile(blob, encryptionKey);
   }, [encryptionKey]);
 

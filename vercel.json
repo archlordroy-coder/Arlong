@@ -31,8 +31,5 @@
       "src": "/(.*)",
       "dest": "frontend/web/index.html"
     }
-  ],
-  "env": {
-    "NODE_ENV": "production"
-  }
+  ]
 }

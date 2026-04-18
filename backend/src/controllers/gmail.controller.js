@@ -17,17 +17,24 @@ const supabase = require('../config/supabase');
  *    active explicitement la fonctionnalité
  */
 
+const getRedirectUri = () => {
+  const isProduction = process.env.VERCEL || process.env.NODE_ENV === 'production';
+  return isProduction
+    ? 'https://arlong-gamma.vercel.app/api/auth/google/callback'
+    : (process.env.GOOGLE_REDIRECT_URI || 'http://localhost:5000/api/auth/google/callback');
+};
+
 /**
  * Récupérer le client OAuth2 pour un utilisateur
  */
 const getOAuth2Client = async (userId) => {
   const { data: user, error } = await supabase
     .from('User')
-    .select('googleRefreshToken, google_refresh_token')
+    .select('google_refresh_token, google_refresh_token')
     .eq('id', userId)
     .single();
 
-  const refreshToken = user?.googleRefreshToken || user?.google_refresh_token;
+  const refreshToken = user?.google_refresh_token || user?.google_refresh_token;
 
   if (error || !user || !refreshToken) {
     throw new Error('Compte Google non lié');
@@ -36,7 +43,7 @@ const getOAuth2Client = async (userId) => {
   const oauth2Client = new google.auth.OAuth2(
     process.env.GOOGLE_CLIENT_ID,
     process.env.GOOGLE_CLIENT_SECRET,
-    process.env.GOOGLE_REDIRECT_URI
+    getRedirectUri()
   );
 
   oauth2Client.setCredentials({

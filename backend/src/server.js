@@ -3,10 +3,15 @@ const cors = require('cors');
 const dotenv = require('dotenv');
 const path = require('path');
 
-// Try .env.local first (for local dev), fallback to .env BEFORE other imports
-dotenv.config({ path: path.resolve(__dirname, '../.env.local') });
-if (!process.env.SUPABASE_URL) {
-  dotenv.config({ path: path.resolve(__dirname, '../.env') });
+// Load environment variables only if not already set (like on Vercel)
+const fs = require('fs');
+const envLocalPath = path.resolve(__dirname, '../.env.local');
+const envPath = path.resolve(__dirname, '../.env');
+
+if (fs.existsSync(envLocalPath)) {
+  dotenv.config({ path: envLocalPath });
+} else if (fs.existsSync(envPath)) {
+  dotenv.config({ path: envPath });
 }
 
 const { initFirebase } = require('./services/firebase.service');
@@ -14,10 +19,15 @@ const { initAI } = require('./services/ai.service');
 const supabase = require('./config/supabase');
 const authMiddleware = require('./middlewares/auth.middleware');
 const errorMiddleware = require('./middlewares/error.middleware');
+const { checkSchema } = require('./utils/schema-check');
+const { googleDriveErrorLogger, googleDriveRequestLogger } = require('./middlewares/googleDriveErrorLogger.middleware');
+
 // initFirebase(); // DÉSACTIVÉ: On utilise uniquement Google Drive pour le stockage
 initAI();
 
 const authRoutes = require('./routes/auth.routes');
+const adminRoutes = require('./routes/admin.routes');
+const debugRoutes = require('./routes/debug.routes');
 const espaceRoutes = require('./routes/espace.routes');
 const dossierRoutes = require('./routes/dossier.routes');
 const documentRoutes = require('./routes/document.routes');
@@ -34,6 +44,12 @@ const PORT = process.env.PORT || 5000;
 // Middleware - CORS restrictif
 const allowedOrigins = [
   'http://localhost:5173',
+  'http://localhost:5174',
+  'http://localhost:5175',
+  'http://localhost:5176',
+  'http://localhost:5177',
+  'http://localhost:5178',
+  'http://localhost:5179',
   'http://localhost:3000',
   'https://arlong-gamma.vercel.app',
   process.env.FRONTEND_URL
@@ -56,6 +72,9 @@ app.use(cors({
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
+
+// Logger pour les requêtes Google Drive
+app.use(googleDriveRequestLogger);
 
 // Health check
 app.get('/api/health', (req, res) => {
@@ -166,6 +185,11 @@ app.use('/api/shares', shareRoutes);
 app.use('/api/contacts', contactRoutes);
 app.use('/api/gmail', gmailRoutes);
 app.use('/api/ai', aiRoutes);
+app.use('/api/admin', adminRoutes);
+app.use('/api/debug', debugRoutes);
+
+// Google Drive error logger (doit être avant le global error handler)
+app.use(googleDriveErrorLogger);
 
 // Global error handler
 app.use(errorMiddleware);

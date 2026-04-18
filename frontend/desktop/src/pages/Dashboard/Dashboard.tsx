@@ -6,7 +6,7 @@ import api from '../../api/client';
 import localforage from 'localforage';
 import {
   UploadCloud, Folder, File, WifiOff, RefreshCw, CheckCircle, Clock,
-  Activity, Eye, Download, Trash2, Import, ChevronRight
+  Activity, Eye, Download, Trash2, Import, ChevronRight, Cloud
 } from 'lucide-react';
 import './Dashboard.css';
 
@@ -29,7 +29,7 @@ interface HistoryItem {
 }
 
 const Dashboard = () => {
-  const { user } = useAuth();
+  const { user, updateUser } = useAuth();
   const { updateAvailable } = useUpdater();
   const [isOnline, setIsOnline] = useState(navigator.onLine);
   const [offlineQueue, setOfflineQueue] = useState<OfflineFile[]>([]);
@@ -55,7 +55,7 @@ const Dashboard = () => {
   const [showNewFolderInput, setShowNewFolderInput] = useState(false);
   const [newFolderName, setNewFolderName] = useState("");
 
-  // Chargement des données initiales
+  // Chargement des données initiales et rafraîchissement si retour de Drive
   useEffect(() => {
     const fetchDashboardData = async () => {
       try {
@@ -72,8 +72,26 @@ const Dashboard = () => {
         console.error("Échec du chargement du dashboard:", error);
       }
     };
+
+    const checkReturnFromDrive = async () => {
+      const params = new URLSearchParams(window.location.search);
+      if (params.get('drive_linked') === 'true') {
+        try {
+          const res = await api.get('/auth/me');
+          if (res.data.success) {
+            updateUser(res.data.data);
+          }
+        } catch (e) {
+          console.error("Erreur refresh profile", e);
+        }
+        // Cleanup URL
+        window.history.replaceState({}, document.title, '/dashboard');
+      }
+    };
+
     fetchDashboardData();
-  }, []);
+    checkReturnFromDrive();
+  }, [updateUser]);
 
   // Initialisation file d'attente hors-ligne
   useEffect(() => {
@@ -317,6 +335,17 @@ const Dashboard = () => {
           <UploadCloud size={20} />
           <span>Importer</span>
         </button>
+        {user?.googleRefreshToken ? (
+          <div className="flex items-center gap-2 px-3 py-1.5 bg-success/10 text-success rounded-full text-sm font-medium border border-success/20">
+            <CheckCircle size={14} />
+            <span>DRIVE LIÉ</span>
+          </div>
+        ) : (
+          <Link to="/settings" className="flex items-center gap-2 px-3 py-1.5 bg-warning/10 text-warning rounded-full text-sm font-medium border border-warning/20 hover:bg-warning/20 transition-all">
+            <Cloud size={14} />
+            <span>DRIVE NON LIÉ</span>
+          </Link>
+        )}
       </div>
 
       <div className="dashboard-grid mb-8">

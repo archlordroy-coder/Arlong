@@ -21,7 +21,8 @@ const getEspaces = async (req, res, next) => {
       .from('Espace')
       .select('*')
       .eq('createdById', req.user.id)
-      .eq('isDeleted', false);
+      .eq('isDeleted', false)
+      .order('created_at', { ascending: false });
     if (error) throw error;
     res.json({ success: true, data });
   } catch (error) {
